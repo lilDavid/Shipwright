@@ -899,6 +899,11 @@ void DrawEnhancementsMenu() {
             UIWidgets::PaddedEnhancementCheckbox("Targetable Hookshot Reticle", "gHookshotableReticle", true, false);
             UIWidgets::Tooltip("Use a different color when aiming at hookshotable collision");
 
+            UIWidgets::PaddedEnhancementCheckbox("Ask to continue playing after saving", "gSaveAndQuit", true, false);
+            UIWidgets::Tooltip(
+                "The save dialog from the pause menu will ask you to continue playing after you select Yes or No.\n"
+                "Pressing B or Start on the save prompt will close the pause menu without displaying the extra screen.");
+
             ImGui::EndMenu();
         }
 
