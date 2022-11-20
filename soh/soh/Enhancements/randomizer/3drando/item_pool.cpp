@@ -29,7 +29,7 @@ const std::array<uint32_t, 9> dungeonRewards = {
   SHADOW_MEDALLION,
   LIGHT_MEDALLION,
 };
-const std::array<uint32_t, 16> JunkPoolItems = {
+const std::array<uint32_t, 17> JunkPoolItems = {
   BOMBS_5,
   BOMBS_10,
   BOMBS_20,
@@ -46,6 +46,7 @@ const std::array<uint32_t, 16> JunkPoolItems = {
   HUGE_RUPEE,
   DEKU_NUTS_10,
   ICE_TRAP,
+  NOTHING,
 };
 const std::array<uint32_t, 59> alwaysItems = {
   BIGGORON_SWORD,

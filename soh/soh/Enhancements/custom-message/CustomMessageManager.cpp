@@ -68,7 +68,9 @@ void CustomMessageManager::ReplaceStringInMessage(CustomMessageEntry& messageEnt
 }
 
 void CustomMessageManager::FormatCustomMessage(std::string& message, ItemID iid) {
-    message.insert(0, ITEM_OBTAINED(iid));
+    if (iid != ITEM_NONE) {
+        message.insert(0, ITEM_OBTAINED(iid));
+    }
     size_t start_pos = 0;
     std::replace(message.begin(), message.end(), '&', NEWLINE()[0]);
     while ((start_pos = message.find('^', start_pos)) != std::string::npos) {

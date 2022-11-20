@@ -1594,6 +1594,7 @@ ItemObtainability Randomizer::GetItemObtainabilityFromRandomizerGet(RandomizerGe
         case RG_BUY_DEKU_NUT_10:
         case RG_BUY_DEKU_STICK_1:
         case RG_BUY_HEART:
+        case RG_NOTHING:
         default:
             return CAN_OBTAIN;
     }
@@ -4455,7 +4456,8 @@ void Randomizer::CreateCustomMessages() {
                             "Vous obtenez un %rPaquet de&Haricots Magiques%w! Trouvez&un endroit approprié pour un&jardin et plantez-les.^Attendez ensuite que quelque&chose d'amusant se produise!"),
         GIMESSAGE_NO_GERMAN(RG_TYCOON_WALLET, ITEM_WALLET_GIANT,
                             "You got a %rTycoon's Wallet%w!&It's gigantic! Now you can carry&up to %y999 rupees%w!",
-                            "Vous obtenez la %rBourse de Magnat%w!&Elle peut contenir jusqu'à %y999 rubis%w!&C'est gigantesque!")
+                            "Vous obtenez la %rBourse de Magnat%w!&Elle peut contenir jusqu'à %y999 rubis%w!&C'est gigantesque!"),
+        GIMESSAGE_UNTRANSLATED(RG_NOTHING, ITEM_NONE, "You got %rnothing%w!")
     };
     CreateGetItemMessages(getItemMessages);
     CreateRupeeMessages();
@@ -4566,6 +4568,7 @@ void InitRandoItemTable() {
         GET_ITEM(RG_ICE_CAVERN_COMPASS,                OBJECT_GI_COMPASS,  GID_COMPASS,          TEXT_RANDOMIZER_CUSTOM_ITEM, 0x80, CHEST_ANIM_LONG,  ITEM_CATEGORY_LESSER,    MOD_RANDOMIZER, RG_ICE_CAVERN_COMPASS),
         GET_ITEM(RG_MAGIC_BEAN_PACK,                   OBJECT_GI_BEAN,     GID_BEAN,             TEXT_RANDOMIZER_CUSTOM_ITEM, 0x80, CHEST_ANIM_LONG,  ITEM_CATEGORY_MAJOR,     MOD_RANDOMIZER, RG_MAGIC_BEAN_PACK),
         GET_ITEM(RG_TYCOON_WALLET,                     OBJECT_GI_PURSE,    GID_WALLET_GIANT,     TEXT_RANDOMIZER_CUSTOM_ITEM, 0x80, CHEST_ANIM_LONG,  ITEM_CATEGORY_LESSER,    MOD_RANDOMIZER, RG_TYCOON_WALLET),
+        GET_ITEM(RG_NOTHING,                           OBJECT_GI_RUPY,     GID_RUPEE_BLUE,       TEXT_RANDOMIZER_CUSTOM_ITEM, 0x80, CHEST_ANIM_SHORT, ITEM_CATEGORY_JUNK,      MOD_RANDOMIZER, RG_NOTHING),
     };
     ItemTableManager::Instance->AddItemTable(MOD_RANDOMIZER);
     for (int i = 0; i < ARRAY_COUNT(extendedVanillaGetItemTable); i++) {
@@ -4581,6 +4584,8 @@ void InitRandoItemTable() {
             randoGetItemTable[i].drawFunc = (CustomDrawFunc)Randomizer_DrawBossKey;
         } else if (randoGetItemTable[i].itemId == RG_DOUBLE_DEFENSE) {
             randoGetItemTable[i].drawFunc = (CustomDrawFunc)Randomizer_DrawDoubleDefense;
+        } else if (randoGetItemTable[i].itemId == RG_NOTHING) {
+            randoGetItemTable[i].drawFunc = (CustomDrawFunc)Randomizer_DontDraw;
         }
         ItemTableManager::Instance->AddItemEntry(MOD_RANDOMIZER, randoGetItemTable[i].itemId, randoGetItemTable[i]);
     }

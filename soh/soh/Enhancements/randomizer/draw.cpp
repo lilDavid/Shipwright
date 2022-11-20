@@ -155,3 +155,5 @@ extern "C" void Randomizer_DrawDoubleDefense(PlayState* play, GetItemEntry getIt
 
     CLOSE_DISPS(play->state.gfxCtx);
 }
+
+extern "C" void Randomizer_DontDraw(PlayState* play, GetItemEntry getItemEntry) { }

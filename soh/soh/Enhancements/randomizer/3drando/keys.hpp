@@ -174,6 +174,7 @@ typedef enum {
   HEART_CONTAINER,
   ICE_TRAP,
   MILK,
+  NOTHING,
 
   BOMBS_5,
   BOMBS_10,
