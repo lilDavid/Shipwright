@@ -658,7 +658,7 @@ void func_80AD58D4(EnPoField* this, PlayState* play) {
     if (this->actionTimer != 0) {
         this->actionTimer--;
     }
-    if (Actor_ProcessTalkRequest(&this->actor, play)) {
+    if (!CVarGetInteger("gMMPoeBottling", 0) && Actor_ProcessTalkRequest(&this->actor, play)) {
         EnPoField_SetupInteractWithSoul(this);
         return;
     }
@@ -668,7 +668,15 @@ void func_80AD58D4(EnPoField* this, PlayState* play) {
         EnPoField_SetupSoulDisappear(this);
         return;
     }
-    if (this->collider.base.ocFlags1 & OC1_HIT) {
+    if (CVarGetInteger("gMMPoeBottling", 0)) {
+        // do not collide
+        if (Actor_HasParent(&this->actor, play)) {
+            Actor_Kill(&this->actor);
+        }
+
+        // GI_MAX in this case allows the player to catch the actor in a bottle
+        func_8002F434(&this->actor, play, GI_MAX, 35.0f, 60.0f);
+    } else if (this->collider.base.ocFlags1 & OC1_HIT) {
         this->actor.flags |= ACTOR_FLAG_WILL_TALK;
         func_8002F2F4(&this->actor, play);
     } else {
