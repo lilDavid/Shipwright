@@ -662,6 +662,8 @@ void SaveManager::InitFileDebug() {
     for (int button = 0; button < ARRAY_COUNT(gSaveContext.childEquips.cButtonSlots); button++) {
         gSaveContext.childEquips.cButtonSlots[button] = SLOT_NONE;
     }
+    gSaveContext.childEquips.buttonItems[4] = ITEM_OCARINA_FAIRY;
+    gSaveContext.childEquips.cButtonSlots[3] = SLOT_OCARINA;
     gSaveContext.childEquips.equipment = 0;
     for (int button = 0; button < ARRAY_COUNT(gSaveContext.adultEquips.buttonItems); button++) {
         gSaveContext.adultEquips.buttonItems[button] = ITEM_NONE;
@@ -669,6 +671,8 @@ void SaveManager::InitFileDebug() {
     for (int button = 0; button < ARRAY_COUNT(gSaveContext.adultEquips.cButtonSlots); button++) {
         gSaveContext.adultEquips.cButtonSlots[button] = SLOT_NONE;
     }
+    gSaveContext.adultEquips.buttonItems[4] = ITEM_OCARINA_FAIRY;
+    gSaveContext.adultEquips.cButtonSlots[3] = SLOT_OCARINA;
     gSaveContext.adultEquips.equipment = 0;
     gSaveContext.unk_54 = 0;
     gSaveContext.savedSceneNum = 0x51;
@@ -682,19 +686,22 @@ void SaveManager::InitFileDebug() {
     for (int button = 0; button < ARRAY_COUNT(gSaveContext.equips.cButtonSlots); button++) {
         gSaveContext.equips.cButtonSlots[button] = sCButtonSlots[button];
     }
+    gSaveContext.equips.buttonItems[4] = ITEM_OCARINA_FAIRY;
+    gSaveContext.equips.cButtonSlots[3] = SLOT_OCARINA;
     gSaveContext.equips.equipment = 0x1122;
 
     // Inventory
-    static std::array<u8, 24> sItems = {
-        ITEM_STICK,     ITEM_NUT,           ITEM_BOMB,         ITEM_BOW,         ITEM_ARROW_FIRE,  ITEM_DINS_FIRE,
-        ITEM_SLINGSHOT, ITEM_OCARINA_FAIRY, ITEM_BOMBCHU,      ITEM_HOOKSHOT,    ITEM_ARROW_ICE,   ITEM_FARORES_WIND,
-        ITEM_BOOMERANG, ITEM_LENS,          ITEM_BEAN,         ITEM_HAMMER,      ITEM_ARROW_LIGHT, ITEM_NAYRUS_LOVE,
-        ITEM_BOTTLE,    ITEM_POTION_RED,    ITEM_POTION_GREEN, ITEM_POTION_BLUE, ITEM_POCKET_EGG,  ITEM_WEIRD_EGG,
+    static std::array<u8, 28> sItems = {
+        ITEM_DINS_FIRE,     ITEM_BOMB,       ITEM_BOMBCHU,    ITEM_NUT,          ITEM_LENS,        ITEM_BEAN,     
+        ITEM_FARORES_WIND,  ITEM_SLINGSHOT,  ITEM_BOOMERANG,  ITEM_STICK,        ITEM_BOOTS_HOVER, ITEM_WEIRD_EGG,
+        ITEM_NAYRUS_LOVE,   ITEM_BOW,        ITEM_HOOKSHOT,   ITEM_HAMMER,       ITEM_BOOTS_IRON,  ITEM_CLAIM_CHECK,
+        ITEM_NONE,          ITEM_BOTTLE,     ITEM_POTION_RED, ITEM_POTION_GREEN, ITEM_POTION_BLUE, ITEM_NONE,
+        ITEM_OCARINA_FAIRY, ITEM_ARROW_FIRE, ITEM_ARROW_ICE,  ITEM_ARROW_LIGHT
     };
     for (int item = 0; item < ARRAY_COUNT(gSaveContext.inventory.items); item++) {
         gSaveContext.inventory.items[item] = sItems[item];
     }
-    static std::array<s8, 16> sAmmo = { 50, 50, 10, 30, 1, 1, 30, 1, 50, 1, 1, 1, 1, 1, 1, 1 };
+    static std::array<s8, 16> sAmmo = { 1, 20, 50, 20, 1, 10, 1, 30, 1, 10, 1, 1, 1, 30, 1, 1 };
     for (int ammo = 0; ammo < ARRAY_COUNT(gSaveContext.inventory.ammo); ammo++) {
         gSaveContext.inventory.ammo[ammo] = sAmmo[ammo];
     }

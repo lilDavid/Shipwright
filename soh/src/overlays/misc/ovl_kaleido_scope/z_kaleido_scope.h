@@ -12,6 +12,14 @@ extern u8 gSlotAgeReqs[];
 extern u8 gItemAgeReqs[];
 extern u8 gAreaGsFlags[];
 extern bool gSelectingMask;
+typedef enum {
+    AMS_DISABLED,
+    AMS_ENABLED,
+    AMS_CLOSING,
+    AMS_OPENING
+} ArrowMenuState;
+extern ArrowMenuState gArrowMenuState;
+#define ARROW_SELECT_OPEN (gArrowMenuState & 1)
 
 #define MAP_48x85_TEX_WIDTH 48
 #define MAP_48x85_TEX_HEIGHT 85
@@ -45,6 +53,7 @@ void KaleidoScope_ProcessPlayerPreRender();
 void KaleidoScope_SetupPlayerPreRender(PlayState* play);
 void KaleidoScope_DrawCursor(PlayState* play, u16 pageIndex);
 void KaleidoScope_UpdateDungeonMap(PlayState* play);
+void KaleidoScope_SetArrowSelectActive(PauseContext* pauseCtx, bool active);
 
 void PauseMapMark_Draw(PlayState* play);
 

@@ -86,6 +86,13 @@ static InitChainEntry sInitChain[] = {
 void ObjTsubo_SpawnCollectible(ObjTsubo* this, PlayState* play) {
     s16 dropParams = this->actor.params & 0x1F;
 
+	// Avoid spawning a Deku Shield if the item isn't loaded.
+    // Targeted fix for a crash due to a broken drop from the pot in Spirit
+    // Temple surrounded by a circling spike trap.
+    if (dropParams == ITEM00_SHIELD_DEKU && Object_GetIndex(&play->objectCtx, OBJECT_GI_SHIELD_1) == -1) {
+        return;
+    }
+
     if ((dropParams >= ITEM00_RUPEE_GREEN) && (dropParams <= ITEM00_BOMBS_SPECIAL)) {
         Item_DropCollectible(play, &this->actor.world.pos,
                              (dropParams | (((this->actor.params >> 9) & 0x3F) << 8)));
