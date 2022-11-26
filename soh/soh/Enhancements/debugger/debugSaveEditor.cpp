@@ -1705,10 +1705,12 @@ void DrawPlayerTab() {
             ImGui::SameLine();
             ImGui::InputScalar("C Right", ImGuiDataType_U8, &gSaveContext.equips.buttonItems[3], &one, NULL);
 
-            if (CVarGetInteger("gDpadEquips", 0)) {
+            if (CVarGetInteger("gDpadEquips", 0) || CVarGetInteger("gAltItemMenu", 0)) {
                 ImGui::NewLine();
                 ImGui::Text("Current D-pad Equips");
                 ImGui::InputScalar("D-pad Up  ", ImGuiDataType_U8, &gSaveContext.equips.buttonItems[4], &one, NULL); // Two spaces at the end for aligning, not elegant but it's working
+            }
+            if (CVarGetInteger("gDpadEquips", 0)) {
                 ImGui::SameLine();
                 ImGui::InputScalar("D-pad Down", ImGuiDataType_U8, &gSaveContext.equips.buttonItems[5], &one, NULL);
                 // Intentionnal to not put everything on the same line, else it's taking too much for lower resolution.

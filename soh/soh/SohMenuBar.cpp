@@ -614,7 +614,9 @@ void DrawEnhancementsMenu() {
                 UIWidgets::Tooltip("After completing the mask trading sub-quest, press A and any direction on the mask slot to change masks");
                 UIWidgets::PaddedEnhancementCheckbox("Nuts explode bombs", "gNutsExplodeBombs", true, false);
                 UIWidgets::Tooltip("Makes nuts explode bombs, similar to how they interact with bombchus. This does not affect bombflowers.");
-                UIWidgets::PaddedEnhancementCheckbox("Equip Multiple Arrows at Once", "gSeparateArrows", true, false);
+                bool disableSeparateArrows = CVarGetInteger("gAltItemMenu", 0);
+                static const char* disableSeparateArrowsText = "This setting is diabled because \"Rearrange Item Menu\" is on.";
+                UIWidgets::PaddedEnhancementCheckbox("Equip Multiple Arrows at Once", "gSeparateArrows", true, false, disableSeparateArrows, disableSeparateArrowsText);
                 UIWidgets::Tooltip("Allow the bow and magic arrows to be equipped at the same time on different slots. (Note this will disable the behaviour of the 'Equip Dupe' glitch)");
                 UIWidgets::PaddedEnhancementCheckbox("Bow as Child/Slingshot as Adult", "gBowSlingShotAmmoFix", true, false);
                 UIWidgets::Tooltip("Allows child to use bow with arrows.\nAllows adult to use slingshot with seeds.\n\nRequires glitches or 'Timeless Equipment' cheat to equip.");
@@ -866,6 +868,10 @@ void DrawEnhancementsMenu() {
             UIWidgets::Tooltip("Displays an icon and plays a sound when Stone of Agony should be activated, for those without rumble");
             UIWidgets::PaddedEnhancementCheckbox("Assignable Tunics and Boots", "gAssignableTunicsAndBoots", true, false);
             UIWidgets::Tooltip("Allows equipping the tunic and boots to c-buttons");
+            UIWidgets::PaddedEnhancementCheckbox("Rearrange Item Menu", "gAltItemMenu", true, false);
+            UIWidgets::Tooltip("Change the organization of the item subscreen so that boots behave as regular items without the need for "
+                               "\"Assignable Tunics and Boots\". Magic arrows are now accessed from the bow's slot, and the ocarina is always "
+                               "equipped on D-pad up.");
             UIWidgets::PaddedEnhancementCheckbox("Equipment Toggle", "gEquipmentCanBeRemoved", true, false);
             UIWidgets::Tooltip("Allows equipment to be removed by toggling it off on\nthe equipment subscreen.");
             UIWidgets::PaddedEnhancementCheckbox("Link's Cow in Both Time Periods", "gCowOfTime", true, false);

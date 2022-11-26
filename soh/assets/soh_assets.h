@@ -61,6 +61,18 @@ static const ALIGN_ASSET(2) char gTriforcePieceCompletedDL[] = dgTriforcePieceCo
 static const ALIGN_ASSET(2) char gOptionsDividerChangeLangVtx[] = dgOptionsDividerChangeLangVtx;
 
 // textures
+#define dgArrowIconTex "__OTR__textures/icon_item_static/gArrowIconTex"
+static const ALIGN_ASSET(2) char gArrowIconTex[] = dgArrowIconTex;
+
+#define dgFireArrowPower "__OTR__textures/icon_item_static/gFireArrowPower"
+static const ALIGN_ASSET(2) char gFireArrowPowerTex[] = dgFireArrowPower;
+
+#define dgIceArrowPower "__OTR__textures/icon_item_static/gIceArrowPower"
+static const ALIGN_ASSET(2) char gIceArrowPowerTex[] = dgIceArrowPower;
+
+#define dgLightArrowPower "__OTR__textures/icon_item_static/gLightArrowPower"
+static const ALIGN_ASSET(2) char gLightArrowPowerTex[] = dgLightArrowPower;
+
 #define dgDPad "__OTR__textures/parameter_static/gDPad"
 static const ALIGN_ASSET(2) char gDPadTex[] = dgDPad;
 

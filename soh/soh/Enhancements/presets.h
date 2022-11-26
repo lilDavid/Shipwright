@@ -250,6 +250,7 @@ const std::vector<const char*> enhancementsCvars = {
     "gAddTraps.Speed",
     "gAddTraps.Tele",
     "gAddTraps.Void",
+    "gAltItemMenu",
 };
 
 const std::vector<const char*> cheatCvars = {

@@ -2029,7 +2029,15 @@ s32 func_80833C98(s32 item1, s32 actionParam) {
 }
 
 s32 func_80833CDC(PlayState* play, s32 index) {
-    if (index >= ((CVarGetInteger("gDpadEquips", 0) != 0) ? 8 : 4)) {
+    int buttons;
+    if (CVarGetInteger("gDpadEquips", 0)) {
+        buttons = 8;
+    } else if (CVarGetInteger("gAltItemMenu", 0)) {
+        buttons = 5;
+    } else {
+        buttons = 4;
+    }
+    if (index >= buttons) {
         return ITEM_NONE;
     } else if (play->bombchuBowlingStatus != 0) {
         return (play->bombchuBowlingStatus > 0) ? ITEM_BOMBCHU : ITEM_NONE;
@@ -2085,6 +2093,28 @@ void func_80833DF8(Player* this, PlayState* play) {
                 !func_80833C98(C_BTN_ITEM(2), maskActionParam) && !hasOnDpad) {
                 this->currentMask = PLAYER_MASK_NONE;
             }
+        }
+    }
+
+	// Alt item menu: Since boots are items, take them off if not equipped on a button
+    if (CVarGetInteger("gAltItemMenu", 0) && this->currentBoots != PLAYER_BOOTS_KOKIRI) {
+        s32 bootsItemAction = this->currentBoots + PLAYER_IA_BOOTS_KOKIRI;
+
+        bool hasOnCBtn = false;
+        bool hasOnDpad = false;
+        for (int buttonIndex = 0; buttonIndex < 3; buttonIndex++) {
+            hasOnCBtn |= func_80833C98(C_BTN_ITEM(buttonIndex), bootsItemAction);
+        }
+        if (CVarGetInteger("gDpadEquips", 0)) {
+            for (int buttonIndex = 1; buttonIndex < 4; buttonIndex++) {
+                hasOnDpad |= func_80833C98(DPAD_ITEM(buttonIndex), bootsItemAction);
+            }
+        }
+
+        if (!hasOnCBtn && !hasOnDpad) {
+            Inventory_ChangeEquipment(EQUIP_TYPE_BOOTS, PLAYER_BOOTS_KOKIRI + 1);
+            Player_SetEquipmentData(play, this);
+            func_808328EC(this, NA_SE_PL_CHANGE_ARMS);
         }
     }
 
@@ -2473,6 +2503,9 @@ s32 func_80834E44(PlayState* play) {
 
 s32 func_80834E7C(PlayState* play) {
     u16 buttonsToCheck = BTN_A | BTN_B | BTN_CUP | BTN_CLEFT | BTN_CRIGHT | BTN_CDOWN;
+    if (CVarGetInteger("gAltItemMenu", 0)) {
+        buttonsToCheck |= BTN_DUP;
+    }
     if (CVarGetInteger("gDpadEquips", 0) != 0) {
         buttonsToCheck |= BTN_DUP | BTN_DDOWN | BTN_DLEFT | BTN_DRIGHT;
     }
@@ -6483,6 +6516,9 @@ s32 func_8083EAF0(Player* this, Actor* actor) {
 
 s32 func_8083EB44(Player* this, PlayState* play) {
     u16 buttonsToCheck = BTN_A | BTN_B | BTN_CLEFT | BTN_CRIGHT | BTN_CDOWN;
+    if (CVarGetInteger("gAltItemMenu", 0)) {
+        buttonsToCheck |= BTN_DUP;
+    }
     if (CVarGetInteger("gDpadEquips", 0) != 0) {
         buttonsToCheck |= BTN_DUP | BTN_DDOWN | BTN_DLEFT | BTN_DRIGHT;
     }
@@ -8547,6 +8583,9 @@ void func_8084411C(Player* this, PlayState* play) {
             Actor* heldActor = this->heldActor;
 
             u16 buttonsToCheck = BTN_A | BTN_B | BTN_CLEFT | BTN_CRIGHT | BTN_CDOWN;
+            if (CVarGetInteger("gAltItemMenu", 0)) {
+                buttonsToCheck |= BTN_DUP;
+            }
             if (CVarGetInteger("gDpadEquips", 0) != 0) {
                 buttonsToCheck |= BTN_DUP | BTN_DDOWN | BTN_DLEFT | BTN_DRIGHT;
             }
@@ -9329,6 +9368,9 @@ void func_80846260(Player* this, PlayState* play) {
     }
 
     u16 buttonsToCheck = BTN_A | BTN_B | BTN_CLEFT | BTN_CRIGHT | BTN_CDOWN;
+    if (CVarGetInteger("gAltItemMenu", 0)) {
+        buttonsToCheck |= BTN_DUP;
+    }
     if (CVarGetInteger("gDpadEquips", 0) != 0) {
         buttonsToCheck |= BTN_DUP | BTN_DDOWN | BTN_DLEFT | BTN_DRIGHT;
     }
@@ -11594,6 +11636,9 @@ void func_8084B1D8(Player* this, PlayState* play) {
     }
 
     u16 buttonsToCheck = BTN_A | BTN_B | BTN_R | BTN_CUP | BTN_CLEFT | BTN_CRIGHT | BTN_CDOWN;
+    if (CVarGetInteger("gAltItemMenu", 0)) {
+        buttonsToCheck |= BTN_DUP;
+    }
     if (CVarGetInteger("gDpadEquips", 0) != 0) {
         buttonsToCheck |= BTN_DUP | BTN_DDOWN | BTN_DLEFT | BTN_DRIGHT;
     }

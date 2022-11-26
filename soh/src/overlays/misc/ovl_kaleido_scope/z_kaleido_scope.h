@@ -12,6 +12,7 @@ extern u8 gSlotAgeReqs[];
 extern u8 gItemAgeReqs[];
 extern u8 gAreaGsFlags[];
 extern bool gSelectingMask;
+extern bool gSelectingArrow;
 
 #define MAP_48x85_TEX_WIDTH 48
 #define MAP_48x85_TEX_HEIGHT 85
@@ -22,7 +23,6 @@ extern bool gSelectingMask;
 #define AGE_REQ_NONE 9
 
 #define CHECK_AGE_REQ_EQUIP(i, j) (CVarGetInteger("gTimelessEquipment", 0) || (gEquipAgeReqs[i][j] == AGE_REQ_NONE) || (gEquipAgeReqs[i][j] == ((void)0, gSaveContext.linkAge)))
-#define CHECK_AGE_REQ_SLOT(slotIndex) (CVarGetInteger("gTimelessEquipment", 0) || (gSlotAgeReqs[slotIndex] == AGE_REQ_NONE) || gSlotAgeReqs[slotIndex] == ((void)0, gSaveContext.linkAge))
 #define CHECK_AGE_REQ_ITEM(itemIndex) (CVarGetInteger("gTimelessEquipment", 0) || (gItemAgeReqs[itemIndex] == AGE_REQ_NONE) || (gItemAgeReqs[itemIndex] == gSaveContext.linkAge))
 
 void KaleidoScope_DrawQuestStatus(PlayState* play, GraphicsContext* gfxCtx);
@@ -51,5 +51,23 @@ void PauseMapMark_Draw(PlayState* play);
 void KaleidoScope_UpdateCursorSize(PauseContext* pauseCtx);
 
 void KaleidoScope_ResetTradeSelect();
+
+/* Alternate item menu */
+typedef enum {
+    SLOT_ALT_DINS_FIRE,    SLOT_ALT_BOMB,      SLOT_ALT_BOMBCHU,   SLOT_ALT_NUT,      SLOT_ALT_LENS,        SLOT_ALT_BEAN,
+    SLOT_ALT_FARORES_WIND, SLOT_ALT_SLINGSHOT, SLOT_ALT_BOOMERANG, SLOT_ALT_STICK,    SLOT_ALT_BOOTS_HOVER, SLOT_ALT_TRADE_CHILD,
+    SLOT_ALT_NAYRUS_LOVE,  SLOT_ALT_BOW,       SLOT_ALT_HOOKSHOT,  SLOT_ALT_HAMMER,   SLOT_ALT_BOOTS_IRON,  SLOT_ALT_TRADE_ADULT,
+    SLOT_ALT_EMPTY_LEFT,   SLOT_ALT_BOTTLE_1,  SLOT_ALT_BOTTLE_2,  SLOT_ALT_BOTTLE_3, SLOT_ALT_BOTTLE_4,    SLOT_ALT_EMPTY_RIGHT,
+    SLOT_ALT_NONE = 0xFF
+} InventorySlotAlt;
+
+extern u8 gSlotAgeReqsAlt[24];
+extern u8 gAltItemSlots[71];
+extern u8 gAltToMainSlot[24];
+#define _CHECK_AGE_REQ_SLOT_MAIN(slotIndex) (CVarGetInteger("gTimelessEquipment", 0) || (gSlotAgeReqs[slotIndex] == AGE_REQ_NONE) || gSlotAgeReqs[slotIndex] == ((void)0, gSaveContext.linkAge))
+#define _CHECK_AGE_REQ_SLOT_ALT(slotIndex) (CVarGetInteger("gTimelessEquipment", 0) || (gSlotAgeReqsAlt[slotIndex] == AGE_REQ_NONE) || gSlotAgeReqsAlt[slotIndex] == ((void)0, gSaveContext.linkAge))
+#define CHECK_AGE_REQ_SLOT(slotIndex) (CVarGetInteger("gAltItemMenu", 0) ? _CHECK_AGE_REQ_SLOT_ALT(slotIndex) : _CHECK_AGE_REQ_SLOT_MAIN(slotIndex))
+#define KALEIDO_SLOT(item) (CVarGetInteger("gAltItemMenu", 0) ? gAltItemSlots[item] : SLOT(item))
+u8 KaleidoScope_ItemInSlot(u8 slot);
 
 #endif
