@@ -1869,6 +1869,9 @@ u8 Item_Give(PlayState* play, u8 item) {
         return Return_Item(item, MOD_NONE, ITEM_NONE);
     } else if ((item >= ITEM_BOOTS_KOKIRI) && (item <= ITEM_BOOTS_HOVER)) {
         gSaveContext.inventory.equipment |= (gBitFlags[item - ITEM_BOOTS_KOKIRI] << gEquipShifts[EQUIP_BOOTS]);
+        if (item != ITEM_BOOTS_KOKIRI) {
+            INV_CONTENT(item) = item;
+        }
         return Return_Item(item, MOD_NONE, ITEM_NONE);
     } else if ((item == ITEM_KEY_BOSS) || (item == ITEM_COMPASS) || (item == ITEM_DUNGEON_MAP)) {
         // Boss Key, Compass, and Dungeon Map exceptions for rando.
@@ -2176,6 +2179,14 @@ u8 Item_Give(PlayState* play, u8 item) {
         return Return_Item(item, MOD_NONE, ITEM_SEEDS);
     } else if (item == ITEM_OCARINA_FAIRY) {
         INV_CONTENT(ITEM_OCARINA_FAIRY) = ITEM_OCARINA_FAIRY;
+
+        gSaveContext.equips.buttonItems[4] = item;
+        gSaveContext.equips.cButtonSlots[3] = SLOT_OCARINA;
+        gSaveContext.childEquips.buttonItems[4] = item;
+        gSaveContext.childEquips.cButtonSlots[3] = SLOT_OCARINA;
+        gSaveContext.adultEquips.buttonItems[4] = item;
+        gSaveContext.adultEquips.cButtonSlots[3] = SLOT_OCARINA;
+
         return Return_Item(item, MOD_NONE, ITEM_NONE);
     } else if (item == ITEM_OCARINA_TIME) {
         INV_CONTENT(ITEM_OCARINA_TIME) = ITEM_OCARINA_TIME;

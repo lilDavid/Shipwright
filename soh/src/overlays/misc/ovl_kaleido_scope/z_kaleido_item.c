@@ -5,8 +5,9 @@
 #include "soh/Enhancements/enhancementTypes.h"
 
 u8 gAmmoItems[] = {
-    ITEM_STICK,   ITEM_NUT,  ITEM_BOMB, ITEM_BOW,  ITEM_NONE, ITEM_NONE, ITEM_SLINGSHOT, ITEM_NONE,
-    ITEM_BOMBCHU, ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_NONE, ITEM_BEAN,      ITEM_NONE,
+    ITEM_NONE, ITEM_BOMB,      ITEM_BOMBCHU, ITEM_NUT,   ITEM_NONE, ITEM_BEAN,
+    ITEM_NONE, ITEM_SLINGSHOT, ITEM_NONE,    ITEM_STICK, ITEM_NONE, ITEM_NONE,
+    ITEM_NONE, ITEM_BOW,       ITEM_NONE,    ITEM_NONE,
 };
 
 static s16 sEquipState = 0;
@@ -15,8 +16,11 @@ static s16 sEquipMoveTimer = 10;
 bool gSelectingMask;
 bool gSelectingAdultTrade;
 
+/* Maps an inventory slot to double the position of its ammo count in sAmmoVtxTableIdx */
 static s16 sAmmoVtxOffset[] = {
-    0, 2, 4, 6, 99, 99, 8, 99, 10, 99, 99, 99, 99, 99, 12,
+    99,  0,  2,  4, 99,  6,
+    99,  8, 99, 10, 99, 99,
+    99, 12, 99
 };
 
 extern const char* _gAmmoDigit0Tex[];
