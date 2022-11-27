@@ -648,11 +648,12 @@ void SaveManager::InitFileDebug() {
     gSaveContext.equips.equipment = 0x1122;
 
     // Inventory
-    static std::array<u8, 24> sItems = {
-        ITEM_DINS_FIRE,    ITEM_BOMB,      ITEM_BOMBCHU,    ITEM_NUT,          ITEM_LENS,        ITEM_BEAN,     
-        ITEM_FARORES_WIND, ITEM_SLINGSHOT, ITEM_BOOMERANG,  ITEM_STICK,        ITEM_BOOTS_HOVER, ITEM_WEIRD_EGG,
-        ITEM_NAYRUS_LOVE,  ITEM_BOW,       ITEM_HOOKSHOT,   ITEM_HAMMER,       ITEM_BOOTS_IRON,  ITEM_CLAIM_CHECK,
-        ITEM_NONE,         ITEM_BOTTLE,    ITEM_POTION_RED, ITEM_POTION_GREEN, ITEM_POTION_BLUE, ITEM_NONE,
+    static std::array<u8, 28> sItems = {
+        ITEM_DINS_FIRE,     ITEM_BOMB,       ITEM_BOMBCHU,    ITEM_NUT,          ITEM_LENS,        ITEM_BEAN,     
+        ITEM_FARORES_WIND,  ITEM_SLINGSHOT,  ITEM_BOOMERANG,  ITEM_STICK,        ITEM_BOOTS_HOVER, ITEM_WEIRD_EGG,
+        ITEM_NAYRUS_LOVE,   ITEM_BOW,        ITEM_HOOKSHOT,   ITEM_HAMMER,       ITEM_BOOTS_IRON,  ITEM_CLAIM_CHECK,
+        ITEM_NONE,          ITEM_BOTTLE,     ITEM_POTION_RED, ITEM_POTION_GREEN, ITEM_POTION_BLUE, ITEM_NONE,
+        ITEM_OCARINA_FAIRY, ITEM_ARROW_FIRE, ITEM_ARROW_ICE,  ITEM_ARROW_LIGHT
     };
     for (int item = 0; item < ARRAY_COUNT(gSaveContext.inventory.items); item++) {
         gSaveContext.inventory.items[item] = sItems[item];

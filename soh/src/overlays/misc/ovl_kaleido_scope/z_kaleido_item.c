@@ -148,13 +148,13 @@ void KaleidoScope_ArrowSelect(PlayState* play, u16 cursorSlot) {
         newBow = ITEM_BOW;
         arrowCursorSlot = cursorSlot + 6;
     } else if (pauseCtx->stickRelY > 30 || (dpad && CHECK_BTN_ALL(input->press.button, BTN_DUP))) {
-        newBow = (INV_CONTENT(ITEM_ARROW_FIRE) != ITEM_NONE) ? ITEM_BOW_ARROW_FIRE : ITEM_BOW;
+        newBow = (INV_CONTENT(ITEM_ARROW_FIRE) != ITEM_NONE) ? ITEM_BOW_ARROW_FIRE : ITEM_NONE;
         arrowCursorSlot = cursorSlot - 6;
     } else if (pauseCtx->stickRelX < -30 || (dpad && CHECK_BTN_ALL(input->press.button, BTN_DLEFT))) {
-        newBow = (INV_CONTENT(ITEM_ARROW_ICE) != ITEM_NONE) ? ITEM_BOW_ARROW_ICE : ITEM_BOW;
+        newBow = (INV_CONTENT(ITEM_ARROW_ICE) != ITEM_NONE) ? ITEM_BOW_ARROW_ICE : ITEM_NONE;
         arrowCursorSlot = cursorSlot - 1;
     } else if (pauseCtx->stickRelX > 30 || (dpad && CHECK_BTN_ALL(input->press.button, BTN_DRIGHT))) {
-        newBow = (INV_CONTENT(ITEM_ARROW_LIGHT) != ITEM_NONE) ? ITEM_BOW_ARROW_LIGHT : ITEM_BOW;
+        newBow = (INV_CONTENT(ITEM_ARROW_LIGHT) != ITEM_NONE) ? ITEM_BOW_ARROW_LIGHT : ITEM_NONE;
         arrowCursorSlot = cursorSlot + 1;
     }
 
@@ -196,9 +196,18 @@ void KaleidoScope_ArrowSelect(PlayState* play, u16 cursorSlot) {
 }
 
 void KaleidoScope_DrawSelectableArrow(PlayState* play, s16 xOffset, s16 yOffset, u8 vtx, u8 itemId) {
+    if (INV_CONTENT(itemId) == ITEM_NONE) {
+        return;
+    }
+
     PauseContext* pauseCtx = &play->pauseCtx;
     s16 x = -64;
     s16 y = -6;
+
+    if ((INV_CONTENT(ITEM_BOW) == ITEM_BOW_ARROW_FIRE && itemId == ITEM_ARROW_FIRE) ||
+        (INV_CONTENT(ITEM_BOW) == ITEM_BOW_ARROW_ICE && itemId == ITEM_ARROW_ICE) ||
+        (INV_CONTENT(ITEM_BOW) == ITEM_BOW_ARROW_LIGHT && itemId == ITEM_ARROW_LIGHT))
+        itemId = ITEM_BOW;
 
     OPEN_DISPS(play->state.gfxCtx);
     gDPPipeSync(POLY_KAL_DISP++);
@@ -595,9 +604,11 @@ void KaleidoScope_DrawItemSelect(PlayState* play) {
     gDPSetEnvColor(POLY_KAL_DISP++, 0, 0, 0, 0);
 
     for (i = 0, j = 24 * 4; i < ARRAY_COUNT(gSaveContext.equips.cButtonSlots); i++, j += 4) {
-        if ((gSaveContext.equips.buttonItems[i + 1] != ITEM_NONE) &&
-            !((gSaveContext.equips.buttonItems[i + 1] >= ITEM_SHIELD_DEKU) &&
-              (gSaveContext.equips.buttonItems[i + 1] <= ITEM_BOOTS_HOVER))) {
+        u8 buttonItem = gSaveContext.equips.buttonItems[i + 1];
+        if ((buttonItem != ITEM_NONE) &&                                                // equipped
+            (buttonItem < ARRAY_COUNT(gItemSlots)) &&                                   // has an assigned slot
+            (gItemSlots[buttonItem] < 24) &&                                            // assigned slot is on the menu
+            !((buttonItem >= ITEM_SHIELD_DEKU) && (buttonItem <= ITEM_BOOTS_KOKIRI))) { // not equipment (except boots)
             gSPVertex(POLY_KAL_DISP++, &pauseCtx->itemVtx[j], 4, 0);
             POLY_KAL_DISP = KaleidoScope_QuadTextureIA8(POLY_KAL_DISP, gEquippedItemOutlineTex, 32, 32, 0);
         }
@@ -1008,7 +1019,7 @@ void KaleidoScope_UpdateItemEquip(PlayState* play) {
         sEquipMoveTimer--;
 
         if (sEquipMoveTimer == 0) {
-            if (sEquipState = ES_MAGIC_ARROW_APPLYING) {
+            if (sEquipState == ES_MAGIC_ARROW_APPLYING) {
                 pauseCtx->unk_1E4 = 0;
                 if (pauseCtx->equipTargetItem != ITEM_BOW) {
                     pauseCtx->equipTargetItem -= 0xBF - ITEM_BOW_ARROW_FIRE;
