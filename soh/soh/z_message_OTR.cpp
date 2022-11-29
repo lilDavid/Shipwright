@@ -162,4 +162,37 @@ extern "C" void OTRMessage_Init()
             "Cette sauvegarde a été créée sur&une version différente de SoH.&Certaines fonctionnalités&peuvent être "
             "corrompues.",
             TEXTBOX_TYPE_NONE_BOTTOM));
+    CustomMessageManager::Instance->CreateGetItemMessage(
+        customMessageTableID, (GetItemID)TEXT_FIRE_ARROW, ITEM_ARROW_FIRE,
+        CustomMessage(
+            "You got the %rFire Arrow%w!&Any target it strikes will&catch fire.^"
+            "Select your bow with %b\x9f%w to&open the arrow submenu.&Tilt %c\xaa%w to equip your bow&with powered-up arrows!",
+            "You got the %rFire Arrow%w!&Any target it strikes will&catch fire.^"
+            "Select your bow with %b\x9f%w to&open the arrow submenu.&Tilt %c\xaa%w to equip your bow&with powered-up arrows!",
+            "You got the %rFire Arrow%w!&Any target it strikes will&catch fire.^"
+            "Select your bow with %b\x9f%w to&open the arrow submenu.&Tilt %c\xaa%w to equip your bow&with powered-up arrows!",
+            TEXTBOX_TYPE_BLUE));
+    CustomMessageManager::Instance->CreateGetItemMessage(
+        customMessageTableID, (GetItemID)TEXT_ICE_ARROW, ITEM_ARROW_ICE,
+        CustomMessage(
+            "You got the %bIce Arrow%w!&Any target it strikes&will freeze.^"
+            "This arrow magic is granted&only to those who complete the&difficult training of the Gerudo,&so use it with pride!^"
+            "Select your bow with %b\x9f%w to&open the arrow submenu.&Tilt %c\xaa%w to equip your bow&with powered-up arrows!",
+            "You got the %bIce Arrow%w!&Any target it strikes&will freeze.^"
+            "This arrow magic is granted&only to those who complete the&difficult training of the Gerudo,&so use it with pride!^"
+            "Select your bow with %b\x9f%w to&open the arrow submenu.&Tilt %c\xaa%w to equip your bow&with powered-up arrows!",
+            "You got the %bIce Arrow%w!&Any target it strikes&will freeze.^"
+            "This arrow magic is granted&only to those who complete the&difficult training of the Gerudo,&so use it with pride!^"
+            "Select your bow with %b\x9f%w to&open the arrow submenu.&Tilt %c\xaa%w to equip your bow&with powered-up arrows!",
+            TEXTBOX_TYPE_BLUE));
+    CustomMessageManager::Instance->CreateGetItemMessage(
+        customMessageTableID, (GetItemID)TEXT_LIGHT_ARROW, ITEM_ARROW_LIGHT,
+        CustomMessage(
+            "You got the %cLight Arrow%w!&The light of justice will&smite evil!^"
+            "Select your bow with %b\x9f%w to&open the arrow submenu.&Tilt %c\xaa%w to equip your bow&with powered-up arrows!",
+            "You got the %cLight Arrow%w!&The light of justice will&smite evil!^"
+            "Select your bow with %b\x9f%w to&open the arrow submenu.&Tilt %c\xaa%w to equip your bow&with powered-up arrows!",
+            "You got the %cLight Arrow%w!&The light of justice will&smite evil!^"
+            "Select your bow with %b\x9f%w to&open the arrow submenu.&Tilt %c\xaa%w to equip your bow&with powered-up arrows!",
+            TEXTBOX_TYPE_BLUE));
 }

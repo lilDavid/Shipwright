@@ -916,7 +916,6 @@ typedef struct {
     /* 0x027C */ SkelAnime playerSkelAnime;
     			 Vtx*   arrowSelectVtx;
                  s16    arrowMenuAnimPos;
-                 s16    arrowMenuAnimTimer;
 } PauseContext; // size = 0x2C0
 
 typedef enum {

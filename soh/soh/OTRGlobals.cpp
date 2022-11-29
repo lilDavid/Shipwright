@@ -2105,6 +2105,9 @@ extern "C" int CustomMessage_RetrieveIfExists(PlayState* play) {
     if (textId == TEXT_RANDO_SAVE_VERSION_WARNING) {
         messageEntry = CustomMessageManager::Instance->RetrieveMessage(customMessageTableID, TEXT_RANDO_SAVE_VERSION_WARNING);
     }
+    if (textId >= TEXT_FIRE_ARROW && textId <= TEXT_LIGHT_ARROW) {
+        messageEntry = CustomMessageManager::Instance->RetrieveMessage(customMessageTableID, textId);
+    }
     font->charTexBuf[0] = (messageEntry.GetTextBoxType() << 4) | messageEntry.GetTextBoxPosition();
     switch (gSaveContext.language) {
         case LANGUAGE_FRA:
