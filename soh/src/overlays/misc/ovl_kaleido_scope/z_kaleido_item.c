@@ -16,15 +16,8 @@ static s16 sEquipMoveTimer = 10;
 bool gSelectingMask;
 bool gSelectingAdultTrade;
 
-typedef enum {
-    AMS_DISABLED,
-    AMS_ENABLED,
-    AMS_CLOSING,
-    AMS_OPENING
-} ArrowMenuState;
-static ArrowMenuState sArrowMenuState = AMS_DISABLED;
+ArrowMenuState gArrowMenuState;
 static s16 sArrowMenuTimer = 0;
-#define ARROW_SELECT_OPEN (sArrowMenuState & 1)
 
 /* Maps an inventory slot to double the position of its ammo count in sAmmoVtxTableIdx */
 static s16 sAmmoVtxOffset[] = {
@@ -111,7 +104,7 @@ void KaleidoScope_SetArrowSelectActive(PauseContext* pauseCtx, bool active) {
     if (ARROW_SELECT_OPEN == active)
         return;
 
-	sArrowMenuState = AMS_CLOSING + active;
+	gArrowMenuState = AMS_CLOSING + active;
     pauseCtx->arrowMenuAnimPos = 12;
     sArrowMenuTimer = 2;
 }
@@ -119,7 +112,7 @@ void KaleidoScope_SetArrowSelectActive(PauseContext* pauseCtx, bool active) {
 void KaleidoScope_ArrowSelect(PlayState* play, u16 cursorSlot) {
     PauseContext* pauseCtx = &play->pauseCtx;
     if (cursorSlot != SLOT_BOW || !CHECK_SLOT_AGE(SLOT_BOW)) {
-        sArrowMenuState = AMS_DISABLED;
+        gArrowMenuState = AMS_DISABLED;
         pauseCtx->arrowMenuAnimPos = 0;
         sArrowMenuTimer = 0;
         return;
@@ -207,7 +200,7 @@ void KaleidoScope_ArrowSelect(PlayState* play, u16 cursorSlot) {
 void KaleidoScope_DrawBowMenuTexture(PlayState* play, s16 xOffset, s16 yOffset, s16 drawSize, u8 vtx, void* tex, u16 texSize) {
     PauseContext* pauseCtx = &play->pauseCtx;
     s16 bowCenterX = -64 + 16;
-    s16 bowCenterY = -6 - 16;
+    s16 bowCenterY = -6 - 16 + pauseCtx->offsetY;
     s16 arrowCenterX = bowCenterX + xOffset;
     s16 arrowCenterY = bowCenterY + yOffset;
     s16 arrowX = arrowCenterX - drawSize / 2;
@@ -763,19 +756,19 @@ void KaleidoScope_DrawItemSelect(PlayState* play) {
     }
 
     gDPSetPrimColor(POLY_KAL_DISP++, 0, 0, 255, 255, 255, pauseCtx->alpha);
-    if (sArrowMenuState == AMS_DISABLED) {
+    if (gArrowMenuState == AMS_DISABLED) {
         s16 offset = 14;
         KaleidoScope_DrawMagicArrowIcon(play, offset, ITEM_ARROW_FIRE);
         KaleidoScope_DrawMagicArrowIcon(play, offset, ITEM_ARROW_ICE);
         KaleidoScope_DrawMagicArrowIcon(play, offset, ITEM_ARROW_LIGHT);
     } else {
         s16 offset;
-        if (sArrowMenuState == AMS_ENABLED) {
+        if (gArrowMenuState == AMS_ENABLED) {
             offset = 32;
         } else {
             offset = pauseCtx->arrowMenuAnimPos / sArrowMenuTimer;
             pauseCtx->arrowMenuAnimPos -= offset;
-            if (sArrowMenuState == AMS_OPENING) {
+            if (gArrowMenuState == AMS_OPENING) {
                 offset = 32 - pauseCtx->arrowMenuAnimPos;
             } else {
                 offset = 20 + pauseCtx->arrowMenuAnimPos;
@@ -790,7 +783,7 @@ void KaleidoScope_DrawItemSelect(PlayState* play) {
         sArrowMenuTimer--;
 
         if (sArrowMenuTimer == 0) {
-            sArrowMenuState &= 1;
+            gArrowMenuState &= 1;
         }
     }
 

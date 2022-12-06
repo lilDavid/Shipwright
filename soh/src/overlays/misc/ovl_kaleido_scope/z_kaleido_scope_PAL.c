@@ -893,6 +893,7 @@ void KaleidoScope_SetDefaultCursor(PlayState* play) {
     s16 s;
     s16 i;
     gSelectingMask = false;
+    KaleidoScope_SetArrowSelectActive(pauseCtx, false);
 
     switch (pauseCtx->pageIndex) {
         case PAUSE_ITEM:
@@ -927,6 +928,7 @@ void KaleidoScope_SwitchPage(PauseContext* pauseCtx, u8 pt) {
     pauseCtx->unk_1E4 = 1;
     pauseCtx->unk_1EA = 0;
     gSelectingMask = false;
+    KaleidoScope_SetArrowSelectActive(pauseCtx, false);
 
     if (!pt) {
         pauseCtx->mode = pauseCtx->pageIndex * 2 + 1;
@@ -2107,6 +2109,18 @@ void KaleidoScope_UpdateNamePanel(PlayState* play) {
                 memcpy(pauseCtx->nameSegment, textureName, strlen(textureName) + 1);
             } else {
                 osSyncPrintf("zoom_name=%d\n", pauseCtx->namedItem);
+
+                switch (sp2A) {
+                    case ITEM_BOW_ARROW_FIRE:
+                        sp2A = ITEM_ARROW_FIRE;
+                        break;
+                    case ITEM_BOW_ARROW_ICE:
+                        sp2A = ITEM_ARROW_ICE;
+                        break;
+                    case ITEM_BOW_ARROW_LIGHT:
+                    	sp2A = ITEM_ARROW_LIGHT;
+                        break;
+                }
 
                 if (gSaveContext.language) {
                     sp2A += 123;
@@ -4218,6 +4232,9 @@ void KaleidoScope_Update(PlayState* play)
             break;
 
         case 0x12:
+        	// OTRTODO: move this somewhere it won't be called repeatedly for several frames
+            KaleidoScope_SetArrowSelectActive(pauseCtx, false);
+
             if (pauseCtx->unk_1F4 != 160.0f) {
                 pauseCtx->unk_1F4 = pauseCtx->unk_1F8 = pauseCtx->unk_1FC = pauseCtx->unk_200 += 160.0f / WREG(6);
                 pauseCtx->infoPanelOffsetY -= 40 / WREG(6);
