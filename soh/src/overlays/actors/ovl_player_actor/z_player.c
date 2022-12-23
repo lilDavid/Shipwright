@@ -2080,6 +2080,28 @@ void func_80833DF8(Player* this, PlayState* play) {
         }
     }
 
+	// Since boots are items now, take them off if not equipped on a button
+    if (this->currentBoots != PLAYER_BOOTS_KOKIRI) {
+        s32 bootsItemAction = this->currentBoots + PLAYER_IA_BOOTS_KOKIRI;
+
+        bool hasOnCBtn = false;
+        bool hasOnDpad = false;
+        for (int buttonIndex = 0; buttonIndex < 3; buttonIndex++) {
+            hasOnCBtn |= func_80833C98(C_BTN_ITEM(buttonIndex), bootsItemAction);
+        }
+        if (CVarGetInteger("gDpadEquips", 0)) {
+            for (int buttonIndex = 0; buttonIndex < 4; buttonIndex++) {
+                hasOnDpad |= func_80833C98(DPAD_ITEM(buttonIndex), bootsItemAction);
+            }
+        }
+
+        if (!hasOnCBtn && !hasOnDpad) {
+            Inventory_ChangeEquipment(EQUIP_BOOTS, PLAYER_BOOTS_KOKIRI + 1);
+            Player_SetEquipmentData(play, this);
+            func_808328EC(this, NA_SE_PL_CHANGE_ARMS);
+        }
+    }
+
     if (!(this->stateFlags1 & (PLAYER_STATE1_ITEM_OVER_HEAD | PLAYER_STATE1_IN_CUTSCENE)) && !func_8008F128(this)) {
         if (this->itemAction >= PLAYER_IA_FISHING_POLE) {
             bool hasOnDpad = false;

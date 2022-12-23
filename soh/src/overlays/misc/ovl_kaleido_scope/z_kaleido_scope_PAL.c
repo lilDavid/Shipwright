@@ -2788,7 +2788,7 @@ void KaleidoScope_InitVertices(PlayState* play, GraphicsContext* gfxCtx) {
                 pauseCtx->equipVtx[phi_t4 + 0].v.ob[0] + 28;
 
             pauseCtx->equipVtx[phi_t4 + 0].v.ob[1] = pauseCtx->equipVtx[phi_t4 + 1].v.ob[1] =
-                phi_t5 + pauseCtx->offsetY - 2;
+                phi_t5 + pauseCtx->offsetY - 2 - (phi_t3 > 0 ? 16 : 0);
 
             pauseCtx->equipVtx[phi_t4 + 2].v.ob[1] = pauseCtx->equipVtx[phi_t4 + 3].v.ob[1] =
                 pauseCtx->equipVtx[phi_t4 + 0].v.ob[1] - 28;
