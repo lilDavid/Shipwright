@@ -2980,21 +2980,32 @@ void KaleidoScope_InitVertices(PlayState* play, GraphicsContext* gfxCtx) {
     pauseCtx->saveVtx = Graph_Alloc(gfxCtx, 80 * sizeof(Vtx));
     func_80823A0C(play, pauseCtx->saveVtx, 5, 5);
 
-    pauseCtx->arrowSelectVtx = Graph_Alloc(gfxCtx, 16 * sizeof(Vtx));
+    pauseCtx->arrowSelectVtx = Graph_Alloc(gfxCtx, 32 * sizeof(Vtx));
 
-    for (phi_t2 = 0; phi_t2 < 16; phi_t2++) {
-        pauseCtx->arrowSelectVtx[phi_t2].v.ob[0] = pauseCtx->arrowSelectVtx[phi_t2].v.ob[1] =
-            pauseCtx->arrowSelectVtx[phi_t2].v.ob[2] = 0;
-
+	// All arrow select vertices
+    for (phi_t2 = 0; phi_t2 < 32; phi_t2++) {
         pauseCtx->arrowSelectVtx[phi_t2].v.flag = 0;
 
+        // Z position
+        pauseCtx->arrowSelectVtx[phi_t2].v.ob[2] = 0;
+
+		// Color
         pauseCtx->arrowSelectVtx[phi_t2].v.cn[0] = pauseCtx->arrowSelectVtx[phi_t2].v.cn[1] =
             pauseCtx->arrowSelectVtx[phi_t2].v.cn[2] = pauseCtx->arrowSelectVtx[phi_t2].v.cn[3] = 255;
     }
 
-    for (phi_t2 = 0; phi_t2 < 16; phi_t2 += 4) {
+	// All arrow select quads
+    for (phi_t2 = 0; phi_t2 < 32; phi_t2 += 4) {
+        // Top left UV at (0, 0);
         pauseCtx->arrowSelectVtx[phi_t2 + 0].v.tc[0] = pauseCtx->arrowSelectVtx[phi_t2 + 0].v.tc[1] =
             pauseCtx->arrowSelectVtx[phi_t2 + 1].v.tc[1] = pauseCtx->arrowSelectVtx[phi_t2 + 2].v.tc[0] = 0;
+    }
+
+	// Background quads
+    for (phi_t2 = 16; phi_t2 < 32; phi_t2 += 4) {
+        // Bottom left UV at (32, 32)
+        pauseCtx->arrowSelectVtx[phi_t2 + 1].v.tc[0] = pauseCtx->arrowSelectVtx[phi_t2 + 2].v.tc[1] =
+            pauseCtx->arrowSelectVtx[phi_t2 + 3].v.tc[0] = pauseCtx->arrowSelectVtx[phi_t2 + 3].v.tc[1] = 0x400;
     }
 }
 

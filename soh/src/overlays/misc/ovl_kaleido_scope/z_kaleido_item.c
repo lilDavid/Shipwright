@@ -197,25 +197,28 @@ void KaleidoScope_ArrowSelect(PlayState* play, u16 cursorSlot) {
     pauseCtx->unk_1E4 = 3;
 }
 
-void KaleidoScope_DrawBowMenuTexture(PlayState* play, s16 xOffset, s16 yOffset, s16 drawSize, u8 vtx, void* tex, u16 texSize) {
-    PauseContext* pauseCtx = &play->pauseCtx;
+void KaleidoScope_BowMenuSetRect(PauseContext* pauseCtx, s16 xOffset, s16 yOffset, s16 size, u8 vtx) {
     s16 bowCenterX = -64 + 16;
     s16 bowCenterY = -6 - 16 + pauseCtx->offsetY;
     s16 arrowCenterX = bowCenterX + xOffset;
     s16 arrowCenterY = bowCenterY + yOffset;
-    s16 arrowX = arrowCenterX - drawSize / 2;
-    s16 arrowY = arrowCenterY + drawSize / 2;
-
-    OPEN_DISPS(play->state.gfxCtx);
-    gDPPipeSync(POLY_KAL_DISP++);
+    s16 arrowX = arrowCenterX - size / 2;
+    s16 arrowY = arrowCenterY + size / 2;
 
     pauseCtx->arrowSelectVtx[vtx].v.ob[0] = pauseCtx->arrowSelectVtx[vtx + 2].v.ob[0] = arrowX;
-    pauseCtx->arrowSelectVtx[vtx + 1].v.ob[0] = pauseCtx->arrowSelectVtx[vtx + 3].v.ob[0] = arrowX + drawSize;
+    pauseCtx->arrowSelectVtx[vtx + 1].v.ob[0] = pauseCtx->arrowSelectVtx[vtx + 3].v.ob[0] = arrowX + size;
     pauseCtx->arrowSelectVtx[vtx].v.ob[1] = pauseCtx->arrowSelectVtx[vtx + 1].v.ob[1] = arrowY;
-    pauseCtx->arrowSelectVtx[vtx + 2].v.ob[1] = pauseCtx->arrowSelectVtx[vtx + 3].v.ob[1] = arrowY - drawSize;
+    pauseCtx->arrowSelectVtx[vtx + 2].v.ob[1] = pauseCtx->arrowSelectVtx[vtx + 3].v.ob[1] = arrowY - size;
+}
 
+void KaleidoScope_DrawBowMenuTexture(PlayState* play, s16 xOffset, s16 yOffset, s16 drawSize, u8 vtx, void* tex, u16 texSize) {
+    PauseContext* pauseCtx = &play->pauseCtx;
+
+    KaleidoScope_BowMenuSetRect(pauseCtx, xOffset, yOffset, drawSize, vtx);
     pauseCtx->arrowSelectVtx[vtx + 1].v.tc[0] = pauseCtx->arrowSelectVtx[vtx + 2].v.tc[1] =
         pauseCtx->arrowSelectVtx[vtx + 3].v.tc[0] = pauseCtx->arrowSelectVtx[vtx + 3].v.tc[1] = texSize << 5;
+
+    OPEN_DISPS(play->state.gfxCtx);
 
     gSPVertex(POLY_KAL_DISP++, &pauseCtx->arrowSelectVtx[vtx], 4, 0);
     KaleidoScope_DrawQuadTextureRGBA32(play->state.gfxCtx, tex, texSize, texSize, 0);
@@ -288,6 +291,22 @@ void KaleidoScope_DrawSelectableArrow(PlayState* play, s16 offset, u8 itemId) {
             break;
         default:
             return;
+    }
+
+    if (gArrowMenuState == AMS_ENABLED) {
+        PauseContext* pauseCtx = &play->pauseCtx;
+        OPEN_DISPS(play->state.gfxCtx);
+        gDPPipeSync(POLY_KAL_DISP++);
+        vtx += 16;
+
+        gDPSetPrimColor(POLY_KAL_DISP++, 0, 0, 255, 255, 255, pauseCtx->alpha);
+        gDPSetEnvColor(POLY_KAL_DISP++, 0, 0, 0, 0);
+        KaleidoScope_BowMenuSetRect(pauseCtx, xOffset, yOffset, 32, vtx);
+        gSPVertex(POLY_KAL_DISP++, &pauseCtx->arrowSelectVtx[vtx], 4, 0);
+        POLY_KAL_DISP = KaleidoScope_QuadTextureIA8(POLY_KAL_DISP, gEquippedItemOutlineTex, 32, 32, 0);
+
+        vtx -= 16;
+        CLOSE_DISPS(play->state.gfxCtx);
     }
 
     KaleidoScope_DrawBowMenuTexture(play, xOffset, yOffset, 28, vtx, tex, 32);
