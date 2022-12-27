@@ -2021,7 +2021,7 @@ s32 func_80833C98(s32 item1, s32 actionParam) {
 }
 
 s32 func_80833CDC(PlayState* play, s32 index) {
-    if (index >= ((CVarGetInteger("gDpadEquips", 0) != 0) ? 8 : 4)) {
+    if (index >= ((CVarGetInteger("gDpadEquips", 0) != 0) ? 8 : 5)) {
         return ITEM_NONE;
     } else if (play->bombchuBowlingStatus != 0) {
         return (play->bombchuBowlingStatus > 0) ? ITEM_BOMBCHU : ITEM_NONE;
@@ -2054,7 +2054,7 @@ void func_80833DF8(Player* this, PlayState* play) {
             s32 maskItem = this->currentMask - PLAYER_MASK_KEATON + ITEM_MASK_KEATON;
             bool hasOnDpad = false;
             if (CVarGetInteger("gDpadEquips", 0) != 0) {
-                for (int buttonIndex = 4; buttonIndex < 8; buttonIndex++) {
+                for (int buttonIndex = 5; buttonIndex < 8; buttonIndex++) {
                     hasOnDpad |= gSaveContext.equips.buttonItems[buttonIndex] == maskItem;
                 }
             }
@@ -2069,7 +2069,7 @@ void func_80833DF8(Player* this, PlayState* play) {
             maskActionParam = this->currentMask - 1 + PLAYER_IA_MASK_KEATON;
             bool hasOnDpad = false;
             if (CVarGetInteger("gDpadEquips", 0) != 0) {
-                for (int buttonIndex = 0; buttonIndex < 4; buttonIndex++) {
+                for (int buttonIndex = 0; buttonIndex < 5; buttonIndex++) {
                     hasOnDpad |= func_80833C98(DPAD_ITEM(buttonIndex), maskActionParam);
                 }
             }
@@ -2090,7 +2090,7 @@ void func_80833DF8(Player* this, PlayState* play) {
             hasOnCBtn |= func_80833C98(C_BTN_ITEM(buttonIndex), bootsItemAction);
         }
         if (CVarGetInteger("gDpadEquips", 0)) {
-            for (int buttonIndex = 0; buttonIndex < 4; buttonIndex++) {
+            for (int buttonIndex = 1; buttonIndex < 4; buttonIndex++) {
                 hasOnDpad |= func_80833C98(DPAD_ITEM(buttonIndex), bootsItemAction);
             }
         }
@@ -2486,9 +2486,9 @@ s32 func_80834E44(PlayState* play) {
 }
 
 s32 func_80834E7C(PlayState* play) {
-    u16 buttonsToCheck = BTN_A | BTN_B | BTN_CUP | BTN_CLEFT | BTN_CRIGHT | BTN_CDOWN;
+    u16 buttonsToCheck = BTN_A | BTN_B | BTN_CUP | BTN_CLEFT | BTN_CRIGHT | BTN_CDOWN | BTN_DUP;
     if (CVarGetInteger("gDpadEquips", 0) != 0) {
-        buttonsToCheck |= BTN_DUP | BTN_DDOWN | BTN_DLEFT | BTN_DRIGHT;
+        buttonsToCheck |= BTN_DDOWN | BTN_DLEFT | BTN_DRIGHT;
     }
     return (play->shootingGalleryStatus != 0) &&
            ((play->shootingGalleryStatus < 0) || CHECK_BTN_ANY(sControlInput->cur.button, buttonsToCheck));
@@ -6510,9 +6510,9 @@ s32 func_8083EAF0(Player* this, Actor* actor) {
 }
 
 s32 func_8083EB44(Player* this, PlayState* play) {
-    u16 buttonsToCheck = BTN_A | BTN_B | BTN_CLEFT | BTN_CRIGHT | BTN_CDOWN;
+    u16 buttonsToCheck = BTN_A | BTN_B | BTN_CLEFT | BTN_CRIGHT | BTN_CDOWN | BTN_DUP;
     if (CVarGetInteger("gDpadEquips", 0) != 0) {
-        buttonsToCheck |= BTN_DUP | BTN_DDOWN | BTN_DLEFT | BTN_DRIGHT;
+        buttonsToCheck |= BTN_DDOWN | BTN_DLEFT | BTN_DRIGHT;
     }
     if ((this->stateFlags1 & PLAYER_STATE1_ITEM_OVER_HEAD) && (this->heldActor != NULL) &&
         CHECK_BTN_ANY(sControlInput->press.button, buttonsToCheck)) {
@@ -8572,9 +8572,9 @@ void func_8084411C(Player* this, PlayState* play) {
         if (this->stateFlags1 & PLAYER_STATE1_ITEM_OVER_HEAD) {
             Actor* heldActor = this->heldActor;
 
-            u16 buttonsToCheck = BTN_A | BTN_B | BTN_CLEFT | BTN_CRIGHT | BTN_CDOWN;
+            u16 buttonsToCheck = BTN_A | BTN_B | BTN_CLEFT | BTN_CRIGHT | BTN_CDOWN | BTN_DUP;
             if (CVarGetInteger("gDpadEquips", 0) != 0) {
-                buttonsToCheck |= BTN_DUP | BTN_DDOWN | BTN_DLEFT | BTN_DRIGHT;
+                buttonsToCheck |= BTN_DDOWN | BTN_DLEFT | BTN_DRIGHT;
             }
             if (!func_80835644(play, this, heldActor) && (heldActor->id == ACTOR_EN_NIW) &&
                 CHECK_BTN_ANY(sControlInput->press.button, buttonsToCheck)) {
@@ -9354,7 +9354,7 @@ void func_80846260(Player* this, PlayState* play) {
         return;
     }
 
-    u16 buttonsToCheck = BTN_A | BTN_B | BTN_CLEFT | BTN_CRIGHT | BTN_CDOWN;
+    u16 buttonsToCheck = BTN_A | BTN_B | BTN_CLEFT | BTN_CRIGHT | BTN_CDOWN | BTN_DUP;
     if (CVarGetInteger("gDpadEquips", 0) != 0) {
         buttonsToCheck |= BTN_DUP | BTN_DDOWN | BTN_DLEFT | BTN_DRIGHT;
     }
@@ -11522,9 +11522,9 @@ void func_8084B1D8(Player* this, PlayState* play) {
         func_80836670(this, play);
     }
 
-    u16 buttonsToCheck = BTN_A | BTN_B | BTN_R | BTN_CUP | BTN_CLEFT | BTN_CRIGHT | BTN_CDOWN;
+    u16 buttonsToCheck = BTN_A | BTN_B | BTN_R | BTN_CUP | BTN_CLEFT | BTN_CRIGHT | BTN_CDOWN | BTN_DUP;
     if (CVarGetInteger("gDpadEquips", 0) != 0) {
-        buttonsToCheck |= BTN_DUP | BTN_DDOWN | BTN_DLEFT | BTN_DRIGHT;
+        buttonsToCheck |= BTN_DDOWN | BTN_DLEFT | BTN_DRIGHT;
     }
     if ((this->csMode != 0) || (this->unk_6AD == 0) || (this->unk_6AD >= 4) || func_80833B54(this) ||
         (this->unk_664 != NULL) || !func_8083AD4C(play, this) ||
