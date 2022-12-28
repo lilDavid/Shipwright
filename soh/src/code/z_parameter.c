@@ -4407,10 +4407,17 @@ void Interface_DrawItemIconTexture(PlayState* play, void* texture, s16 button) {
         ItemIconPos[3][1] = ItemIconPos_ori[3][1];
     }
 
-    gDPLoadTextureBlock(OVERLAY_DISP++, texture, G_IM_FMT_RGBA, G_IM_SIZ_32b, 32, 32, 0, G_TX_NOMIRROR | G_TX_WRAP,
+    // Exception specifically for dungeon map texture since only that appears on a button
+	bool smallTex = texture == gItemIcons[ITEM_DUNGEON_MAP];
+    int texSize = smallTex ? 24 : 32;
+    int offset = smallTex ? 4 : 0;
+
+    gDPLoadTextureBlock(OVERLAY_DISP++, texture, G_IM_FMT_RGBA, G_IM_SIZ_32b, texSize, texSize, 0, G_TX_NOMIRROR | G_TX_WRAP,
                         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
 
-    gSPWideTextureRectangle(OVERLAY_DISP++, ItemIconPos[button][0] << 2, ItemIconPos[button][1] << 2,
+    gSPWideTextureRectangle(OVERLAY_DISP++,
+                        (ItemIconPos[button][0] + offset << 2),
+                        (ItemIconPos[button][1] + offset << 2),
                         (ItemIconPos[button][0] + gItemIconWidth[button]) << 2,
                         (ItemIconPos[button][1] + gItemIconWidth[button]) << 2, G_TX_RENDERTILE, 0, 0,
                         gItemIconDD[button] << 1, gItemIconDD[button] << 1);
@@ -5286,7 +5293,10 @@ void Interface_Draw(PlayState* play) {
                                     G_TX_RENDERTILE, 0, 0, (1 << 10), (1 << 10));
         }
 
+        bool dpadEquips = CVarGetInteger("gDpadEquips", 0);
+
         // DPad-Up Button Icon & Ammo Count
+		// Ocarina is perma-mapped to D-up, so that part has to be drawn
         if (gSaveContext.equips.buttonItems[4] < 0xF0) {
             gDPSetPrimColor(OVERLAY_DISP++, 0, 0, 255, 255, 255, interfaceCtx->dpadUpAlpha);
             gDPSetCombineMode(OVERLAY_DISP++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
@@ -5297,19 +5307,26 @@ void Interface_Draw(PlayState* play) {
             Interface_DrawAmmoCount(play, 4, interfaceCtx->dpadUpAlpha);
         }
 
-		// Ocarina is perma-mapped to D-up, so that part has to be drawn
-        if (CVarGetInteger("gDpadEquips", 0)) {
-            // DPad-Down Button Icon & Ammo Count
-            if (gSaveContext.equips.buttonItems[5] < 0xF0) {
-                gDPSetPrimColor(OVERLAY_DISP++, 0, 0, 255, 255, 255, interfaceCtx->dpadDownAlpha);
-                gDPSetCombineMode(OVERLAY_DISP++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
-                Interface_DrawItemIconTexture(play, gItemIcons[gSaveContext.equips.buttonItems[5]], 5);
-                gDPPipeSync(OVERLAY_DISP++);
-                gDPSetCombineLERP(OVERLAY_DISP++, PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, TEXEL0, 0, PRIMITIVE, 0,
-                                  PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, TEXEL0, 0, PRIMITIVE, 0);
+        // DPad-Down Button Icon & Ammo Count
+		bool itemOnDpad = dpadEquips && gSaveContext.equips.buttonItems[5] < 0xF0;
+        bool dpadMap = fullUi && CVarGetInteger("gMapOnDDown", 0) &&
+            play->pauseCtx.state < 4 &&
+            ((play->sceneNum >= SCENE_YDAN && play->sceneNum <= SCENE_ICE_DOUKUTO) ||
+             (play->sceneNum >= SCENE_SPOT00 && play->sceneNum <= SCENE_GANON_TOU));
+        if (itemOnDpad || dpadMap) {
+            gDPSetPrimColor(OVERLAY_DISP++, 0, 0, 255, 255, 255, interfaceCtx->dpadDownAlpha);
+            gDPSetCombineMode(OVERLAY_DISP++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
+            void* texture = gItemIcons[itemOnDpad ? gSaveContext.equips.buttonItems[5] : ITEM_DUNGEON_MAP];
+            Interface_DrawItemIconTexture(play, texture, 5);
+            gDPPipeSync(OVERLAY_DISP++);
+            gDPSetCombineLERP(OVERLAY_DISP++, PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, TEXEL0, 0, PRIMITIVE, 0,
+                                PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, TEXEL0, 0, PRIMITIVE, 0);
+            if (itemOnDpad) {
                 Interface_DrawAmmoCount(play, 5, interfaceCtx->dpadDownAlpha);
             }
+        }
 
+        if (dpadEquips) {
             // DPad-Left Button Icon & Ammo Count
             if (gSaveContext.equips.buttonItems[6] < 0xF0) {
                 gDPSetPrimColor(OVERLAY_DISP++, 0, 0, 255, 255, 255, interfaceCtx->dpadLeftAlpha);

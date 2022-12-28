@@ -322,6 +322,8 @@ namespace GameControlEditor {
         UIWidgets::Spacer(0);
         UIWidgets::PaddedEnhancementCheckbox("Answer Navi Prompt with L Button", "gNaviOnL");
         DrawHelpIcon("Speak to Navi with L but enter first-person camera with C-Up");
+        UIWidgets::PaddedEnhancementCheckbox("Toggle minimap with D-pad down", "gMapOnDDown");
+        DrawHelpIcon("Toggle the minimap by pressing down on the D-pad\nIf \"D-pad as Equip Items\" is enabled, equipping an item on D-pad down will prevent you from toggling the map");
         window->EndGroupPanelPublic(0);
     }
 
