@@ -29,7 +29,7 @@ static s16 sAmmoVtxOffset[] = {
 typedef enum {
     ES_MAGIC_ARROW_GLOWING = 0,
     ES_MAGIC_ARROW_APPLYING = 1,
-    ES_MAGIC_ARROW_EQUIPPING = 2,
+    ES_MAGIC_ARROW_EQUIPPING = 2, // Unused in item screen mod
     ES_DEFAULT = 3,
 } EquipState;
 
@@ -712,39 +712,20 @@ void KaleidoScope_DrawItemSelect(PlayState* play) {
     for (i = j = 0; i < 24; i++, j += 4) {
         gDPSetPrimColor(POLY_KAL_DISP++, 0, 0, 255, 255, 255, pauseCtx->alpha);
 
-        if (gSaveContext.inventory.items[i] != ITEM_NONE) {
-            if ((pauseCtx->unk_1E4 == 0) && (pauseCtx->pageIndex == PAUSE_ITEM) && (pauseCtx->cursorSpecialPos == 0)) {
-                if (CHECK_SLOT_AGE(i)) {
-                    if ((sEquipState == ES_MAGIC_ARROW_EQUIPPING) && (i == SLOT_BOW)) {
-                        gDPSetPrimColor(POLY_KAL_DISP++, 0, 0, magicArrowEffectsR[pauseCtx->equipTargetItem - 0xBF],
-                                        magicArrowEffectsG[pauseCtx->equipTargetItem - 0xBF],
-                                        magicArrowEffectsB[pauseCtx->equipTargetItem - 0xBF], pauseCtx->alpha);
+        if ((gSaveContext.inventory.items[i] != ITEM_NONE)) {
+            if ((pauseCtx->unk_1E4 == 0) && (pauseCtx->pageIndex == PAUSE_ITEM) &&
+                (pauseCtx->cursorSpecialPos == 0) && CHECK_SLOT_AGE(i) && (i == cursorSlot)) {
+                pauseCtx->itemVtx[j + 0].v.ob[0] = pauseCtx->itemVtx[j + 2].v.ob[0] =
+                    pauseCtx->itemVtx[j + 0].v.ob[0] - 2;
 
-                        pauseCtx->itemVtx[j + 0].v.ob[0] = pauseCtx->itemVtx[j + 2].v.ob[0] =
-                            pauseCtx->itemVtx[j + 0].v.ob[0] - 2;
+                pauseCtx->itemVtx[j + 1].v.ob[0] = pauseCtx->itemVtx[j + 3].v.ob[0] =
+                    pauseCtx->itemVtx[j + 0].v.ob[0] + 32;
 
-                        pauseCtx->itemVtx[j + 1].v.ob[0] = pauseCtx->itemVtx[j + 3].v.ob[0] =
-                            pauseCtx->itemVtx[j + 0].v.ob[0] + 32;
+                pauseCtx->itemVtx[j + 0].v.ob[1] = pauseCtx->itemVtx[j + 1].v.ob[1] =
+                    pauseCtx->itemVtx[j + 0].v.ob[1] + 2;
 
-                        pauseCtx->itemVtx[j + 0].v.ob[1] = pauseCtx->itemVtx[j + 1].v.ob[1] =
-                            pauseCtx->itemVtx[j + 0].v.ob[1] + 2;
-
-                        pauseCtx->itemVtx[j + 2].v.ob[1] = pauseCtx->itemVtx[j + 3].v.ob[1] =
-                            pauseCtx->itemVtx[j + 0].v.ob[1] - 32;
-                    } else if (i == cursorSlot) {
-                        pauseCtx->itemVtx[j + 0].v.ob[0] = pauseCtx->itemVtx[j + 2].v.ob[0] =
-                            pauseCtx->itemVtx[j + 0].v.ob[0] - 2;
-
-                        pauseCtx->itemVtx[j + 1].v.ob[0] = pauseCtx->itemVtx[j + 3].v.ob[0] =
-                            pauseCtx->itemVtx[j + 0].v.ob[0] + 32;
-
-                        pauseCtx->itemVtx[j + 0].v.ob[1] = pauseCtx->itemVtx[j + 1].v.ob[1] =
-                            pauseCtx->itemVtx[j + 0].v.ob[1] + 2;
-
-                        pauseCtx->itemVtx[j + 2].v.ob[1] = pauseCtx->itemVtx[j + 3].v.ob[1] =
-                            pauseCtx->itemVtx[j + 0].v.ob[1] - 32;
-                    }
-                }
+                pauseCtx->itemVtx[j + 2].v.ob[1] = pauseCtx->itemVtx[j + 3].v.ob[1] =
+                    pauseCtx->itemVtx[j + 0].v.ob[1] - 32;
             }
 
             gSPVertex(POLY_KAL_DISP++, &pauseCtx->itemVtx[j + 0], 4, 0);
@@ -1049,23 +1030,6 @@ void KaleidoScope_UpdateItemEquip(PlayState* play) {
             sEquipState = ES_MAGIC_ARROW_APPLYING;
         }
         sEquipAnimTimer = 5;
-        return;
-    }
-
-    if (sEquipState == ES_MAGIC_ARROW_EQUIPPING) {
-        D_8082A488--;
-
-        if (D_8082A488 == 0) {
-            pauseCtx->equipTargetItem -= 0xBF - ITEM_BOW_ARROW_FIRE;
-            if (!CVarGetInteger("gSeparateArrows", 0)) {
-                pauseCtx->equipTargetSlot = SLOT_BOW;
-            }
-            sEquipMoveTimer = 6;
-            WREG(90) = 320;
-            WREG(87) = WREG(91);
-            sEquipState = ES_DEFAULT;
-            Audio_PlaySoundGeneral(NA_SE_SY_SYNTH_MAGIC_ARROW, &D_801333D4, 4, &D_801333E0, &D_801333E0, &D_801333E8);
-        }
         return;
     }
 
