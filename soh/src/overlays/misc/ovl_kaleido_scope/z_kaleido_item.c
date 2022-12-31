@@ -177,7 +177,7 @@ void KaleidoScope_ArrowSelect(PlayState* play, u16 cursorSlot) {
     }
 
 	u16 sfxId;
-    if (newBow == ITEM_BOW) {
+    if (newBow == ITEM_BOW || CVarGetInteger("gSkipArrowAnimation", 0)) {
         sfxId = NA_SE_SY_DECIDE;
         pauseCtx->equipTargetItem = newBow;
         pauseCtx->equipAnimAlpha = 255;
@@ -1122,8 +1122,9 @@ void KaleidoScope_UpdateItemEquip(PlayState* play) {
         if (sEquipMoveTimer == 0) {
             if (sEquipState == ES_MAGIC_ARROW_APPLYING) {
                 pauseCtx->unk_1E4 = 0;
-                if (pauseCtx->equipTargetItem != ITEM_BOW) {
-                    pauseCtx->equipTargetItem -= 0xBF - ITEM_BOW_ARROW_FIRE;
+                s16 magicArrowType = pauseCtx->equipTargetItem - 0xBF;
+                if (magicArrowType >= 0 && magicArrowType <= 2) {
+                    pauseCtx->equipTargetItem = ITEM_BOW_ARROW_FIRE + magicArrowType;
                 }
                 Inventory_ReplaceItem(play, INV_CONTENT(ITEM_BOW), pauseCtx->equipTargetItem);
                 KaleidoScope_SetArrowSelectActive(pauseCtx, false);
@@ -1132,26 +1133,6 @@ void KaleidoScope_UpdateItemEquip(PlayState* play) {
 
             osSyncPrintf("\n＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝\n");
 
-			// Skipping the arrow animation: need to change the item's type and
-            // slot when it hits the button since it didn't get set earlier
-            if (pauseCtx->equipTargetItem == ITEM_ARROW_FIRE || pauseCtx->equipTargetItem == ITEM_ARROW_ICE ||
-                pauseCtx->equipTargetItem == ITEM_ARROW_LIGHT) {
-                switch (pauseCtx->equipTargetItem) {
-                    case ITEM_ARROW_FIRE:
-                        pauseCtx->equipTargetItem = ITEM_BOW_ARROW_FIRE;
-                        break;
-                    case ITEM_ARROW_ICE:
-                        pauseCtx->equipTargetItem = ITEM_BOW_ARROW_ICE;
-                        break;
-                    case ITEM_ARROW_LIGHT:
-                        pauseCtx->equipTargetItem = ITEM_BOW_ARROW_LIGHT;
-                        break;
-                }
-                if (!CVarGetInteger("gSeparateArrows", 0)) {
-                    pauseCtx->equipTargetSlot = SLOT_BOW;
-                }
-            }
-            
             // If the item is on another button already, swap the two
             uint16_t targetButtonIndex = pauseCtx->equipTargetCBtn + 1;
             for (uint16_t otherSlotIndex = 0; otherSlotIndex < ARRAY_COUNT(gSaveContext.equips.cButtonSlots);
