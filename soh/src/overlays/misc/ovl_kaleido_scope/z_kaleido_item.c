@@ -238,25 +238,24 @@ void KaleidoScope_DrawMagicArrowIcon(PlayState* play, s16 offset, u8 itemId) {
             xOffset = 0;
             yOffset = offset;
             vtx = 0;
-            source = "assets/textures/icon_item_static/gFireArrowPower";
+            source = "__OTR__textures/icon_item_static/gFireArrowPower";
             break;
         case ITEM_ARROW_ICE:
             xOffset = -offset;
             yOffset = 0;
             vtx = 4;
-            source = "assets/textures/icon_item_static/gIceArrowPower";
+            source = "__OTR__textures/icon_item_static/gIceArrowPower";
             break;
         case ITEM_ARROW_LIGHT:
             xOffset = offset;
             yOffset = 0;
             vtx = 8;
-            source = "assets/textures/icon_item_static/gLightArrowPower";
+            source = "__OTR__textures/icon_item_static/gLightArrowPower";
             break;
         default:
             return;
     }
 
-    source = ResourceMgr_LoadFileRaw(source);
     KaleidoScope_DrawBowMenuTexture(play, xOffset, yOffset, 12, vtx, source, 16);
 }
 
@@ -287,7 +286,7 @@ void KaleidoScope_DrawSelectableArrow(PlayState* play, s16 offset, u8 itemId) {
             xOffset = 0;
             yOffset = -offset;
             vtx = 12;
-            tex = ResourceMgr_LoadFileRaw("assets/textures/icon_item_static/gArrowIconTex");
+            tex = "__OTR__textures/icon_item_static/gArrowIconTex";
             break;
         default:
             return;

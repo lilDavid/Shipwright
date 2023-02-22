@@ -1424,7 +1424,9 @@ void Inventory_SwapAgeEquipment(void) {
 
         if (gSaveContext.adultEquips.buttonItems[0] == ITEM_NONE) {
             gSaveContext.equips.buttonItems[0] = ITEM_SWORD_MASTER;
+            gSaveContext.equips.equipment = 0x1122;
 
+            // Nuts on C-left (if present)
             if (gSaveContext.inventory.items[SLOT_NUT] != ITEM_NONE) {
                 gSaveContext.equips.buttonItems[1] = ITEM_NUT;
                 gSaveContext.equips.cButtonSlots[0] = SLOT_NUT;
@@ -1432,18 +1434,22 @@ void Inventory_SwapAgeEquipment(void) {
                 gSaveContext.equips.buttonItems[1] = gSaveContext.equips.cButtonSlots[0] = ITEM_NONE;
             }
 
+            // Bombs on C-down
             gSaveContext.equips.buttonItems[2] = ITEM_BOMB;
-            gSaveContext.equips.buttonItems[3] = gSaveContext.inventory.items[SLOT_OCARINA];
             gSaveContext.equips.cButtonSlots[1] = SLOT_BOMB;
-            gSaveContext.equips.cButtonSlots[2] = SLOT_OCARINA;
-            gSaveContext.equips.equipment = 0x1122;
 
-            // Set the dpad to nothing
-            gSaveContext.equips.buttonItems[4] = ITEM_NONE;
+            // Nothing on C-right
+            gSaveContext.equips.buttonItems[3] = ITEM_NONE;
+            gSaveContext.equips.cButtonSlots[2] = SLOT_NONE;
+
+            // Ocarina on D-up
+            gSaveContext.equips.buttonItems[4] = gSaveContext.inventory.items[SLOT_OCARINA];
+            gSaveContext.equips.cButtonSlots[3] = SLOT_OCARINA;
+
+            // Set the rest of the d-pad to nothing
             gSaveContext.equips.buttonItems[5] = ITEM_NONE;
             gSaveContext.equips.buttonItems[6] = ITEM_NONE;
             gSaveContext.equips.buttonItems[7] = ITEM_NONE;
-            gSaveContext.equips.cButtonSlots[3] = SLOT_NONE;
             gSaveContext.equips.cButtonSlots[4] = SLOT_NONE;
             gSaveContext.equips.cButtonSlots[5] = SLOT_NONE;
             gSaveContext.equips.cButtonSlots[6] = SLOT_NONE;
