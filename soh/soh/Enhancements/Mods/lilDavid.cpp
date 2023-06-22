@@ -125,6 +125,13 @@ static void DrawMenu() {
         OnConfigurationChanged();
     }
     UIWidgets::Tooltip("Equip Bombs onto the same item as your bow to shoot Bomb Arrows that explode on contact.");
+
+    UIWidgets::EnhancementCheckbox("Visual Small Key Display", CVAR("VisualSmallKeys.Enabled"));
+    UIWidgets::Tooltip("Displays Small Key count using multiple icons rather than a numeric counter");
+    const bool disableKeySpacing = !CVarGetInteger(CVAR("VisualSmallKeys.Enabled"), 0);
+    static const char* disableKeySpacingTooltip = "This option is disabled because \"Visual Small Key Display\" is turned off";
+    UIWidgets::EnhancementSliderInt("Small Key Icon Spacing: %d", "##SmallKeySpacing", CVAR("VisualSmallKeys.Spacing"), 1, 16, "", 8, true, disableKeySpacing, disableKeySpacingTooltip);
+    UIWidgets::EnhancementCheckbox("Right Align Key Icons", CVAR("VisualSmallKeys.RightAlign"), disableKeySpacing, disableKeySpacingTooltip);
 }
 
 static void RegisterMod() {

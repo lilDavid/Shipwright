@@ -5128,6 +5128,21 @@ void Interface_Draw(PlayState* play) {
 
                             gDPSetPrimColor(OVERLAY_DISP++, 0, 0, keyCountColor.r,keyCountColor.g,keyCountColor.b, interfaceCtx->magicAlpha);
                             gDPSetEnvColor(OVERLAY_DISP++, 0, 0, 20, 255); //We reset this here so it match user color :)
+
+                            if (CVarGetInteger("gMods.lilDavid.VisualSmallKeys.Enabled", 0)) {
+                                s8 keyCount = gSaveContext.inventory.dungeonKeys[gSaveContext.mapIndex];
+                                s16 rectLeft = PosX_SKC;
+                                s16 keyOffset = CVarGetInteger("gMods.lilDavid.VisualSmallKeys.Spacing", 8);
+                                if (CVarGetInteger("gMods.lilDavid.VisualSmallKeys.RightAlign", 0)) {
+                                    keyOffset = -keyOffset;
+                                }
+                                for (int i = 0; i < keyCount; i++, rectLeft += keyOffset) {
+                                    OVERLAY_DISP = Gfx_TextureIA8(OVERLAY_DISP, gSmallKeyCounterIconTex, 16, 16, rectLeft, PosY_SKC, 16, 16,
+                                                                  1 << 10, 1 << 10);
+                                }
+                                break;
+                            }
+
                             OVERLAY_DISP = Gfx_TextureIA8(OVERLAY_DISP, gSmallKeyCounterIconTex, 16, 16, PosX_SKC, PosY_SKC, 16, 16,
                                                           1 << 10, 1 << 10);
 
