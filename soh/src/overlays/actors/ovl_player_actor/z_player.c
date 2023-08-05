@@ -2952,7 +2952,9 @@ void func_80835F44(PlayState* play, Player* this, s32 item) {
 
         if ((actionParam == PLAYER_IA_NONE) || !(this->stateFlags1 & PLAYER_STATE1_IN_WATER) ||
             ((this->actor.bgCheckFlags & 1) &&
-             ((actionParam == PLAYER_IA_HOOKSHOT) || (actionParam == PLAYER_IA_LONGSHOT))) ||
+             ((actionParam == PLAYER_IA_HOOKSHOT) || (actionParam == PLAYER_IA_LONGSHOT) ||
+              (CVarGetInteger("gEnhancedIronBoots", 0) && 
+               ((Player_ActionToSword(actionParam) != 0) || (actionParam == PLAYER_IA_BOMBCHU))))) ||
             ((actionParam >= PLAYER_IA_SHIELD_DEKU) && (actionParam <= PLAYER_IA_BOOTS_HOVER))) {
 
             if ((play->bombchuBowlingStatus == 0) &&
@@ -6392,7 +6394,7 @@ s32 func_8083E5A8(Player* this, PlayState* play) {
                 this->getItemEntry = (GetItemEntry)GET_ITEM_NONE;
             }
         } else if (CHECK_BTN_ALL(sControlInput->press.button, BTN_A) && !(this->stateFlags1 & PLAYER_STATE1_ITEM_OVER_HEAD) &&
-                   !(this->stateFlags2 & PLAYER_STATE2_UNDERWATER)) {
+                   (CVarGetInteger("gEnhancedIronBoots", 0) || !(this->stateFlags2 & PLAYER_STATE2_UNDERWATER))) {
             if (this->getItemId != GI_NONE) {
                 GetItemEntry giEntry;
                 if (this->getItemEntry.objectId == OBJECT_INVALID) {
@@ -9853,7 +9855,8 @@ void func_808473D4(PlayState* play, Player* this) {
                 } else if ((!(this->stateFlags1 & PLAYER_STATE1_ITEM_OVER_HEAD) || (heldActor == NULL)) &&
                            (interactRangeActor != NULL) &&
                            ((!sp1C && (this->getItemId == GI_NONE)) ||
-                            (this->getItemId < 0 && !(this->stateFlags1 & PLAYER_STATE1_IN_WATER)))) {
+                            (this->getItemId < 0 && !(this->stateFlags1 & PLAYER_STATE1_IN_WATER)) ||
+                            CVarGetInteger("gEnhancedIronBoots", 0) && this->stateFlags2 & PLAYER_STATE2_UNDERWATER)) {
                     if (this->getItemId < 0) {
                         doAction = DO_ACTION_OPEN;
                     } else if ((interactRangeActor->id == ACTOR_BG_TOKI_SWD) && LINK_IS_ADULT) {
