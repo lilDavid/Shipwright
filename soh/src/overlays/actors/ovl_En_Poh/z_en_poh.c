@@ -773,7 +773,8 @@ void func_80ADFE80(EnPoh* this, PlayState* play) {
     if (this->unk_198 != 0) {
         this->unk_198--;
     }
-    if (Actor_ProcessTalkRequest(&this->actor, play)) {
+    if (!(CVarGetInteger("gMMPoeBottling", 0) && this->actor.params < EN_POH_SHARP) &&
+        Actor_ProcessTalkRequest(&this->actor, play)) {
         if (this->actor.params >= EN_POH_SHARP) {
             func_80ADE9BC(this);
         } else {
@@ -786,7 +787,15 @@ void func_80ADFE80(EnPoh* this, PlayState* play) {
         this->actor.flags &= ~ACTOR_FLAG_WILL_TALK;
         return;
     }
-    if (this->colliderCyl.base.ocFlags1 & OC1_HIT) {
+    if (CVarGetInteger("gMMPoeBottling", 0) && this->actor.params < EN_POH_SHARP) {
+        if (Actor_HasParent(&this->actor, play)) {
+            Actor_Kill(&this->actor);
+            return;
+        }
+
+        // GI_MAX in this case allows the player to catch the actor in a bottle
+        func_8002F434(&this->actor, play, GI_MAX, 35.0f, 60.0f);
+    } else if (this->colliderCyl.base.ocFlags1 & OC1_HIT) {
         this->actor.flags |= ACTOR_FLAG_WILL_TALK;
         func_8002F2F4(&this->actor, play);
     } else {
