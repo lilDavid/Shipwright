@@ -72,6 +72,7 @@ const std::vector<const char*> enhancementsCvars = {
     "gFasterHeavyBlockLift",
     "gNoForcedNavi",
     "gSkulltulaFreeze",
+    "gMMPoeBottling",
     "gMMBunnyHood",
     "gFastChests",
     "gChestSizeAndTextureMatchesContents",
@@ -167,10 +168,10 @@ const std::vector<const char*> enhancementsCvars = {
     "gGsCutscene",
     "gSkipSaveConfirmation",
     "gAutosave",
+    "gSaveAndQuit",
     "gDisableCritWiggle",
     "gChestSizeDependsStoneOfAgony",
     "gSkipArrowAnimation",
-    "gSeparateArrows",
     "gCustomizeShootingGallery",
     "gInstantShootingGalleryWin",
     "gConstantAdultGallery",
@@ -181,6 +182,7 @@ const std::vector<const char*> enhancementsCvars = {
     "gBombchuBowlingNoBigCucco",
     "gBombchuBowlingAmmunition",
     "gCreditsFix",
+    "gArrowSwitching",
     "gSilverRupeeJingleExtend",
     "gStaticExplosionRadius",
     "gNoInputForCredits",
@@ -208,6 +210,9 @@ const std::vector<const char*> enhancementsCvars = {
     "gFPSGauntlets",
     "gSceneSpecificDirtPathFix",
     "gZFightingMode",
+    "gVisualKeys",
+    "gSmallKeySpacing",
+    "gRightAlignKeys",
     "gAuthenticLogo",
     "gPauseLiveLinkRotationSpeed",
     "gBowReticle",
@@ -564,9 +569,6 @@ const std::vector<PresetEntry> enhancedPresetEntries = {
     // Skip Magic Arrow Equip Animation
     PRESET_ENTRY_S32("gSkipArrowAnimation", 1),
 
-    // Equip arrows on multiple slots
-    PRESET_ENTRY_S32("gSeparateArrows", 1),
-
     // Disable Navi Call Audio
     PRESET_ENTRY_S32("gDisableNaviCallAudio", 1),
 
@@ -685,9 +687,6 @@ const std::vector<PresetEntry> randomizerPresetEntries = {
     PRESET_ENTRY_S32("gSkipArrowAnimation", 1),
     // Exit Market at Night
     PRESET_ENTRY_S32("gMarketSneak", 1),
-
-    // Equip arrows on multiple slots
-    PRESET_ENTRY_S32("gSeparateArrows", 1),
 
     // Disable Navi Call Audio
     PRESET_ENTRY_S32("gDisableNaviCallAudio", 1),

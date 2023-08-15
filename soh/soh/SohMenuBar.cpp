@@ -578,12 +578,15 @@ void DrawEnhancementsMenu() {
                     "Wearing the Bunny Hood grants a speed increase like in Majora's Mask. The longer jump option is not accounted for in randomizer logic.\n\n"
                     "Also disables NPC's reactions to wearing the Bunny Hood."
                 );
+                UIWidgets::PaddedEnhancementCheckbox("Catch Poes with a bottle", "gMMPoeBottling", true, false);
+                UIWidgets::Tooltip("Catch Poes by swinging an empty bottle at them instead of from a text box like you can in Majora's Mask.");
                 UIWidgets::PaddedEnhancementCheckbox("Mask Select in Inventory", "gMaskSelect", true, false);
                 UIWidgets::Tooltip("After completing the mask trading sub-quest, press A and any direction on the mask slot to change masks");
                 UIWidgets::PaddedEnhancementCheckbox("Nuts explode bombs", "gNutsExplodeBombs", true, false);
                 UIWidgets::Tooltip("Makes nuts explode bombs, similar to how they interact with bombchus. This does not affect bombflowers.");
-                UIWidgets::PaddedEnhancementCheckbox("Equip Multiple Arrows at Once", "gSeparateArrows", true, false);
-                UIWidgets::Tooltip("Allow the bow and magic arrows to be equipped at the same time on different slots");
+                UIWidgets::PaddedEnhancementCheckbox("Switch Arrow Types", "gArrowSwitching", true, false);
+                UIWidgets::Tooltip("Press R with the bow out to switch between normal, fire, ice, and light arrows\n"
+                            "Use the \"Customize Game Controls\" window to switch with a different button");
                 UIWidgets::PaddedEnhancementCheckbox("Bow as Child/Slingshot as Adult", "gBowSlingShotAmmoFix", true, false);
                 UIWidgets::Tooltip("Allows child to use bow with arrows.\nAllows adult to use slingshot with seeds.\n\nRequires glitches or 'Timeless Equipment' cheat to equip.");
                 UIWidgets::PaddedEnhancementCheckbox("Better Farore's Wind", "gBetterFW", true, false);
@@ -832,6 +835,8 @@ void DrawEnhancementsMenu() {
             UIWidgets::Tooltip("Allows equipping the tunic and boots to c-buttons");
             UIWidgets::PaddedEnhancementCheckbox("Equipment Toggle", "gEquipmentCanBeRemoved", true, false);
             UIWidgets::Tooltip("Allows equipment to be removed by toggling it off on\nthe equipment subscreen.");
+            UIWidgets::PaddedEnhancementCheckbox("Extra Underwater Actions", "gEnhancedIronBoots", true, false);
+            UIWidgets::Tooltip("Allows opening chests and using your sword and Bombchus when underwater with Iron Boots");
             UIWidgets::PaddedEnhancementCheckbox("Link's Cow in Both Time Periods", "gCowOfTime", true, false);
             UIWidgets::Tooltip("Allows the Lon Lon Ranch obstacle course reward to be shared across time periods");
             UIWidgets::PaddedEnhancementCheckbox("Enable visible guard vision", "gGuardVision", true, false);
@@ -867,6 +872,11 @@ void DrawEnhancementsMenu() {
             UIWidgets::Tooltip("Disable random camera wiggle at low health");
             UIWidgets::PaddedEnhancementCheckbox("Enemy Health Bars", "gEnemyHealthBar", true, false);
             UIWidgets::Tooltip("Renders a health bar for enemies when Z-Targeted");
+
+            UIWidgets::PaddedEnhancementCheckbox("Ask to continue playing after saving", "gSaveAndQuit", true, false);
+            UIWidgets::Tooltip(
+                "The save dialog from the pause menu will ask you to continue playing after you select Yes or No.\n"
+                "Pressing B or Start on the save prompt will close the pause menu without displaying the extra screen.");
 
             ImGui::EndMenu();
         }
@@ -956,6 +966,11 @@ void DrawEnhancementsMenu() {
                                 "Consistent: Certain paths vanish the same way in all resolutions\n"
                                 "No Vanish: Paths do not vanish, Link seems to sink in to some paths\n"
                                 "This might affect other decal effects\n");
+            UIWidgets::PaddedEnhancementCheckbox("Visual Small Key display", "gVisualKeys", true, false);
+            UIWidgets::Tooltip("Displays Small Key count using multiple icons rather than a numeric counter");
+            const bool disableKeySpacing = !CVarGetInteger("gVisualKeys", 0);
+            static const char* disableKeySpacingTooltip = "This option is disabled because \"Visual Small Key display\" is turned off";
+            UIWidgets::EnhancementSliderInt("Small Key icon spacing: %d", "##SmallKeySpacing", "gSmallKeySpacing", 1, 16, "", 8, true, disableKeySpacing, disableKeySpacingTooltip);
             UIWidgets::PaddedEnhancementSliderInt("Text Spacing: %d", "##TEXTSPACING", "gTextSpacing", 4, 6, "", 6, true, true, true);
             UIWidgets::Tooltip("Space between text characters (useful for HD font textures)");
             ImGui::EndMenu();

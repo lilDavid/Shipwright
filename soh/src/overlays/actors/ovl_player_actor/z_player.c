@@ -2028,7 +2028,7 @@ s32 func_80833C98(s32 item1, s32 actionParam) {
 }
 
 s32 func_80833CDC(PlayState* play, s32 index) {
-    if (index >= ((CVarGetInteger("gDpadEquips", 0) != 0) ? 8 : 4)) {
+    if (index >= ((CVarGetInteger("gDpadEquips", 0) != 0) ? 8 : 5)) {
         return ITEM_NONE;
     } else if (play->bombchuBowlingStatus != 0) {
         return (play->bombchuBowlingStatus > 0) ? ITEM_BOMBCHU : ITEM_NONE;
@@ -2061,7 +2061,7 @@ void func_80833DF8(Player* this, PlayState* play) {
             s32 maskItem = this->currentMask - PLAYER_MASK_KEATON + ITEM_MASK_KEATON;
             bool hasOnDpad = false;
             if (CVarGetInteger("gDpadEquips", 0) != 0) {
-                for (int buttonIndex = 4; buttonIndex < 8; buttonIndex++) {
+                for (int buttonIndex = 5; buttonIndex < 8; buttonIndex++) {
                     hasOnDpad |= gSaveContext.equips.buttonItems[buttonIndex] == maskItem;
                 }
             }
@@ -2076,7 +2076,7 @@ void func_80833DF8(Player* this, PlayState* play) {
             maskActionParam = this->currentMask - 1 + PLAYER_IA_MASK_KEATON;
             bool hasOnDpad = false;
             if (CVarGetInteger("gDpadEquips", 0) != 0) {
-                for (int buttonIndex = 0; buttonIndex < 4; buttonIndex++) {
+                for (int buttonIndex = 0; buttonIndex < 5; buttonIndex++) {
                     hasOnDpad |= func_80833C98(DPAD_ITEM(buttonIndex), maskActionParam);
                 }
             }
@@ -2084,6 +2084,28 @@ void func_80833DF8(Player* this, PlayState* play) {
                 !func_80833C98(C_BTN_ITEM(2), maskActionParam) && !hasOnDpad) {
                 this->currentMask = PLAYER_MASK_NONE;
             }
+        }
+    }
+
+	// Since boots are items now, take them off if not equipped on a button
+    if (this->currentBoots != PLAYER_BOOTS_KOKIRI) {
+        s32 bootsItemAction = this->currentBoots + PLAYER_IA_BOOTS_KOKIRI;
+
+        bool hasOnCBtn = false;
+        bool hasOnDpad = false;
+        for (int buttonIndex = 0; buttonIndex < 3; buttonIndex++) {
+            hasOnCBtn |= func_80833C98(C_BTN_ITEM(buttonIndex), bootsItemAction);
+        }
+        if (CVarGetInteger("gDpadEquips", 0)) {
+            for (int buttonIndex = 1; buttonIndex < 4; buttonIndex++) {
+                hasOnDpad |= func_80833C98(DPAD_ITEM(buttonIndex), bootsItemAction);
+            }
+        }
+
+        if (!hasOnCBtn && !hasOnDpad) {
+            Inventory_ChangeEquipment(EQUIP_BOOTS, PLAYER_BOOTS_KOKIRI + 1);
+            Player_SetEquipmentData(play, this);
+            func_808328EC(this, NA_SE_PL_CHANGE_ARMS);
         }
     }
 
@@ -2217,6 +2239,98 @@ s32 func_80834380(PlayState* play, Player* this, s32* itemPtr, s32* typePtr) {
     }
 }
 
+typedef struct {
+    u8 asArrow;
+    u8 asBowArrow;
+} ArrowItems;
+
+static ArrowItems arrowTypeToItem[] = {
+    /* normal arrows */ { ITEM_BOW, ITEM_BOW },
+    /* fire arrows */ { ITEM_ARROW_FIRE, ITEM_BOW_ARROW_FIRE },
+    /* ice arrows */ { ITEM_ARROW_ICE, ITEM_BOW_ARROW_ICE },
+    /* light arrows */ { ITEM_ARROW_LIGHT, ITEM_BOW_ARROW_LIGHT },
+    /* unused arrow types are excluded from cycling */
+};
+
+static bool gSwitchingArrow = false;
+
+// Returns true if the player is in a state where they can switch arrows.
+// Specifically, the gArrowSwitching CVar is enabled, the player is holding the
+// bow with normal, fire, ice, or light arrows, and they're either aiming or
+// have an arrow notched.
+bool Player_CanSwitchArrows(Player* this) {
+    if (!CVarGetInteger("gArrowSwitching", 0)) {
+        return false;
+    }
+
+    if (this->heldItemAction < PLAYER_IA_BOW || this->heldItemAction > PLAYER_IA_BOW_LIGHT) {
+        return false;
+    }
+
+    return this->func_82C == func_808351D4 || this->func_82C == func_808353D8;
+}
+
+bool Player_SwitchArrowsIfEnabled(Player* this) {
+    if (!CVarGetInteger("gArrowSwitching", 0)) {
+        return false;
+    }
+    if (this->heldItemAction < PLAYER_IA_BOW || this->heldItemAction > PLAYER_IA_BOW_LIGHT) {
+        return false;
+    }
+    if (!CHECK_BTN_ANY(sControlInput->press.button, CVarGetInteger("gArrowSwitchBtnMap", BTN_R))) {
+        return false;
+    }
+
+    u8 i, newItem, newItemAction;
+    const u8 arrowCount = ARRAY_COUNT(arrowTypeToItem);
+    u8 heldArrowAP = this->heldItemAction - PLAYER_IA_BOW;
+    for (i = 1; i < arrowCount; i++) {
+        u8 arrowAP = (heldArrowAP + i) % arrowCount;
+        ArrowItems items = arrowTypeToItem[arrowAP];
+        if (INV_CONTENT(items.asArrow) != ITEM_NONE) {
+            newItem = items.asBowArrow;
+            newItemAction = PLAYER_IA_BOW + arrowAP;
+            break;
+        }
+    }
+    if (i == arrowCount) {
+        return false;
+    }
+
+    gSaveContext.equips.buttonItems[this->heldItemButton] = newItem;
+    this->heldItemId = newItem;
+    this->itemAction = newItemAction;
+    this->heldItemAction = newItemAction;
+    return true;
+}
+
+// Replace previously nocked arrow with the new arrow type
+void Player_ReplaceSwitchedArrow(PlayState* play, Player* this) {
+    s32 item, arrowType;
+    if (this->unk_860 < 0 || func_80834380(play, this, &item, &arrowType) <= 0) {
+        return;
+    }
+
+    s32 newMagicArrowType = arrowType - ARROW_FIRE;
+    s32 arrowCost;
+    if (newMagicArrowType < 0 || newMagicArrowType > 2) {
+        arrowCost = 0;
+    } else {
+        arrowCost = sMagicArrowCosts[newMagicArrowType];
+    }
+
+    if (arrowCost == 0 || !func_80087708(play, arrowCost, 4)) {
+        arrowType = ARROW_NORMAL;
+    }
+
+    if (this->heldActor != NULL) {
+        Actor_Kill(this->heldActor);
+    }
+    this->heldActor = Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, ACTOR_EN_ARROW,
+                                            this->actor.world.pos.x, this->actor.world.pos.y,
+                                            this->actor.world.pos.z, 0, this->actor.shape.rot.y, 0, arrowType);
+}
+
 // The player has pressed the bow or hookshot button
 s32 func_8083442C(Player* this, PlayState* play) {
     s32 item;
@@ -2240,7 +2354,8 @@ s32 func_8083442C(Player* this, PlayState* play) {
 
                 if (this->unk_860 >= 0) {
                     if ((magicArrowType >= 0) && (magicArrowType <= 2) &&
-                        !func_80087708(play, sMagicArrowCosts[magicArrowType], 0)) {
+                        !func_80087708(play, sMagicArrowCosts[magicArrowType],
+                                       CVarGetInteger("gArrowSwitching", 0) ? 4 : 0)) {
                         arrowType = ARROW_NORMAL;
                     }
 
@@ -2307,7 +2422,7 @@ s32 func_80834758(PlayState* play, Player* this) {
     if (!(this->stateFlags1 & (PLAYER_STATE1_SHIELDING | PLAYER_STATE1_ON_HORSE | PLAYER_STATE1_IN_CUTSCENE)) &&
         (play->shootingGalleryStatus == 0) && (this->heldItemAction == this->itemAction) &&
         (this->currentShield != PLAYER_SHIELD_NONE) && !Player_IsChildWithHylianShield(this) && func_80833BCC(this) &&
-        CHECK_BTN_ALL(sControlInput->cur.button, BTN_R)) {
+        !Player_CanSwitchArrows(this) && CHECK_BTN_ALL(sControlInput->cur.button, BTN_R)) {
 
         anim = func_808346C4(play, this);
         frame = Animation_GetLastFrame(anim);
@@ -2471,9 +2586,9 @@ s32 func_80834E44(PlayState* play) {
 }
 
 s32 func_80834E7C(PlayState* play) {
-    u16 buttonsToCheck = BTN_A | BTN_B | BTN_CUP | BTN_CLEFT | BTN_CRIGHT | BTN_CDOWN;
+    u16 buttonsToCheck = BTN_A | BTN_B | BTN_CUP | BTN_CLEFT | BTN_CRIGHT | BTN_CDOWN | BTN_DUP;
     if (CVarGetInteger("gDpadEquips", 0) != 0) {
-        buttonsToCheck |= BTN_DUP | BTN_DDOWN | BTN_DLEFT | BTN_DRIGHT;
+        buttonsToCheck |= BTN_DDOWN | BTN_DLEFT | BTN_DRIGHT;
     }
     return (play->shootingGalleryStatus != 0) &&
            ((play->shootingGalleryStatus < 0) || CHECK_BTN_ANY(sControlInput->cur.button, buttonsToCheck));
@@ -2550,6 +2665,12 @@ s32 func_808350A4(PlayState* play, Player* this) {
                 }
             } else {
                 Inventory_ChangeAmmo(item, -1);
+                if (CVarGetInteger("gArrowSwitching", 0) &&
+                    arrowType >= ARROW_FIRE && arrowType <= ARROW_LIGHT
+                    && this->heldActor->child != NULL) {
+                    gSaveContext.magicState = 0;
+                    func_80087708(play, sMagicArrowCosts[arrowType - ARROW_FIRE], 0);
+                }
             }
 
             if (play->shootingGalleryStatus == 1) {
@@ -2603,6 +2724,11 @@ s32 func_808351D4(Player* this, PlayState* play) {
 
     func_80834EB8(this, play);
 
+    if (gSwitchingArrow) {
+        Player_ReplaceSwitchedArrow(play, this);
+        gSwitchingArrow = false;
+    }
+
     if ((this->unk_836 > 0) && ((this->unk_860 < 0) || (!D_80853618 && !func_80834E7C(play)))) {
         func_80833638(this, func_808353D8);
         if (this->unk_860 >= 0) {
@@ -2620,6 +2746,14 @@ s32 func_808351D4(Player* this, PlayState* play) {
         this->stateFlags1 |= PLAYER_STATE1_READY_TO_FIRE;
     }
 
+    gSwitchingArrow = Player_SwitchArrowsIfEnabled(this);
+    if (gSwitchingArrow && this->heldActor != NULL) {
+        if (this->heldActor->child != NULL) {
+            Actor_Kill(this->heldActor->child);
+        }
+        gSwitchingArrow = true;
+    }
+
     return 1;
 }
 
@@ -2629,6 +2763,8 @@ s32 func_808353D8(Player* this, PlayState* play) {
     if (Player_HoldsHookshot(this) && !func_80834FBC(this)) {
         return 1;
     }
+
+    Player_SwitchArrowsIfEnabled(this);
 
     if (!func_80834758(play, this) &&
         (D_80853614 || ((this->unk_860 < 0) && D_80853618) || func_80834E44(play))) {
@@ -2959,7 +3095,9 @@ void func_80835F44(PlayState* play, Player* this, s32 item) {
 
         if ((actionParam == PLAYER_IA_NONE) || !(this->stateFlags1 & PLAYER_STATE1_IN_WATER) ||
             ((this->actor.bgCheckFlags & 1) &&
-             ((actionParam == PLAYER_IA_HOOKSHOT) || (actionParam == PLAYER_IA_LONGSHOT))) ||
+             ((actionParam == PLAYER_IA_HOOKSHOT) || (actionParam == PLAYER_IA_LONGSHOT) ||
+              (CVarGetInteger("gEnhancedIronBoots", 0) && 
+               ((Player_ActionToSword(actionParam) != 0) || (actionParam == PLAYER_IA_BOMBCHU))))) ||
             ((actionParam >= PLAYER_IA_SHIELD_DEKU) && (actionParam <= PLAYER_IA_BOOTS_HOVER))) {
 
             if ((play->bombchuBowlingStatus == 0) &&
@@ -5236,7 +5374,11 @@ s32 func_8083B644(Player* this, PlayState* play) {
                             this->stateFlags2 |= PLAYER_STATE2_NAVI_ALERT;
                         }
 
-                        if (!CHECK_BTN_ALL(sControlInput->press.button, CVarGetInteger("gNaviOnL", 0) ? BTN_L : BTN_CUP) &&
+						u16 naviButton = CVarGetInteger("gNaviOnL", 0) ? BTN_L : BTN_CUP;
+                        if (Player_CanSwitchArrows(this)) {
+                            naviButton &= ~CVarGetInteger("gArrowSwitchBtnMap", BTN_R);
+                        }
+                        if (!(naviButton && CHECK_BTN_ALL(sControlInput->press.button, naviButton)) &&
                             !sp28) {
                             return 0;
                         }
@@ -6408,7 +6550,7 @@ s32 func_8083E5A8(Player* this, PlayState* play) {
                 this->getItemEntry = (GetItemEntry)GET_ITEM_NONE;
             }
         } else if (CHECK_BTN_ALL(sControlInput->press.button, BTN_A) && !(this->stateFlags1 & PLAYER_STATE1_ITEM_OVER_HEAD) &&
-                   !(this->stateFlags2 & PLAYER_STATE2_UNDERWATER)) {
+                   (CVarGetInteger("gEnhancedIronBoots", 0) || !(this->stateFlags2 & PLAYER_STATE2_UNDERWATER))) {
             if (this->getItemId != GI_NONE) {
                 GetItemEntry giEntry;
                 if (this->getItemEntry.objectId == OBJECT_INVALID) {
@@ -6504,9 +6646,9 @@ s32 func_8083EAF0(Player* this, Actor* actor) {
 }
 
 s32 func_8083EB44(Player* this, PlayState* play) {
-    u16 buttonsToCheck = BTN_A | BTN_B | BTN_CLEFT | BTN_CRIGHT | BTN_CDOWN;
+    u16 buttonsToCheck = BTN_A | BTN_B | BTN_CLEFT | BTN_CRIGHT | BTN_CDOWN | BTN_DUP;
     if (CVarGetInteger("gDpadEquips", 0) != 0) {
-        buttonsToCheck |= BTN_DUP | BTN_DDOWN | BTN_DLEFT | BTN_DRIGHT;
+        buttonsToCheck |= BTN_DDOWN | BTN_DLEFT | BTN_DRIGHT;
     }
     if ((this->stateFlags1 & PLAYER_STATE1_ITEM_OVER_HEAD) && (this->heldActor != NULL) &&
         CHECK_BTN_ANY(sControlInput->press.button, buttonsToCheck)) {
@@ -8566,9 +8708,9 @@ void func_8084411C(Player* this, PlayState* play) {
         if (this->stateFlags1 & PLAYER_STATE1_ITEM_OVER_HEAD) {
             Actor* heldActor = this->heldActor;
 
-            u16 buttonsToCheck = BTN_A | BTN_B | BTN_CLEFT | BTN_CRIGHT | BTN_CDOWN;
+            u16 buttonsToCheck = BTN_A | BTN_B | BTN_CLEFT | BTN_CRIGHT | BTN_CDOWN | BTN_DUP;
             if (CVarGetInteger("gDpadEquips", 0) != 0) {
-                buttonsToCheck |= BTN_DUP | BTN_DDOWN | BTN_DLEFT | BTN_DRIGHT;
+                buttonsToCheck |= BTN_DDOWN | BTN_DLEFT | BTN_DRIGHT;
             }
             if (!func_80835644(play, this, heldActor) && (heldActor->id == ACTOR_EN_NIW) &&
                 CHECK_BTN_ANY(sControlInput->press.button, buttonsToCheck)) {
@@ -9348,7 +9490,7 @@ void func_80846260(Player* this, PlayState* play) {
         return;
     }
 
-    u16 buttonsToCheck = BTN_A | BTN_B | BTN_CLEFT | BTN_CRIGHT | BTN_CDOWN;
+    u16 buttonsToCheck = BTN_A | BTN_B | BTN_CLEFT | BTN_CRIGHT | BTN_CDOWN | BTN_DUP;
     if (CVarGetInteger("gDpadEquips", 0) != 0) {
         buttonsToCheck |= BTN_DUP | BTN_DDOWN | BTN_DLEFT | BTN_DRIGHT;
     }
@@ -9869,7 +10011,8 @@ void func_808473D4(PlayState* play, Player* this) {
                 } else if ((!(this->stateFlags1 & PLAYER_STATE1_ITEM_OVER_HEAD) || (heldActor == NULL)) &&
                            (interactRangeActor != NULL) &&
                            ((!sp1C && (this->getItemId == GI_NONE)) ||
-                            (this->getItemId < 0 && !(this->stateFlags1 & PLAYER_STATE1_IN_WATER)))) {
+                            (this->getItemId < 0 && !(this->stateFlags1 & PLAYER_STATE1_IN_WATER)) ||
+                            CVarGetInteger("gEnhancedIronBoots", 0) && this->stateFlags2 & PLAYER_STATE2_UNDERWATER)) {
                     if (this->getItemId < 0) {
                         doAction = DO_ACTION_OPEN;
                     } else if ((interactRangeActor->id == ACTOR_BG_TOKI_SWD) && LINK_IS_ADULT) {
@@ -11516,15 +11659,20 @@ void func_8084B1D8(Player* this, PlayState* play) {
         func_80836670(this, play);
     }
 
-    u16 buttonsToCheck = BTN_A | BTN_B | BTN_R | BTN_CUP | BTN_CLEFT | BTN_CRIGHT | BTN_CDOWN;
+    u16 itemButtons = BTN_A | BTN_B | BTN_R | BTN_CUP | BTN_CLEFT | BTN_CRIGHT | BTN_CDOWN | BTN_DUP;
     if (CVarGetInteger("gDpadEquips", 0) != 0) {
-        buttonsToCheck |= BTN_DUP | BTN_DDOWN | BTN_DLEFT | BTN_DRIGHT;
+        itemButtons |= BTN_DDOWN | BTN_DLEFT | BTN_DRIGHT;
+    }
+    u16 returnButtons = BTN_A | BTN_B | BTN_R;
+    if (Player_CanSwitchArrows(this)) {
+        itemButtons &= ~CVarGetInteger("gArrowSwitchBtnMap", BTN_R);
+        returnButtons &= ~CVarGetInteger("gArrowSwitchBtnMap", BTN_R);
     }
     if ((this->csMode != 0) || (this->unk_6AD == 0) || (this->unk_6AD >= 4) || func_80833B54(this) ||
         (this->unk_664 != NULL) || !func_8083AD4C(play, this) ||
-        (((this->unk_6AD == 2) && (CHECK_BTN_ANY(sControlInput->press.button, BTN_A | BTN_B | BTN_R) ||
+        (((this->unk_6AD == 2) && (CHECK_BTN_ANY(sControlInput->press.button, returnButtons) ||
                                    func_80833B2C(this) || (!func_8002DD78(this) && !func_808334B4(this)))) ||
-         ((this->unk_6AD == 1) && CHECK_BTN_ANY(sControlInput->press.button, buttonsToCheck)))) {
+         ((this->unk_6AD == 1) && CHECK_BTN_ANY(sControlInput->press.button, itemButtons)))) {
         func_8083C148(this, play);
         func_80078884(NA_SE_SY_CAMERA_ZOOM_UP);
     } else if ((DECR(this->unk_850) == 0) || (this->unk_6AD != 2)) {
@@ -13171,6 +13319,8 @@ static BottleCatchInfo D_80854A04[] = {
     { ACTOR_EN_FISH, ITEM_FISH, 0x1F, 0x47 },
     { ACTOR_EN_ICE_HONO, ITEM_BLUE_FIRE, 0x20, 0x5D },
     { ACTOR_EN_INSECT, ITEM_BUG, 0x21, 0x7A },
+    { ACTOR_EN_POH, ITEM_POE, PLAYER_IA_BOTTLE_POE, 0x97 },
+    { ACTOR_EN_PO_FIELD, ITEM_BIG_POE, PLAYER_IA_BOTTLE_BIG_POE, 0xF9 },
 };
 
 void func_8084ECA4(Player* this, PlayState* play) {
@@ -13213,13 +13363,29 @@ void func_8084ECA4(Player* this, PlayState* play) {
 
                     if (this->interactRangeActor != NULL) {
                         catchInfo = &D_80854A04[0];
-                        for (i = 0; i < 4; i++, catchInfo++) {
+                        for (i = 0; i < ARRAY_COUNT(D_80854A04); i++, catchInfo++) {
                             if (this->interactRangeActor->id == catchInfo->actorId) {
                                 break;
                             }
                         }
 
-                        if (i < 4) {
+                        if (catchInfo->actorId == ACTOR_EN_POH || catchInfo->actorId == ACTOR_EN_PO_FIELD) {
+                            // Don't catch Sharp or Flat
+                            // I think they talk to you before you can get in catching range, but might as well prevent it outright
+                            if (catchInfo->actorId == ACTOR_EN_POH && this->interactRangeActor->params >= 2) {
+                                i = ARRAY_COUNT(D_80854A04);
+                            }
+                            // If the catch is a small field Poe (as opposed to a Big Poe), catch a graveyard Poe instead
+                            if (catchInfo->actorId == ACTOR_EN_PO_FIELD && this->interactRangeActor->params == 0) {
+                                i--;
+                                catchInfo--;
+                            }
+                            if (!CVarGetInteger("gMMPoeBottling", 0)) {
+                                i = ARRAY_COUNT(D_80854A04);
+                            }
+                        }
+
+                        if (i < ARRAY_COUNT(D_80854A04)) {
                             this->unk_84F = i + 1;
                             this->unk_850 = 0;
                             this->interactRangeActor->parent = &this->actor;

@@ -10,6 +10,14 @@ extern s16 D_8082AB2C[];
 extern u8 gEquipAgeReqs[][4];
 extern u8 gAreaGsFlags[];
 extern bool gSelectingMask;
+typedef enum {
+    AMS_DISABLED,
+    AMS_ENABLED,
+    AMS_CLOSING,
+    AMS_OPENING
+} ArrowMenuState;
+extern ArrowMenuState gArrowMenuState;
+#define ARROW_SELECT_OPEN (gArrowMenuState & 1)
 
 void KaleidoScope_DrawQuestStatus(PlayState* play, GraphicsContext* gfxCtx);
 s32 KaleidoScope_UpdateQuestStatusPoint(PauseContext* pauseCtx, s32 point);
@@ -31,6 +39,7 @@ void KaleidoScope_ProcessPlayerPreRender();
 void KaleidoScope_SetupPlayerPreRender(PlayState* play);
 void KaleidoScope_DrawCursor(PlayState* play, u16 pageIndex);
 void KaleidoScope_UpdateDungeonMap(PlayState* play);
+void KaleidoScope_SetArrowSelectActive(PauseContext* pauseCtx, bool active);
 
 void PauseMapMark_Draw(PlayState* play);
 

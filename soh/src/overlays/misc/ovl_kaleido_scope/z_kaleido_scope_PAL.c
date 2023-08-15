@@ -734,20 +734,35 @@ static u16 D_8082ABEC[] = {
 };
 
 u8 gSlotAgeReqs[] = {
-    1, 9, 9, 0, 0, 9, 1, 9, 9, 0, 0, 9, 1, 9, 1, 0, 0, 9, 9, 9, 9, 9, 0, 1,
+    LINK_AGE_EITHER, LINK_AGE_EITHER, LINK_AGE_EITHER, LINK_AGE_EITHER, LINK_AGE_EITHER, LINK_AGE_CHILD,
+    LINK_AGE_EITHER, LINK_AGE_CHILD,  LINK_AGE_CHILD,  LINK_AGE_CHILD,  LINK_AGE_ADULT,  LINK_AGE_CHILD,
+    LINK_AGE_EITHER, LINK_AGE_ADULT,  LINK_AGE_ADULT,  LINK_AGE_ADULT,  LINK_AGE_ADULT,  LINK_AGE_ADULT,
+    LINK_AGE_EITHER, LINK_AGE_EITHER, LINK_AGE_EITHER, LINK_AGE_EITHER, LINK_AGE_EITHER, LINK_AGE_EITHER,
 };
 
 u8 gEquipAgeReqs[][4] = {
-    { 0, 1, 0, 0 },
-    { 9, 1, 9, 0 },
-    { 0, 9, 0, 0 },
-    { 9, 9, 0, 0 },
+    { LINK_AGE_ADULT,  LINK_AGE_CHILD,  LINK_AGE_ADULT,  LINK_AGE_ADULT },
+    { LINK_AGE_EITHER, LINK_AGE_CHILD,  LINK_AGE_EITHER, LINK_AGE_ADULT },
+    { LINK_AGE_ADULT,  LINK_AGE_EITHER, LINK_AGE_ADULT,  LINK_AGE_ADULT },
+    { LINK_AGE_EITHER, LINK_AGE_EITHER, LINK_AGE_ADULT,  LINK_AGE_ADULT },
 };
 
 u8 gItemAgeReqs[] = {
-    1, 9, 9, 0, 0, 9, 1, 9, 9, 9, 0, 0, 0, 9, 1, 9, 1, 0, 0, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
-    9, 9, 9, 9, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 1, 0, 0, 1, 9, 0, 9, 0, 0, 9, 0, 0, 1, 1, 1, 0, 0, 0, 9, 9, 9, 1, 0, 0, 9, 9, 0,
+    LINK_AGE_CHILD,  LINK_AGE_EITHER, LINK_AGE_EITHER, LINK_AGE_ADULT,  LINK_AGE_ADULT,  LINK_AGE_EITHER,
+    LINK_AGE_CHILD,  LINK_AGE_EITHER, LINK_AGE_EITHER, LINK_AGE_EITHER, LINK_AGE_ADULT,  LINK_AGE_ADULT,
+    LINK_AGE_ADULT,  LINK_AGE_EITHER, LINK_AGE_CHILD,  LINK_AGE_EITHER, LINK_AGE_CHILD,  LINK_AGE_ADULT,
+    LINK_AGE_ADULT,  LINK_AGE_EITHER, LINK_AGE_EITHER, LINK_AGE_EITHER, LINK_AGE_EITHER, LINK_AGE_EITHER,
+    LINK_AGE_EITHER, LINK_AGE_EITHER, LINK_AGE_EITHER, LINK_AGE_EITHER, LINK_AGE_EITHER, LINK_AGE_EITHER,
+    LINK_AGE_EITHER, LINK_AGE_EITHER, LINK_AGE_EITHER, LINK_AGE_CHILD,  LINK_AGE_CHILD,  LINK_AGE_CHILD,
+    LINK_AGE_CHILD,  LINK_AGE_CHILD,  LINK_AGE_CHILD,  LINK_AGE_CHILD,  LINK_AGE_CHILD,  LINK_AGE_CHILD,
+    LINK_AGE_CHILD,  LINK_AGE_CHILD,  LINK_AGE_CHILD,  LINK_AGE_ADULT,  LINK_AGE_ADULT,  LINK_AGE_ADULT,
+    LINK_AGE_ADULT,  LINK_AGE_ADULT,  LINK_AGE_ADULT,  LINK_AGE_ADULT,  LINK_AGE_ADULT,  LINK_AGE_ADULT,
+    LINK_AGE_ADULT,  LINK_AGE_ADULT,  LINK_AGE_ADULT,  LINK_AGE_ADULT,  LINK_AGE_ADULT,  LINK_AGE_CHILD,
+    LINK_AGE_ADULT,  LINK_AGE_ADULT,  LINK_AGE_CHILD,  LINK_AGE_EITHER, LINK_AGE_ADULT,  LINK_AGE_EITHER,
+    LINK_AGE_ADULT,  LINK_AGE_ADULT,  LINK_AGE_EITHER, LINK_AGE_ADULT,  LINK_AGE_ADULT,  LINK_AGE_CHILD,
+    LINK_AGE_CHILD,  LINK_AGE_CHILD,  LINK_AGE_ADULT,  LINK_AGE_ADULT,  LINK_AGE_ADULT,  LINK_AGE_EITHER,
+    LINK_AGE_EITHER, LINK_AGE_EITHER, LINK_AGE_CHILD,  LINK_AGE_ADULT,  LINK_AGE_ADULT,  LINK_AGE_EITHER,
+    LINK_AGE_EITHER, LINK_AGE_ADULT,
 };
 
 u8 gAreaGsFlags[] = {
@@ -882,6 +897,7 @@ void KaleidoScope_SetDefaultCursor(PlayState* play) {
     s16 s;
     s16 i;
     gSelectingMask = false;
+    KaleidoScope_SetArrowSelectActive(pauseCtx, false);
 
     switch (pauseCtx->pageIndex) {
         case PAUSE_ITEM:
@@ -916,6 +932,7 @@ void KaleidoScope_SwitchPage(PauseContext* pauseCtx, u8 pt) {
     pauseCtx->unk_1E4 = 1;
     pauseCtx->unk_1EA = 0;
     gSelectingMask = false;
+    KaleidoScope_SetArrowSelectActive(pauseCtx, false);
 
     if (!pt) {
         pauseCtx->mode = pauseCtx->pageIndex * 2 + 1;
@@ -1468,9 +1485,17 @@ void KaleidoScope_DrawPages(PlayState* play, GraphicsContext* gfxCtx) {
 
         gSPVertex(POLY_KAL_DISP++, &pauseCtx->saveVtx[60], 32, 0);
 
-        if (((pauseCtx->state == 7) && (pauseCtx->unk_1EC < 4)) || (pauseCtx->state == 0xE)) {
-            POLY_KAL_DISP =
-                KaleidoScope_QuadTextureIA8(POLY_KAL_DISP, sSavePromptTexs[gSaveContext.language], 152, 16, 0);
+        if (((pauseCtx->state == 7) &&
+             (pauseCtx->unk_1EC < 4 || pauseCtx->unk_1EC == 7 ||
+              (CVarGetInteger("gSaveAndQuit", 0) && pauseCtx->unk_1EC == 5))) ||
+            (pauseCtx->state == 0xE)) {
+            if (pauseCtx->unk_1EC == 7 || pauseCtx->unk_1EC == 5) {
+                POLY_KAL_DISP =
+                    KaleidoScope_QuadTextureIA8(POLY_KAL_DISP, sContinuePromptTexs[gSaveContext.language], 152, 16, 0);
+            } else {
+                POLY_KAL_DISP =
+                    KaleidoScope_QuadTextureIA8(POLY_KAL_DISP, sSavePromptTexs[gSaveContext.language], 152, 16, 0);
+            }
 
             gDPSetCombineLERP(POLY_KAL_DISP++, 1, 0, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0, 1, 0, PRIMITIVE, 0, TEXEL0,
                               0, PRIMITIVE, 0);
@@ -2097,6 +2122,18 @@ void KaleidoScope_UpdateNamePanel(PlayState* play) {
             } else {
                 osSyncPrintf("zoom_name=%d\n", pauseCtx->namedItem);
 
+                switch (sp2A) {
+                    case ITEM_BOW_ARROW_FIRE:
+                        sp2A = ITEM_ARROW_FIRE;
+                        break;
+                    case ITEM_BOW_ARROW_ICE:
+                        sp2A = ITEM_ARROW_ICE;
+                        break;
+                    case ITEM_BOW_ARROW_LIGHT:
+                    	sp2A = ITEM_ARROW_LIGHT;
+                        break;
+                }
+
                 if (gSaveContext.language) {
                     sp2A += 123;
                 }
@@ -2486,7 +2523,8 @@ s16 func_80823A0C(PlayState* play, Vtx* vtx, s16 arg2, s16 arg3) {
     return phi_t1;
 }
 
-static s16 D_8082B11C[] = { 0, 4, 8, 12, 24, 32, 56 };
+/* Maps an ammo item to an inventory slot by 4x its slot number */
+static s16 sAmmoVtxTableIdx[] = { 4, 8, 12, 20, 28, 36, 52 };
 
 static s16 D_8082B12C[] = { -114, 12, 44, 76 };
 
@@ -2651,7 +2689,7 @@ void KaleidoScope_InitVertices(PlayState* play, GraphicsContext* gfxCtx) {
 
     for (phi_t3 = 1; phi_t3 < ARRAY_COUNT(gSaveContext.equips.buttonItems); phi_t3++, phi_t2 += 4) {
         if (gSaveContext.equips.cButtonSlots[phi_t3 - 1] != ITEM_NONE &&
-            ((phi_t3 < 4) || CVarGetInteger("gDpadEquips", 0))) {
+            ((phi_t3 < 5) || CVarGetInteger("gDpadEquips", 0))) {
             phi_t4 = gSaveContext.equips.cButtonSlots[phi_t3 - 1] * 4;
 
             pauseCtx->itemVtx[phi_t2 + 0].v.ob[0] = pauseCtx->itemVtx[phi_t2 + 2].v.ob[0] =
@@ -2701,7 +2739,7 @@ void KaleidoScope_InitVertices(PlayState* play, GraphicsContext* gfxCtx) {
     }
 
     for (phi_t3 = 0; phi_t3 < 7; phi_t3++) {
-        phi_t4 = D_8082B11C[phi_t3];
+        phi_t4 = sAmmoVtxTableIdx[phi_t3];
 
         pauseCtx->itemVtx[phi_t2 + 0].v.ob[0] = pauseCtx->itemVtx[phi_t2 + 2].v.ob[0] =
             pauseCtx->itemVtx[phi_t4].v.ob[0];
@@ -2762,7 +2800,7 @@ void KaleidoScope_InitVertices(PlayState* play, GraphicsContext* gfxCtx) {
                 pauseCtx->equipVtx[phi_t4 + 0].v.ob[0] + 28;
 
             pauseCtx->equipVtx[phi_t4 + 0].v.ob[1] = pauseCtx->equipVtx[phi_t4 + 1].v.ob[1] =
-                phi_t5 + pauseCtx->offsetY - 2;
+                phi_t5 + pauseCtx->offsetY - 2 - (phi_t3 > 0 ? 16 : 0);
 
             pauseCtx->equipVtx[phi_t4 + 2].v.ob[1] = pauseCtx->equipVtx[phi_t4 + 3].v.ob[1] =
                 pauseCtx->equipVtx[phi_t4 + 0].v.ob[1] - 28;
@@ -2953,6 +2991,34 @@ void KaleidoScope_InitVertices(PlayState* play, GraphicsContext* gfxCtx) {
 
     pauseCtx->saveVtx = Graph_Alloc(gfxCtx, 80 * sizeof(Vtx));
     func_80823A0C(play, pauseCtx->saveVtx, 5, 5);
+
+    pauseCtx->arrowSelectVtx = Graph_Alloc(gfxCtx, 32 * sizeof(Vtx));
+
+	// All arrow select vertices
+    for (phi_t2 = 0; phi_t2 < 32; phi_t2++) {
+        pauseCtx->arrowSelectVtx[phi_t2].v.flag = 0;
+
+        // Z position
+        pauseCtx->arrowSelectVtx[phi_t2].v.ob[2] = 0;
+
+		// Color
+        pauseCtx->arrowSelectVtx[phi_t2].v.cn[0] = pauseCtx->arrowSelectVtx[phi_t2].v.cn[1] =
+            pauseCtx->arrowSelectVtx[phi_t2].v.cn[2] = pauseCtx->arrowSelectVtx[phi_t2].v.cn[3] = 255;
+    }
+
+	// All arrow select quads
+    for (phi_t2 = 0; phi_t2 < 32; phi_t2 += 4) {
+        // Top left UV at (0, 0);
+        pauseCtx->arrowSelectVtx[phi_t2 + 0].v.tc[0] = pauseCtx->arrowSelectVtx[phi_t2 + 0].v.tc[1] =
+            pauseCtx->arrowSelectVtx[phi_t2 + 1].v.tc[1] = pauseCtx->arrowSelectVtx[phi_t2 + 2].v.tc[0] = 0;
+    }
+
+	// Background quads
+    for (phi_t2 = 16; phi_t2 < 32; phi_t2 += 4) {
+        // Bottom left UV at (32, 32)
+        pauseCtx->arrowSelectVtx[phi_t2 + 1].v.tc[0] = pauseCtx->arrowSelectVtx[phi_t2 + 2].v.tc[1] =
+            pauseCtx->arrowSelectVtx[phi_t2 + 3].v.tc[0] = pauseCtx->arrowSelectVtx[phi_t2 + 3].v.tc[1] = 0x400;
+    }
 }
 
 void KaleidoScope_DrawGameOver(PlayState* play) {
@@ -3799,6 +3865,12 @@ void KaleidoScope_Update(PlayState* play)
                 case 1:
                     if (CHECK_BTN_ALL(input->press.button, BTN_A)) {
                         if (pauseCtx->promptChoice != 0) {
+                            if (CVarGetInteger("gSaveAndQuit", 0)) {
+                                pauseCtx->promptChoice = 0;
+                                Audio_PlaySoundGeneral(NA_SE_SY_DECIDE, &D_801333D4, 4, &D_801333E0, &D_801333E0, &D_801333E8);
+                                pauseCtx->unk_1EC = 7;
+                                break;
+                            }
                             Interface_SetDoAction(play, DO_ACTION_NONE);
                             gSaveContext.buttonStatus[0] = gSaveContext.buttonStatus[1] = gSaveContext.buttonStatus[2] =
                                 gSaveContext.buttonStatus[3] = BTN_ENABLED;
@@ -3814,7 +3886,7 @@ void KaleidoScope_Update(PlayState* play)
                             Audio_PlaySoundGeneral(NA_SE_SY_PIECE_OF_HEART, &D_801333D4, 4, &D_801333E0, &D_801333E0,
                                                    &D_801333E8);
                             Play_PerformSave(play);
-                            pauseCtx->unk_1EC = 4;
+                            pauseCtx->unk_1EC = CVarGetInteger("gSaveAndQuit", 0) ? 7 : 4;
                             D_8082B25C = CVarGetInteger("gSkipSaveConfirmation", 0) ? 3 /* 0.1 sec */ : 90 /* 3 secs */;
                         }
                     } else if (CHECK_BTN_ALL(input->press.button, BTN_START) ||
@@ -3836,6 +3908,10 @@ void KaleidoScope_Update(PlayState* play)
                 case 4:
                     if (CHECK_BTN_ALL(input->press.button, BTN_B) || CHECK_BTN_ALL(input->press.button, BTN_A) ||
                         CHECK_BTN_ALL(input->press.button, BTN_START) || (--D_8082B25C == 0)) {
+                        if (CVarGetInteger("gSaveAndQuit", 0)) {
+                            pauseCtx->unk_1EC = 7;
+                            break;
+                        }
                         Interface_SetDoAction(play, DO_ACTION_NONE);
                         gSaveContext.buttonStatus[0] = gSaveContext.buttonStatus[1] = gSaveContext.buttonStatus[2] =
                             gSaveContext.buttonStatus[3] = BTN_ENABLED;
@@ -3884,6 +3960,46 @@ void KaleidoScope_Update(PlayState* play)
                         pauseCtx->namedItem = PAUSE_ITEM_NONE;
                         pauseCtx->unk_1E4 = 0;
                         pauseCtx->unk_204 = -434.0f;
+                    }
+                    break;
+
+                // 7 and 8 are used by "Prompt to quit after saving" enhancement
+                case 7:
+                    if (CHECK_BTN_ALL(input->press.button, BTN_A) || CHECK_BTN_ALL(input->press.button, BTN_B) ||
+                        CHECK_BTN_ALL(input->press.button, BTN_START)) {
+                        if (pauseCtx->promptChoice == 0 || CHECK_BTN_ALL(input->press.button, BTN_B)) {
+                            Interface_SetDoAction(play, DO_ACTION_NONE);
+                            gSaveContext.buttonStatus[0] = gSaveContext.buttonStatus[1] = gSaveContext.buttonStatus[2] =
+                                gSaveContext.buttonStatus[3] = BTN_ENABLED;
+                            gSaveContext.buttonStatus[5] = gSaveContext.buttonStatus[6] = gSaveContext.buttonStatus[7] =
+                                gSaveContext.buttonStatus[8] = BTN_ENABLED;
+                            gSaveContext.unk_13EA = 0;
+                            Interface_ChangeAlpha(50);
+                            pauseCtx->unk_1EC = 5;
+                            WREG(2) = -6240;
+                            YREG(8) = pauseCtx->unk_204;
+                            func_800F64E0(0);
+                        } else {
+                            Audio_PlaySoundGeneral(NA_SE_SY_DECIDE, &D_801333D4, 4, &D_801333E0, &D_801333E0,
+                                                   &D_801333E8);
+                            pauseCtx->unk_1EC = 8;
+                        }
+                    }
+                    break;
+
+                case 8:
+                    if (interfaceCtx->unk_244 != 255) {
+                        interfaceCtx->unk_244 += 10;
+                        if (interfaceCtx->unk_244 >= 255) {
+                            interfaceCtx->unk_244 = 255;
+                            pauseCtx->state = 0;
+                            R_UPDATE_RATE = 3;
+                            R_PAUSE_MENU_MODE = 0;
+                            func_800981B8(&play->objectCtx);
+                            func_800418D0(&play->colCtx, play);
+                            play->state.running = 0;
+                            SET_NEXT_GAMESTATE(&play->state, Opening_Init, OpeningContext);
+                        }
                     }
                     break;
             }
@@ -4189,6 +4305,9 @@ void KaleidoScope_Update(PlayState* play)
             break;
 
         case 0x12:
+        	// OTRTODO: move this somewhere it won't be called repeatedly for several frames
+            KaleidoScope_SetArrowSelectActive(pauseCtx, false);
+
             if (pauseCtx->unk_1F4 != 160.0f) {
                 pauseCtx->unk_1F4 = pauseCtx->unk_1F8 = pauseCtx->unk_1FC = pauseCtx->unk_200 += 160.0f / WREG(6);
                 pauseCtx->infoPanelOffsetY -= 40 / WREG(6);

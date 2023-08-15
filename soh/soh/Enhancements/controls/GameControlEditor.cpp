@@ -85,6 +85,9 @@ namespace GameControlEditor {
     static CustomButtonMap ocarinaSharp = {"Pitch up", "gOcarinaSharpBtnMap", BTN_R};
     static CustomButtonMap ocarinaFlat = {"Pitch down", "gOcarinaFlatBtnMap", BTN_Z};
 
+    // Misc.
+    static CustomButtonMap arrowSwitch = {"Switch arrows", "gArrowSwitchBtnMap", BTN_R};
+
     void GameControlEditorWindow::InitElement() {
         addButtonName(BTN_A,		"A");
         addButtonName(BTN_B,		"B");
@@ -291,6 +294,8 @@ namespace GameControlEditor {
                     "To make the cursor only move a single space during name entry no matter how long a direction is held, manually set gDpadHoldChange to 0");
         UIWidgets::PaddedEnhancementCheckbox("D-pad as Equip Items", "gDpadEquips");
         DrawHelpIcon("Equip items and equipment on the D-pad\nIf used with D-pad on Pause Screen, you must hold C-Up to equip instead of navigate");
+        UIWidgets::PaddedEnhancementCheckbox("Toggle minimap with D-pad down", "gMapOnDDown");
+        DrawHelpIcon("Toggle the minimap by pressing down on the D-pad\nIf \"D-pad as Equip Items\" is enabled, equipping an item on D-pad down will prevent you from toggling the map");
         window->EndGroupPanelPublic(0);
     }
 
@@ -322,6 +327,25 @@ namespace GameControlEditor {
         UIWidgets::Spacer(0);
         UIWidgets::PaddedEnhancementCheckbox("Answer Navi Prompt with L Button", "gNaviOnL");
         DrawHelpIcon("Speak to Navi with L but enter first-person camera with C-Up");
+
+        float longestLabelWidth = ImGui::CalcTextSize(arrowSwitch.label).x + 10;
+
+		// Switch arrows
+        bool arrowSwitchingEnabled = CVarGetInteger("gArrowSwitching", 0);
+        if (!arrowSwitchingEnabled) {
+            ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+            ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+        }
+        N64ButtonMask arrowSwitchAllowedButtons = BTN_A | BTN_L | BTN_R | BTN_CUP;
+        DrawMapping(arrowSwitch, longestLabelWidth, ~arrowSwitchAllowedButtons);
+        if (!arrowSwitchingEnabled) {
+            ImGui::PopStyleVar(1);
+            if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+                ImGui::SetTooltip("%s", "This option is disabled because Arrow Switching from Enhancements > Gameplay > Time Savers is disabled");
+            }
+            ImGui::PopItemFlag();
+        }
+
         window->EndGroupPanelPublic(0);
     }
 
