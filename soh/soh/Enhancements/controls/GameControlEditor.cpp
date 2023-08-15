@@ -291,6 +291,8 @@ namespace GameControlEditor {
                     "To make the cursor only move a single space during name entry no matter how long a direction is held, manually set gDpadHoldChange to 0");
         UIWidgets::PaddedEnhancementCheckbox("D-pad as Equip Items", "gDpadEquips");
         DrawHelpIcon("Equip items and equipment on the D-pad\nIf used with D-pad on Pause Screen, you must hold C-Up to equip instead of navigate");
+        UIWidgets::PaddedEnhancementCheckbox("Toggle minimap with D-pad down", "gMapOnDDown");
+        DrawHelpIcon("Toggle the minimap by pressing down on the D-pad\nIf \"D-pad as Equip Items\" is enabled, equipping an item on D-pad down will prevent you from toggling the map");
         window->EndGroupPanelPublic(0);
     }
 

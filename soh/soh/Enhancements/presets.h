@@ -170,7 +170,6 @@ const std::vector<const char*> enhancementsCvars = {
     "gDisableCritWiggle",
     "gChestSizeDependsStoneOfAgony",
     "gSkipArrowAnimation",
-    "gSeparateArrows",
     "gCustomizeShootingGallery",
     "gInstantShootingGalleryWin",
     "gConstantAdultGallery",
@@ -564,9 +563,6 @@ const std::vector<PresetEntry> enhancedPresetEntries = {
     // Skip Magic Arrow Equip Animation
     PRESET_ENTRY_S32("gSkipArrowAnimation", 1),
 
-    // Equip arrows on multiple slots
-    PRESET_ENTRY_S32("gSeparateArrows", 1),
-
     // Disable Navi Call Audio
     PRESET_ENTRY_S32("gDisableNaviCallAudio", 1),
 
@@ -685,9 +681,6 @@ const std::vector<PresetEntry> randomizerPresetEntries = {
     PRESET_ENTRY_S32("gSkipArrowAnimation", 1),
     // Exit Market at Night
     PRESET_ENTRY_S32("gMarketSneak", 1),
-
-    // Equip arrows on multiple slots
-    PRESET_ENTRY_S32("gSeparateArrows", 1),
 
     // Disable Navi Call Audio
     PRESET_ENTRY_S32("gDisableNaviCallAudio", 1),

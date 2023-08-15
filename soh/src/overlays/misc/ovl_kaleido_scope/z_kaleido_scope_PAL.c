@@ -734,20 +734,35 @@ static u16 D_8082ABEC[] = {
 };
 
 u8 gSlotAgeReqs[] = {
-    1, 9, 9, 0, 0, 9, 1, 9, 9, 0, 0, 9, 1, 9, 1, 0, 0, 9, 9, 9, 9, 9, 0, 1,
+    LINK_AGE_EITHER, LINK_AGE_EITHER, LINK_AGE_EITHER, LINK_AGE_EITHER, LINK_AGE_EITHER, LINK_AGE_CHILD,
+    LINK_AGE_EITHER, LINK_AGE_CHILD,  LINK_AGE_CHILD,  LINK_AGE_CHILD,  LINK_AGE_ADULT,  LINK_AGE_CHILD,
+    LINK_AGE_EITHER, LINK_AGE_ADULT,  LINK_AGE_ADULT,  LINK_AGE_ADULT,  LINK_AGE_ADULT,  LINK_AGE_ADULT,
+    LINK_AGE_EITHER, LINK_AGE_EITHER, LINK_AGE_EITHER, LINK_AGE_EITHER, LINK_AGE_EITHER, LINK_AGE_EITHER,
 };
 
 u8 gEquipAgeReqs[][4] = {
-    { 0, 1, 0, 0 },
-    { 9, 1, 9, 0 },
-    { 0, 9, 0, 0 },
-    { 9, 9, 0, 0 },
+    { LINK_AGE_ADULT,  LINK_AGE_CHILD,  LINK_AGE_ADULT,  LINK_AGE_ADULT },
+    { LINK_AGE_EITHER, LINK_AGE_CHILD,  LINK_AGE_EITHER, LINK_AGE_ADULT },
+    { LINK_AGE_ADULT,  LINK_AGE_EITHER, LINK_AGE_ADULT,  LINK_AGE_ADULT },
+    { LINK_AGE_EITHER, LINK_AGE_EITHER, LINK_AGE_ADULT,  LINK_AGE_ADULT },
 };
 
 u8 gItemAgeReqs[] = {
-    1, 9, 9, 0, 0, 9, 1, 9, 9, 9, 0, 0, 0, 9, 1, 9, 1, 0, 0, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
-    9, 9, 9, 9, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 1, 0, 0, 1, 9, 0, 9, 0, 0, 9, 0, 0, 1, 1, 1, 0, 0, 0, 9, 9, 9, 1, 0, 0, 9, 9, 0,
+    LINK_AGE_CHILD,  LINK_AGE_EITHER, LINK_AGE_EITHER, LINK_AGE_ADULT,  LINK_AGE_ADULT,  LINK_AGE_EITHER,
+    LINK_AGE_CHILD,  LINK_AGE_EITHER, LINK_AGE_EITHER, LINK_AGE_EITHER, LINK_AGE_ADULT,  LINK_AGE_ADULT,
+    LINK_AGE_ADULT,  LINK_AGE_EITHER, LINK_AGE_CHILD,  LINK_AGE_EITHER, LINK_AGE_CHILD,  LINK_AGE_ADULT,
+    LINK_AGE_ADULT,  LINK_AGE_EITHER, LINK_AGE_EITHER, LINK_AGE_EITHER, LINK_AGE_EITHER, LINK_AGE_EITHER,
+    LINK_AGE_EITHER, LINK_AGE_EITHER, LINK_AGE_EITHER, LINK_AGE_EITHER, LINK_AGE_EITHER, LINK_AGE_EITHER,
+    LINK_AGE_EITHER, LINK_AGE_EITHER, LINK_AGE_EITHER, LINK_AGE_CHILD,  LINK_AGE_CHILD,  LINK_AGE_CHILD,
+    LINK_AGE_CHILD,  LINK_AGE_CHILD,  LINK_AGE_CHILD,  LINK_AGE_CHILD,  LINK_AGE_CHILD,  LINK_AGE_CHILD,
+    LINK_AGE_CHILD,  LINK_AGE_CHILD,  LINK_AGE_CHILD,  LINK_AGE_ADULT,  LINK_AGE_ADULT,  LINK_AGE_ADULT,
+    LINK_AGE_ADULT,  LINK_AGE_ADULT,  LINK_AGE_ADULT,  LINK_AGE_ADULT,  LINK_AGE_ADULT,  LINK_AGE_ADULT,
+    LINK_AGE_ADULT,  LINK_AGE_ADULT,  LINK_AGE_ADULT,  LINK_AGE_ADULT,  LINK_AGE_ADULT,  LINK_AGE_CHILD,
+    LINK_AGE_ADULT,  LINK_AGE_ADULT,  LINK_AGE_CHILD,  LINK_AGE_EITHER, LINK_AGE_ADULT,  LINK_AGE_EITHER,
+    LINK_AGE_ADULT,  LINK_AGE_ADULT,  LINK_AGE_EITHER, LINK_AGE_ADULT,  LINK_AGE_ADULT,  LINK_AGE_CHILD,
+    LINK_AGE_CHILD,  LINK_AGE_CHILD,  LINK_AGE_ADULT,  LINK_AGE_ADULT,  LINK_AGE_ADULT,  LINK_AGE_EITHER,
+    LINK_AGE_EITHER, LINK_AGE_EITHER, LINK_AGE_CHILD,  LINK_AGE_ADULT,  LINK_AGE_ADULT,  LINK_AGE_EITHER,
+    LINK_AGE_EITHER, LINK_AGE_ADULT,
 };
 
 u8 gAreaGsFlags[] = {
@@ -882,6 +897,7 @@ void KaleidoScope_SetDefaultCursor(PlayState* play) {
     s16 s;
     s16 i;
     gSelectingMask = false;
+    KaleidoScope_SetArrowSelectActive(pauseCtx, false);
 
     switch (pauseCtx->pageIndex) {
         case PAUSE_ITEM:
@@ -916,6 +932,7 @@ void KaleidoScope_SwitchPage(PauseContext* pauseCtx, u8 pt) {
     pauseCtx->unk_1E4 = 1;
     pauseCtx->unk_1EA = 0;
     gSelectingMask = false;
+    KaleidoScope_SetArrowSelectActive(pauseCtx, false);
 
     if (!pt) {
         pauseCtx->mode = pauseCtx->pageIndex * 2 + 1;
@@ -2097,6 +2114,18 @@ void KaleidoScope_UpdateNamePanel(PlayState* play) {
             } else {
                 osSyncPrintf("zoom_name=%d\n", pauseCtx->namedItem);
 
+                switch (sp2A) {
+                    case ITEM_BOW_ARROW_FIRE:
+                        sp2A = ITEM_ARROW_FIRE;
+                        break;
+                    case ITEM_BOW_ARROW_ICE:
+                        sp2A = ITEM_ARROW_ICE;
+                        break;
+                    case ITEM_BOW_ARROW_LIGHT:
+                    	sp2A = ITEM_ARROW_LIGHT;
+                        break;
+                }
+
                 if (gSaveContext.language) {
                     sp2A += 123;
                 }
@@ -2486,7 +2515,8 @@ s16 func_80823A0C(PlayState* play, Vtx* vtx, s16 arg2, s16 arg3) {
     return phi_t1;
 }
 
-static s16 D_8082B11C[] = { 0, 4, 8, 12, 24, 32, 56 };
+/* Maps an ammo item to an inventory slot by 4x its slot number */
+static s16 sAmmoVtxTableIdx[] = { 4, 8, 12, 20, 28, 36, 52 };
 
 static s16 D_8082B12C[] = { -114, 12, 44, 76 };
 
@@ -2651,7 +2681,7 @@ void KaleidoScope_InitVertices(PlayState* play, GraphicsContext* gfxCtx) {
 
     for (phi_t3 = 1; phi_t3 < ARRAY_COUNT(gSaveContext.equips.buttonItems); phi_t3++, phi_t2 += 4) {
         if (gSaveContext.equips.cButtonSlots[phi_t3 - 1] != ITEM_NONE &&
-            ((phi_t3 < 4) || CVarGetInteger("gDpadEquips", 0))) {
+            ((phi_t3 < 5) || CVarGetInteger("gDpadEquips", 0))) {
             phi_t4 = gSaveContext.equips.cButtonSlots[phi_t3 - 1] * 4;
 
             pauseCtx->itemVtx[phi_t2 + 0].v.ob[0] = pauseCtx->itemVtx[phi_t2 + 2].v.ob[0] =
@@ -2701,7 +2731,7 @@ void KaleidoScope_InitVertices(PlayState* play, GraphicsContext* gfxCtx) {
     }
 
     for (phi_t3 = 0; phi_t3 < 7; phi_t3++) {
-        phi_t4 = D_8082B11C[phi_t3];
+        phi_t4 = sAmmoVtxTableIdx[phi_t3];
 
         pauseCtx->itemVtx[phi_t2 + 0].v.ob[0] = pauseCtx->itemVtx[phi_t2 + 2].v.ob[0] =
             pauseCtx->itemVtx[phi_t4].v.ob[0];
@@ -2762,7 +2792,7 @@ void KaleidoScope_InitVertices(PlayState* play, GraphicsContext* gfxCtx) {
                 pauseCtx->equipVtx[phi_t4 + 0].v.ob[0] + 28;
 
             pauseCtx->equipVtx[phi_t4 + 0].v.ob[1] = pauseCtx->equipVtx[phi_t4 + 1].v.ob[1] =
-                phi_t5 + pauseCtx->offsetY - 2;
+                phi_t5 + pauseCtx->offsetY - 2 - (phi_t3 > 0 ? 16 : 0);
 
             pauseCtx->equipVtx[phi_t4 + 2].v.ob[1] = pauseCtx->equipVtx[phi_t4 + 3].v.ob[1] =
                 pauseCtx->equipVtx[phi_t4 + 0].v.ob[1] - 28;
@@ -2953,6 +2983,34 @@ void KaleidoScope_InitVertices(PlayState* play, GraphicsContext* gfxCtx) {
 
     pauseCtx->saveVtx = Graph_Alloc(gfxCtx, 80 * sizeof(Vtx));
     func_80823A0C(play, pauseCtx->saveVtx, 5, 5);
+
+    pauseCtx->arrowSelectVtx = Graph_Alloc(gfxCtx, 32 * sizeof(Vtx));
+
+	// All arrow select vertices
+    for (phi_t2 = 0; phi_t2 < 32; phi_t2++) {
+        pauseCtx->arrowSelectVtx[phi_t2].v.flag = 0;
+
+        // Z position
+        pauseCtx->arrowSelectVtx[phi_t2].v.ob[2] = 0;
+
+		// Color
+        pauseCtx->arrowSelectVtx[phi_t2].v.cn[0] = pauseCtx->arrowSelectVtx[phi_t2].v.cn[1] =
+            pauseCtx->arrowSelectVtx[phi_t2].v.cn[2] = pauseCtx->arrowSelectVtx[phi_t2].v.cn[3] = 255;
+    }
+
+	// All arrow select quads
+    for (phi_t2 = 0; phi_t2 < 32; phi_t2 += 4) {
+        // Top left UV at (0, 0);
+        pauseCtx->arrowSelectVtx[phi_t2 + 0].v.tc[0] = pauseCtx->arrowSelectVtx[phi_t2 + 0].v.tc[1] =
+            pauseCtx->arrowSelectVtx[phi_t2 + 1].v.tc[1] = pauseCtx->arrowSelectVtx[phi_t2 + 2].v.tc[0] = 0;
+    }
+
+	// Background quads
+    for (phi_t2 = 16; phi_t2 < 32; phi_t2 += 4) {
+        // Bottom left UV at (32, 32)
+        pauseCtx->arrowSelectVtx[phi_t2 + 1].v.tc[0] = pauseCtx->arrowSelectVtx[phi_t2 + 2].v.tc[1] =
+            pauseCtx->arrowSelectVtx[phi_t2 + 3].v.tc[0] = pauseCtx->arrowSelectVtx[phi_t2 + 3].v.tc[1] = 0x400;
+    }
 }
 
 void KaleidoScope_DrawGameOver(PlayState* play) {
@@ -4189,6 +4247,9 @@ void KaleidoScope_Update(PlayState* play)
             break;
 
         case 0x12:
+        	// OTRTODO: move this somewhere it won't be called repeatedly for several frames
+            KaleidoScope_SetArrowSelectActive(pauseCtx, false);
+
             if (pauseCtx->unk_1F4 != 160.0f) {
                 pauseCtx->unk_1F4 = pauseCtx->unk_1F8 = pauseCtx->unk_1FC = pauseCtx->unk_200 += 160.0f / WREG(6);
                 pauseCtx->infoPanelOffsetY -= 40 / WREG(6);
