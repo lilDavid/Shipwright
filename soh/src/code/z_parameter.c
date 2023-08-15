@@ -1434,7 +1434,9 @@ void Inventory_SwapAgeEquipment(void) {
 
         if (gSaveContext.adultEquips.buttonItems[0] == ITEM_NONE) {
             gSaveContext.equips.buttonItems[0] = ITEM_SWORD_MASTER;
+            gSaveContext.equips.equipment = 0x1122;
 
+            // Nuts on C-left (if present)
             if (gSaveContext.inventory.items[SLOT_NUT] != ITEM_NONE) {
                 gSaveContext.equips.buttonItems[1] = ITEM_NUT;
                 gSaveContext.equips.cButtonSlots[0] = SLOT_NUT;
@@ -1442,18 +1444,22 @@ void Inventory_SwapAgeEquipment(void) {
                 gSaveContext.equips.buttonItems[1] = gSaveContext.equips.cButtonSlots[0] = ITEM_NONE;
             }
 
+            // Bombs on C-down
             gSaveContext.equips.buttonItems[2] = ITEM_BOMB;
-            gSaveContext.equips.buttonItems[3] = gSaveContext.inventory.items[SLOT_OCARINA];
             gSaveContext.equips.cButtonSlots[1] = SLOT_BOMB;
-            gSaveContext.equips.cButtonSlots[2] = SLOT_OCARINA;
-            gSaveContext.equips.equipment = 0x1122;
 
-            // Set the dpad to nothing
-            gSaveContext.equips.buttonItems[4] = ITEM_NONE;
+            // Nothing on C-right
+            gSaveContext.equips.buttonItems[3] = ITEM_NONE;
+            gSaveContext.equips.cButtonSlots[2] = SLOT_NONE;
+
+            // Ocarina on D-up
+            gSaveContext.equips.buttonItems[4] = gSaveContext.inventory.items[SLOT_OCARINA];
+            gSaveContext.equips.cButtonSlots[3] = SLOT_OCARINA;
+
+            // Set the rest of the d-pad to nothing
             gSaveContext.equips.buttonItems[5] = ITEM_NONE;
             gSaveContext.equips.buttonItems[6] = ITEM_NONE;
             gSaveContext.equips.buttonItems[7] = ITEM_NONE;
-            gSaveContext.equips.cButtonSlots[3] = SLOT_NONE;
             gSaveContext.equips.cButtonSlots[4] = SLOT_NONE;
             gSaveContext.equips.cButtonSlots[5] = SLOT_NONE;
             gSaveContext.equips.cButtonSlots[6] = SLOT_NONE;
@@ -1879,6 +1885,9 @@ u8 Item_Give(PlayState* play, u8 item) {
         return Return_Item(item, MOD_NONE, ITEM_NONE);
     } else if ((item >= ITEM_BOOTS_KOKIRI) && (item <= ITEM_BOOTS_HOVER)) {
         gSaveContext.inventory.equipment |= (gBitFlags[item - ITEM_BOOTS_KOKIRI] << gEquipShifts[EQUIP_BOOTS]);
+        if (item != ITEM_BOOTS_KOKIRI) {
+            INV_CONTENT(item) = item;
+        }
         return Return_Item(item, MOD_NONE, ITEM_NONE);
     } else if ((item == ITEM_KEY_BOSS) || (item == ITEM_COMPASS) || (item == ITEM_DUNGEON_MAP)) {
         // Boss Key, Compass, and Dungeon Map exceptions for rando.
@@ -2186,6 +2195,14 @@ u8 Item_Give(PlayState* play, u8 item) {
         return Return_Item(item, MOD_NONE, ITEM_SEEDS);
     } else if (item == ITEM_OCARINA_FAIRY) {
         INV_CONTENT(ITEM_OCARINA_FAIRY) = ITEM_OCARINA_FAIRY;
+
+        gSaveContext.equips.buttonItems[4] = item;
+        gSaveContext.equips.cButtonSlots[3] = SLOT_OCARINA;
+        gSaveContext.childEquips.buttonItems[4] = item;
+        gSaveContext.childEquips.cButtonSlots[3] = SLOT_OCARINA;
+        gSaveContext.adultEquips.buttonItems[4] = item;
+        gSaveContext.adultEquips.cButtonSlots[3] = SLOT_OCARINA;
+
         return Return_Item(item, MOD_NONE, ITEM_NONE);
     } else if (item == ITEM_OCARINA_TIME) {
         INV_CONTENT(ITEM_OCARINA_TIME) = ITEM_OCARINA_TIME;
@@ -3410,7 +3427,7 @@ void Interface_UpdateMagicBar(PlayState* play) {
                 (msgCtx->msgMode == MSGMODE_NONE) && (play->gameOverCtx.state == GAMEOVER_INACTIVE) &&
                 (play->sceneLoadFlag == 0) && (play->transitionMode == 0) && !Play_InCsMode(play)) {
                 bool hasLens = false;
-                for (int buttonIndex = 1; buttonIndex < (CVarGetInteger("gDpadEquips", 0) != 0) ? ARRAY_COUNT(gSaveContext.equips.buttonItems) : 4; buttonIndex++) {
+                for (int buttonIndex = 1; buttonIndex < (CVarGetInteger("gDpadEquips", 0)) ? ARRAY_COUNT(gSaveContext.equips.buttonItems) : 5; buttonIndex++) {
                     if (gSaveContext.equips.buttonItems[buttonIndex] == ITEM_LENS) {
                         hasLens = true;
                         break;
@@ -4406,10 +4423,17 @@ void Interface_DrawItemIconTexture(PlayState* play, void* texture, s16 button) {
         ItemIconPos[3][1] = ItemIconPos_ori[3][1];
     }
 
-    gDPLoadTextureBlock(OVERLAY_DISP++, texture, G_IM_FMT_RGBA, G_IM_SIZ_32b, 32, 32, 0, G_TX_NOMIRROR | G_TX_WRAP,
+    // Exception specifically for dungeon map texture since only that appears on a button
+	bool smallTex = texture == gItemIcons[ITEM_DUNGEON_MAP];
+    int texSize = smallTex ? 24 : 32;
+    int offset = smallTex ? 4 : 0;
+
+    gDPLoadTextureBlock(OVERLAY_DISP++, texture, G_IM_FMT_RGBA, G_IM_SIZ_32b, texSize, texSize, 0, G_TX_NOMIRROR | G_TX_WRAP,
                         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
 
-    gSPWideTextureRectangle(OVERLAY_DISP++, ItemIconPos[button][0] << 2, ItemIconPos[button][1] << 2,
+    gSPWideTextureRectangle(OVERLAY_DISP++,
+                        (ItemIconPos[button][0] + offset << 2),
+                        (ItemIconPos[button][1] + offset << 2),
                         (ItemIconPos[button][0] + gItemIconWidth[button]) << 2,
                         (ItemIconPos[button][1] + gItemIconWidth[button]) << 2, G_TX_RENDERTILE, 0, 0,
                         gItemIconDD[button] << 1, gItemIconDD[button] << 1);
@@ -5253,76 +5277,87 @@ void Interface_Draw(PlayState* play) {
             Interface_DrawAmmoCount(play, 3, interfaceCtx->cRightAlpha);
         }
 
-        if (CVarGetInteger("gDpadEquips", 0) != 0) {
-            // DPad is only greyed-out when all 4 DPad directions are too
-            uint16_t dpadAlpha =
-                MAX(MAX(MAX(interfaceCtx->dpadUpAlpha, interfaceCtx->dpadDownAlpha), interfaceCtx->dpadLeftAlpha),
-                    interfaceCtx->dpadRightAlpha);
+        // DPad is only greyed-out when all 4 DPad directions are too
+        uint16_t dpadAlpha =
+            MAX(MAX(MAX(interfaceCtx->dpadUpAlpha, interfaceCtx->dpadDownAlpha), interfaceCtx->dpadLeftAlpha),
+                interfaceCtx->dpadRightAlpha);
 
-            // Draw DPad
-            s16 DpadPosX;
-            s16 DpadPosY;
-            s16 X_Margins_Dpad;
-            s16 Y_Margins_Dpad;
-            if (CVarGetInteger("gDPadUseMargins", 0) != 0) {
-                if (CVarGetInteger("gDPadPosType", 0) == 0) {X_Margins_Dpad = Right_HUD_Margin;};
-                Y_Margins_Dpad = (Top_HUD_Margin*-1);
-            } else {
-                Y_Margins_Dpad = 0;
-                X_Margins_Dpad = 0;
+        // Draw DPad
+        s16 DpadPosX;
+        s16 DpadPosY;
+        s16 X_Margins_Dpad;
+        s16 Y_Margins_Dpad;
+        if (CVarGetInteger("gDPadUseMargins", 0) != 0) {
+            if (CVarGetInteger("gDPadPosType", 0) == 0) {X_Margins_Dpad = Right_HUD_Margin;};
+            Y_Margins_Dpad = (Top_HUD_Margin*-1);
+        } else {
+            Y_Margins_Dpad = 0;
+            X_Margins_Dpad = 0;
+        }
+        if (CVarGetInteger("gDPadPosType", 0) != 0) {
+            DpadPosY = CVarGetInteger("gDPadPosY", 0)+Y_Margins_Dpad;
+            if (CVarGetInteger("gDPadPosType", 0) == 1) {//Anchor Left
+                if (CVarGetInteger("gDPadUseMargins", 0) != 0) {X_Margins_Dpad = Left_HUD_Margin;};
+                DpadPosX = OTRGetDimensionFromLeftEdge(CVarGetInteger("gDPadPosX", 0)+X_Margins_Dpad);
+            } else if (CVarGetInteger("gDPadPosType", 0) == 2) {//Anchor Right
+                if (CVarGetInteger("gDPadUseMargins", 0) != 0) {X_Margins_Dpad = Right_HUD_Margin;};
+                DpadPosX = OTRGetDimensionFromRightEdge(CVarGetInteger("gDPadPosX", 0)+X_Margins_Dpad);
+            } else if (CVarGetInteger("gDPadPosType", 0) == 3) {//Anchor None
+                DpadPosX = CVarGetInteger("gDPadPosX", 0);
+            } else if (CVarGetInteger("gDPadPosType", 0) == 4) {//Hidden
+                DpadPosX = -9999;
             }
-            if (CVarGetInteger("gDPadPosType", 0) != 0) {
-                DpadPosY = CVarGetInteger("gDPadPosY", 0)+Y_Margins_Dpad;
-                if (CVarGetInteger("gDPadPosType", 0) == 1) {//Anchor Left
-                    if (CVarGetInteger("gDPadUseMargins", 0) != 0) {X_Margins_Dpad = Left_HUD_Margin;};
-                    DpadPosX = OTRGetDimensionFromLeftEdge(CVarGetInteger("gDPadPosX", 0)+X_Margins_Dpad);
-                } else if (CVarGetInteger("gDPadPosType", 0) == 2) {//Anchor Right
-                    if (CVarGetInteger("gDPadUseMargins", 0) != 0) {X_Margins_Dpad = Right_HUD_Margin;};
-                    DpadPosX = OTRGetDimensionFromRightEdge(CVarGetInteger("gDPadPosX", 0)+X_Margins_Dpad);
-                } else if (CVarGetInteger("gDPadPosType", 0) == 3) {//Anchor None
-                    DpadPosX = CVarGetInteger("gDPadPosX", 0);
-                } else if (CVarGetInteger("gDPadPosType", 0) == 4) {//Hidden
-                    DpadPosX = -9999;
-                }
-            } else {
-                DpadPosX = OTRGetRectDimensionFromRightEdge(DPAD_X+X_Margins_Dpad);
-                DpadPosY = DPAD_Y+Y_Margins_Dpad;
-            }
+        } else {
+            DpadPosX = OTRGetRectDimensionFromRightEdge(DPAD_X+X_Margins_Dpad);
+            DpadPosY = DPAD_Y+Y_Margins_Dpad;
+        }
 
-            gDPSetCombineMode(OVERLAY_DISP++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+        gDPSetCombineMode(OVERLAY_DISP++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
 
-            gDPSetPrimColor(OVERLAY_DISP++, 0, 0, dPadColor.r, dPadColor.g, dPadColor.b, dpadAlpha);
-            if (fullUi) {
-                gDPLoadTextureBlock(OVERLAY_DISP++, gDPadTex,
-                                    G_IM_FMT_IA, G_IM_SIZ_16b, 32, 32, 0, G_TX_NOMIRROR | G_TX_WRAP,
-                                    G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-                gSPWideTextureRectangle(OVERLAY_DISP++, DpadPosX << 2, DpadPosY << 2,
-                                        (DpadPosX + 32) << 2, (DpadPosY + 32) << 2,
-                                        G_TX_RENDERTILE, 0, 0, (1 << 10), (1 << 10));
-            }
+        gDPSetPrimColor(OVERLAY_DISP++, 0, 0, dPadColor.r, dPadColor.g, dPadColor.b, dpadAlpha);
+        if (fullUi) {
+            gDPLoadTextureBlock(OVERLAY_DISP++, gDPadTex,
+                                G_IM_FMT_IA, G_IM_SIZ_16b, 32, 32, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                                G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+            gSPWideTextureRectangle(OVERLAY_DISP++, DpadPosX << 2, DpadPosY << 2,
+                                    (DpadPosX + 32) << 2, (DpadPosY + 32) << 2,
+                                    G_TX_RENDERTILE, 0, 0, (1 << 10), (1 << 10));
+        }
 
-            // DPad-Up Button Icon & Ammo Count
-            if (gSaveContext.equips.buttonItems[4] < 0xF0) {
-                gDPSetPrimColor(OVERLAY_DISP++, 0, 0, 255, 255, 255, interfaceCtx->dpadUpAlpha);
-                gDPSetCombineMode(OVERLAY_DISP++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
-                Interface_DrawItemIconTexture(play, gItemIcons[gSaveContext.equips.buttonItems[4]], 4);
-                gDPPipeSync(OVERLAY_DISP++);
-                gDPSetCombineLERP(OVERLAY_DISP++, PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, TEXEL0, 0, PRIMITIVE, 0,
-                                  PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, TEXEL0, 0, PRIMITIVE, 0);
-                Interface_DrawAmmoCount(play, 4, interfaceCtx->dpadUpAlpha);
-            }
+        bool dpadEquips = CVarGetInteger("gDpadEquips", 0);
 
-            // DPad-Down Button Icon & Ammo Count
-            if (gSaveContext.equips.buttonItems[5] < 0xF0) {
-                gDPSetPrimColor(OVERLAY_DISP++, 0, 0, 255, 255, 255, interfaceCtx->dpadDownAlpha);
-                gDPSetCombineMode(OVERLAY_DISP++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
-                Interface_DrawItemIconTexture(play, gItemIcons[gSaveContext.equips.buttonItems[5]], 5);
-                gDPPipeSync(OVERLAY_DISP++);
-                gDPSetCombineLERP(OVERLAY_DISP++, PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, TEXEL0, 0, PRIMITIVE, 0,
-                                  PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, TEXEL0, 0, PRIMITIVE, 0);
+        // DPad-Up Button Icon & Ammo Count
+		// Ocarina is perma-mapped to D-up, so that part has to be drawn
+        if (gSaveContext.equips.buttonItems[4] < 0xF0) {
+            gDPSetPrimColor(OVERLAY_DISP++, 0, 0, 255, 255, 255, interfaceCtx->dpadUpAlpha);
+            gDPSetCombineMode(OVERLAY_DISP++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
+            Interface_DrawItemIconTexture(play, gItemIcons[gSaveContext.equips.buttonItems[4]], 4);
+            gDPPipeSync(OVERLAY_DISP++);
+            gDPSetCombineLERP(OVERLAY_DISP++, PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, TEXEL0, 0, PRIMITIVE, 0,
+                                PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, TEXEL0, 0, PRIMITIVE, 0);
+            Interface_DrawAmmoCount(play, 4, interfaceCtx->dpadUpAlpha);
+        }
+
+        // DPad-Down Button Icon & Ammo Count
+		bool itemOnDpad = dpadEquips && gSaveContext.equips.buttonItems[5] < 0xF0;
+        bool dpadMap = fullUi && CVarGetInteger("gMapOnDDown", 0) &&
+            play->pauseCtx.state < 4 &&
+            ((play->sceneNum >= SCENE_YDAN && play->sceneNum <= SCENE_ICE_DOUKUTO) ||
+             (play->sceneNum >= SCENE_SPOT00 && play->sceneNum <= SCENE_GANON_TOU));
+        if (itemOnDpad || dpadMap) {
+            gDPSetPrimColor(OVERLAY_DISP++, 0, 0, 255, 255, 255, interfaceCtx->dpadDownAlpha);
+            gDPSetCombineMode(OVERLAY_DISP++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
+            void* texture = gItemIcons[itemOnDpad ? gSaveContext.equips.buttonItems[5] : ITEM_DUNGEON_MAP];
+            Interface_DrawItemIconTexture(play, texture, 5);
+            gDPPipeSync(OVERLAY_DISP++);
+            gDPSetCombineLERP(OVERLAY_DISP++, PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, TEXEL0, 0, PRIMITIVE, 0,
+                                PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, TEXEL0, 0, PRIMITIVE, 0);
+            if (itemOnDpad) {
                 Interface_DrawAmmoCount(play, 5, interfaceCtx->dpadDownAlpha);
             }
+        }
 
+        if (dpadEquips) {
             // DPad-Left Button Icon & Ammo Count
             if (gSaveContext.equips.buttonItems[6] < 0xF0) {
                 gDPSetPrimColor(OVERLAY_DISP++, 0, 0, 255, 255, 255, interfaceCtx->dpadLeftAlpha);

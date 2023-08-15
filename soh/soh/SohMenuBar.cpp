@@ -584,8 +584,6 @@ void DrawEnhancementsMenu() {
                 UIWidgets::Tooltip("After completing the mask trading sub-quest, press A and any direction on the mask slot to change masks");
                 UIWidgets::PaddedEnhancementCheckbox("Nuts explode bombs", "gNutsExplodeBombs", true, false);
                 UIWidgets::Tooltip("Makes nuts explode bombs, similar to how they interact with bombchus. This does not affect bombflowers.");
-                UIWidgets::PaddedEnhancementCheckbox("Equip Multiple Arrows at Once", "gSeparateArrows", true, false);
-                UIWidgets::Tooltip("Allow the bow and magic arrows to be equipped at the same time on different slots");
                 UIWidgets::PaddedEnhancementCheckbox("Switch Arrow Types", "gArrowSwitching", true, false);
                 UIWidgets::Tooltip("Press R with the bow out to switch between normal, fire, ice, and light arrows\n"
                             "Use the \"Customize Game Controls\" window to switch with a different button");

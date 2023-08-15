@@ -733,10 +733,20 @@ void Minimap_Draw(PlayState* play) {
 
     OPEN_DISPS(play->state.gfxCtx);
 
-    // If any of these CVars are enabled, disable toggling the minimap with L, unless gEnableMapToggle is set
-    bool enableMapToggle =
-        !(CVarGetInteger("gDebugEnabled", 0) || CVarGetInteger("gMoonJumpOnL", 0) || CVarGetInteger("gTurboOnL", 0)) ||
-        CVarGetInteger("gEnableMapToggle", 0);
+    u16 minimapToggleBtn;
+	bool enableMapToggle;
+    if (CVarGetInteger("gMapOnDDown", 0)) {
+        minimapToggleBtn = BTN_DDOWN;
+        // If you can use an item with D down, disable toggling the minimap with it
+        enableMapToggle = !(CVarGetInteger("gDpadEquips", 0) && gSaveContext.equips.buttonItems[5] < 0xF0);
+    } else {
+        minimapToggleBtn = BTN_L;
+        // If any of these CVars are enabled, disable toggling the minimap with L
+        enableMapToggle =
+            !(CVarGetInteger("gDebugEnabled", 0) || CVarGetInteger("gMoonJumpOnL", 0) || CVarGetInteger("gTurboOnL", 0));
+    }
+    // If this CVar is set, allow toggling the map despite conflicts
+    enableMapToggle = enableMapToggle || CVarGetInteger("gEnableMapToggle", 0);
 
     if (play->pauseCtx.state < 4) {
         //Minimap margins
@@ -807,7 +817,7 @@ void Minimap_Draw(PlayState* play) {
                     }
                 }
 
-                if (CHECK_BTN_ALL(play->state.input[0].press.button, BTN_L) && !Play_InCsMode(play) && enableMapToggle) {
+                if (CHECK_BTN_ALL(play->state.input[0].press.button, minimapToggleBtn) && !Play_InCsMode(play) && enableMapToggle) {
                     osSyncPrintf("Game_play_demo_mode_check=%d\n", Play_InCsMode(play));
                     // clang-format off
                     if (!R_MINIMAP_DISABLED) { Audio_PlaySoundGeneral(NA_SE_SY_CAMERA_ZOOM_UP, &D_801333D4, 4,
@@ -963,11 +973,10 @@ void Minimap_Draw(PlayState* play) {
                     Minimap_DrawCompassIcons(play); // Draw icons for the player spawn and current position
                 }
 
-				u16 minimapButton = BTN_L;
                 if (Player_CanSwitchArrows(GET_PLAYER(play))) {
-                    minimapButton &= ~CVarGetInteger("gArrowSwitchBtnMap", BTN_R);
+                    minimapToggleBtn &= ~CVarGetInteger("gArrowSwitchBtnMap", BTN_R);
                 }
-                if (minimapButton && CHECK_BTN_ALL(play->state.input[0].press.button, minimapButton) && !Play_InCsMode(play) && enableMapToggle) {
+                if (CHECK_BTN_ALL(play->state.input[0].press.button, minimapToggleBtn) && !Play_InCsMode(play) && enableMapToggle) {
                     // clang-format off
                     if (!R_MINIMAP_DISABLED) { Audio_PlaySoundGeneral(NA_SE_SY_CAMERA_ZOOM_UP, &D_801333D4, 4,
                                                                       &D_801333E0, &D_801333E0, &D_801333E8); }

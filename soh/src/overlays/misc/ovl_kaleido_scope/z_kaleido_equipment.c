@@ -186,7 +186,7 @@ void KaleidoScope_DrawEquipment(PlayState* play) {
     gDPSetPrimColor(POLY_KAL_DISP++, 0, 0, ZREG(39), ZREG(40), ZREG(41), pauseCtx->alpha);
     gDPSetEnvColor(POLY_KAL_DISP++, ZREG(43), ZREG(44), ZREG(45), 0);
 
-    for (i = 0, j = 64; i < 4; i++, j += 4) {
+    for (i = 0, j = 64; i < 3; i++, j += 4) {
         if (CUR_EQUIP_VALUE(i) != 0) {
             gDPPipeSync(POLY_KAL_DISP++);
             gSPVertex(POLY_KAL_DISP++, &pauseCtx->equipVtx[j], 4, 0);
@@ -217,6 +217,12 @@ void KaleidoScope_DrawEquipment(PlayState* play) {
                     if (pauseCtx->cursorX[PAUSE_EQUIP] != 0) {
                         pauseCtx->cursorX[PAUSE_EQUIP] -= 1;
                         pauseCtx->cursorPoint[PAUSE_EQUIP] -= 1;
+
+                        // Kokiri tunic -> scale
+                        if (pauseCtx->cursorY[PAUSE_EQUIP] == 2 && pauseCtx->cursorX[PAUSE_EQUIP] == 0) {
+                            pauseCtx->cursorY[PAUSE_EQUIP] += 1;
+                            pauseCtx->cursorPoint[PAUSE_EQUIP] += 4;
+                        }
 
                         if (pauseCtx->cursorX[PAUSE_EQUIP] == 0) {
                             if (pauseCtx->cursorY[PAUSE_EQUIP] == 0) {
@@ -257,6 +263,13 @@ void KaleidoScope_DrawEquipment(PlayState* play) {
                     if (pauseCtx->cursorX[PAUSE_EQUIP] < 3) {
                         pauseCtx->cursorX[PAUSE_EQUIP] += 1;
                         pauseCtx->cursorPoint[PAUSE_EQUIP] += 1;
+
+                        // Strength -> Deku shield
+                        //    Scale -> Kokiri tunic
+                        if (pauseCtx->cursorX[PAUSE_EQUIP] == 1 && pauseCtx->cursorY[PAUSE_EQUIP] >= 2) {
+                            pauseCtx->cursorY[PAUSE_EQUIP] -= 1;
+                            pauseCtx->cursorPoint[PAUSE_EQUIP] -= 4;
+                        }
 
                         if (pauseCtx->cursorX[PAUSE_EQUIP] == 0) {
                             if (CUR_UPG_VALUE(pauseCtx->cursorY[PAUSE_EQUIP]) != 0) {
@@ -325,6 +338,12 @@ void KaleidoScope_DrawEquipment(PlayState* play) {
                     if (pauseCtx->cursorY[PAUSE_EQUIP] < 3) {
                         pauseCtx->cursorY[PAUSE_EQUIP] += 1;
                         pauseCtx->cursorPoint[PAUSE_EQUIP] += 4;
+
+                        // Tunics -> scale
+                        if (pauseCtx->cursorY[PAUSE_EQUIP] == 3 && pauseCtx->cursorX[PAUSE_EQUIP] > 0) {
+                            pauseCtx->cursorPoint[PAUSE_EQUIP] -= pauseCtx->cursorX[PAUSE_EQUIP];
+                            pauseCtx->cursorX[PAUSE_EQUIP] = 0;
+                        }
 
                         if (pauseCtx->cursorX[PAUSE_EQUIP] == 0) {
                             if (CUR_UPG_VALUE(pauseCtx->cursorY[PAUSE_EQUIP]) != 0) {
@@ -504,7 +523,7 @@ void KaleidoScope_DrawEquipment(PlayState* play) {
 
         u16 buttonsToCheck = BTN_A | BTN_CLEFT | BTN_CDOWN | BTN_CRIGHT;
         if (CVarGetInteger("gDpadEquips", 0) && (!CVarGetInteger("gDpadPause", 0) || CHECK_BTN_ALL(input->cur.button, BTN_CUP))) {
-            buttonsToCheck |= BTN_DUP | BTN_DDOWN | BTN_DLEFT | BTN_DRIGHT;
+            buttonsToCheck |= BTN_DDOWN | BTN_DLEFT | BTN_DRIGHT;
         }
 
         if ((pauseCtx->cursorSpecialPos == 0) && (cursorItem != PAUSE_ITEM_NONE) && (pauseCtx->state == 6) &&
@@ -698,6 +717,11 @@ void KaleidoScope_DrawEquipment(PlayState* play) {
                 gSPGrayscale(POLY_KAL_DISP++, false);
             }
         }
+
+        if (i == 3) {
+            continue;
+        }
+
         // Draw inventory screen icons
         for (k = 0, bit = rowStart, point = 4; k < 3; k++, point += 4, temp++, bit++) {
 
