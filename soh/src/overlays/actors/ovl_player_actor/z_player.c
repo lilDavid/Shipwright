@@ -3074,7 +3074,9 @@ void func_80835F44(PlayState* play, Player* this, s32 item) {
 
         if ((actionParam == PLAYER_IA_NONE) || !(this->stateFlags1 & PLAYER_STATE1_IN_WATER) ||
             ((this->actor.bgCheckFlags & 1) &&
-             ((actionParam == PLAYER_IA_HOOKSHOT) || (actionParam == PLAYER_IA_LONGSHOT))) ||
+             ((actionParam == PLAYER_IA_HOOKSHOT) || (actionParam == PLAYER_IA_LONGSHOT) ||
+              (CVarGetInteger("gEnhancedIronBoots", 0) &&
+               ((Player_ActionToMeleeWeapon(actionParam) != 0) || (actionParam == PLAYER_IA_BOMBCHU))))) ||
             ((actionParam >= PLAYER_IA_SHIELD_DEKU) && (actionParam <= PLAYER_IA_BOOTS_HOVER))) {
 
             if ((play->bombchuBowlingStatus == 0) &&
@@ -6504,7 +6506,7 @@ s32 func_8083E5A8(Player* this, PlayState* play) {
                 this->getItemEntry = (GetItemEntry)GET_ITEM_NONE;
             }
         } else if (CHECK_BTN_ALL(sControlInput->press.button, BTN_A) && !(this->stateFlags1 & PLAYER_STATE1_ITEM_OVER_HEAD) &&
-                   !(this->stateFlags2 & PLAYER_STATE2_UNDERWATER)) {
+                   (CVarGetInteger("gEnhancedIronBoots", 0) || !(this->stateFlags2 & PLAYER_STATE2_UNDERWATER))) {
             if (this->getItemId != GI_NONE) {
                 GetItemEntry giEntry;
                 if (this->getItemEntry.objectId == OBJECT_INVALID) {
@@ -9959,7 +9961,8 @@ void func_808473D4(PlayState* play, Player* this) {
                 } else if ((!(this->stateFlags1 & PLAYER_STATE1_ITEM_OVER_HEAD) || (heldActor == NULL)) &&
                            (interactRangeActor != NULL) &&
                            ((!sp1C && (this->getItemId == GI_NONE)) ||
-                            (this->getItemId < 0 && !(this->stateFlags1 & PLAYER_STATE1_IN_WATER)))) {
+                            (this->getItemId < 0 && !(this->stateFlags1 & PLAYER_STATE1_IN_WATER)) ||
+                            CVarGetInteger("gEnhancedIronBoots", 0) && this->stateFlags2 & PLAYER_STATE2_UNDERWATER)) {
                     if (this->getItemId < 0) {
                         doAction = DO_ACTION_OPEN;
                     } else if ((interactRangeActor->id == ACTOR_BG_TOKI_SWD) && LINK_IS_ADULT) {
@@ -13362,6 +13365,8 @@ static BottleCatchInfo D_80854A04[] = {
     { ACTOR_EN_FISH, ITEM_FISH, 0x1F, 0x47 },
     { ACTOR_EN_ICE_HONO, ITEM_BLUE_FIRE, 0x20, 0x5D },
     { ACTOR_EN_INSECT, ITEM_BUG, 0x21, 0x7A },
+    { ACTOR_EN_POH, ITEM_POE, PLAYER_IA_BOTTLE_POE, 0x97 },
+    { ACTOR_EN_PO_FIELD, ITEM_BIG_POE, PLAYER_IA_BOTTLE_BIG_POE, 0xF9 },
 };
 
 void func_8084ECA4(Player* this, PlayState* play) {
@@ -13404,13 +13409,29 @@ void func_8084ECA4(Player* this, PlayState* play) {
 
                     if (this->interactRangeActor != NULL) {
                         catchInfo = &D_80854A04[0];
-                        for (i = 0; i < 4; i++, catchInfo++) {
+                        for (i = 0; i < ARRAY_COUNT(D_80854A04); i++, catchInfo++) {
                             if (this->interactRangeActor->id == catchInfo->actorId) {
                                 break;
                             }
                         }
 
-                        if (i < 4) {
+                        if (catchInfo->actorId == ACTOR_EN_POH || catchInfo->actorId == ACTOR_EN_PO_FIELD) {
+                            // Don't catch Sharp or Flat
+                            // I think they talk to you before you can get in catching range, but might as well prevent it outright
+                            if (catchInfo->actorId == ACTOR_EN_POH && this->interactRangeActor->params >= 2) {
+                                i = ARRAY_COUNT(D_80854A04);
+                            }
+                            // If the catch is a small field Poe (as opposed to a Big Poe), catch a graveyard Poe instead
+                            if (catchInfo->actorId == ACTOR_EN_PO_FIELD && this->interactRangeActor->params == 0) {
+                                i--;
+                                catchInfo--;
+                            }
+                            if (!CVarGetInteger("gMMPoeBottling", 0)) {
+                                i = ARRAY_COUNT(D_80854A04);
+                            }
+                        }
+
+                        if (i < ARRAY_COUNT(D_80854A04)) {
                             this->unk_84F = i + 1;
                             this->unk_850 = 0;
                             this->interactRangeActor->parent = &this->actor;
