@@ -392,7 +392,7 @@ void DrawSettingsMenu() {
             UIWidgets::Tooltip("Changes the scaling of the ImGui menu elements.");
 
             UIWidgets::PaddedSeparator(true, true, 3.0f, 3.0f);
-            
+
             static std::unordered_map<LUS::WindowBackend, const char*> windowBackendNames = {
                 { LUS::WindowBackend::DX11, "DirectX" },
                 { LUS::WindowBackend::SDL_OPENGL, "OpenGL"},
@@ -469,9 +469,9 @@ void DrawSettingsMenu() {
             }
             ImGui::EndMenu();
         }
-        
+
         UIWidgets::Spacer(0);
-        
+
         if (ImGui::BeginMenu("Accessibility")) {
         #if defined(_WIN32) || defined(__APPLE__)
             UIWidgets::PaddedEnhancementCheckbox("Text to Speech", "gA11yTTS");
@@ -479,7 +479,7 @@ void DrawSettingsMenu() {
         #endif
             UIWidgets::PaddedEnhancementCheckbox("Disable Idle Camera Re-Centering", "gA11yDisableIdleCam");
             UIWidgets::Tooltip("Disables the automatic re-centering of the camera when idle.");
-            
+
             ImGui::EndMenu();
         }
         ImGui::EndMenu();
@@ -605,10 +605,15 @@ void DrawEnhancementsMenu() {
                 UIWidgets::Tooltip("Allows the bunny hood to be equipped normally from the pause menu as adult.");
                 UIWidgets::PaddedEnhancementCheckbox("Mask Select in Inventory", "gMaskSelect", true, false);
                 UIWidgets::Tooltip("After completing the mask trading sub-quest, press A and any direction on the mask slot to change masks");
+                UIWidgets::PaddedEnhancementCheckbox("Catch Poes with a bottle", "gMMPoeBottling", true, false);
+                UIWidgets::Tooltip("Catch Poes by swinging an empty bottle at them instead of from a text box like you can in Majora's Mask.");
                 UIWidgets::PaddedEnhancementCheckbox("Nuts explode bombs", "gNutsExplodeBombs", true, false);
                 UIWidgets::Tooltip("Makes nuts explode bombs, similar to how they interact with bombchus. This does not affect bombflowers.");
                 UIWidgets::PaddedEnhancementCheckbox("Equip Multiple Arrows at Once", "gSeparateArrows", true, false);
                 UIWidgets::Tooltip("Allow the bow and magic arrows to be equipped at the same time on different slots");
+                UIWidgets::PaddedEnhancementCheckbox("Switch Arrow Types", "gArrowSwitching", true, false);
+                UIWidgets::Tooltip("Press R with the bow out to switch between normal, fire, ice, and light arrows\n"
+                            "Use the \"Customize Game Controls\" window to switch with a different button");
                 UIWidgets::PaddedEnhancementCheckbox("Bow as Child/Slingshot as Adult", "gBowSlingShotAmmoFix", true, false);
                 UIWidgets::Tooltip("Allows child to use bow with arrows.\nAllows adult to use slingshot with seeds.\n\nRequires glitches or 'Timeless Equipment' cheat to equip.");
                 UIWidgets::PaddedEnhancementCheckbox("Better Farore's Wind", "gBetterFW", true, false);
@@ -869,6 +874,8 @@ void DrawEnhancementsMenu() {
             UIWidgets::Tooltip("Allows equipping the tunic and boots to c-buttons");
             UIWidgets::PaddedEnhancementCheckbox("Equipment Toggle", "gEquipmentCanBeRemoved", true, false);
             UIWidgets::Tooltip("Allows equipment to be removed by toggling it off on\nthe equipment subscreen.");
+            UIWidgets::PaddedEnhancementCheckbox("Extra Underwater Actions", "gEnhancedIronBoots", true, false);
+            UIWidgets::Tooltip("Allows opening chests and using your sword and Bombchus when underwater with Iron Boots");
             UIWidgets::PaddedEnhancementCheckbox("Link's Cow in Both Time Periods", "gCowOfTime", true, false);
             UIWidgets::Tooltip("Allows the Lon Lon Ranch obstacle course reward to be shared across time periods");
             UIWidgets::PaddedEnhancementCheckbox("Enable visible guard vision", "gGuardVision", true, false);
@@ -887,7 +894,7 @@ void DrawEnhancementsMenu() {
                 OTRGlobals::Instance->gRandomizer->GetRandoSettingValue(RSK_BLUE_FIRE_ARROWS);
             static const char* forceEnableBlueFireArrowsText =
                 "This setting is forcefully enabled because a savefile\nwith \"Blue Fire Arrows\" is loaded.";
-            UIWidgets::PaddedEnhancementCheckbox("Blue Fire Arrows", "gBlueFireArrows", true, false, 
+            UIWidgets::PaddedEnhancementCheckbox("Blue Fire Arrows", "gBlueFireArrows", true, false,
                 forceEnableBlueFireArrows, forceEnableBlueFireArrowsText, UIWidgets::CheckboxGraphics::Checkmark);
             UIWidgets::Tooltip("Allows Ice Arrows to melt red ice.\nMay require a room reload if toggled during gameplay.");
 
@@ -896,7 +903,7 @@ void DrawEnhancementsMenu() {
                 OTRGlobals::Instance->gRandomizer->GetRandoSettingValue(RSK_SUNLIGHT_ARROWS);
             static const char* forceEnableSunLightArrowsText =
                 "This setting is forcefully enabled because a savefile\nwith \"Sunlight Arrows\" is loaded.";
-            UIWidgets::PaddedEnhancementCheckbox("Sunlight Arrows", "gSunlightArrows", true, false, 
+            UIWidgets::PaddedEnhancementCheckbox("Sunlight Arrows", "gSunlightArrows", true, false,
                 forceEnableSunLightArrows, forceEnableSunLightArrowsText, UIWidgets::CheckboxGraphics::Checkmark);
             UIWidgets::Tooltip("Allows Light Arrows to activate sun switches.\nMay require a room reload if toggled during gameplay.");
 
@@ -907,6 +914,11 @@ void DrawEnhancementsMenu() {
 
             UIWidgets::PaddedEnhancementCheckbox("Targetable Hookshot Reticle", "gHookshotableReticle", true, false);
             UIWidgets::Tooltip("Use a different color when aiming at hookshotable collision");
+
+            UIWidgets::PaddedEnhancementCheckbox("Ask to continue playing after saving", "gSaveAndQuit", true, false);
+            UIWidgets::Tooltip(
+                "The save dialog from the pause menu will ask you to continue playing after you select Yes or No.\n"
+                "Pressing B or Start on the save prompt will close the pause menu without displaying the extra screen.");
 
             ImGui::EndMenu();
         }
@@ -1009,6 +1021,11 @@ void DrawEnhancementsMenu() {
                                 "Consistent: Certain paths vanish the same way in all resolutions\n"
                                 "No Vanish: Paths do not vanish, Link seems to sink in to some paths\n"
                                 "This might affect other decal effects\n");
+            UIWidgets::PaddedEnhancementCheckbox("Visual Small Key display", "gVisualKeys", true, false);
+            UIWidgets::Tooltip("Displays Small Key count using multiple icons rather than a numeric counter");
+            const bool disableKeySpacing = !CVarGetInteger("gVisualKeys", 0);
+            static const char* disableKeySpacingTooltip = "This option is disabled because \"Visual Small Key display\" is turned off";
+            UIWidgets::EnhancementSliderInt("Small Key icon spacing: %d", "##SmallKeySpacing", "gSmallKeySpacing", 1, 16, "", 8, true, disableKeySpacing, disableKeySpacingTooltip);
             UIWidgets::PaddedEnhancementSliderInt("Text Spacing: %d", "##TEXTSPACING", "gTextSpacing", 4, 6, "", 6, true, true, true);
             UIWidgets::Tooltip("Space between text characters (useful for HD font textures)");
             UIWidgets::PaddedEnhancementCheckbox("More info in file select", "gFileSelectMoreInfo", true, false);
@@ -1072,8 +1089,8 @@ void DrawEnhancementsMenu() {
                                 "Fixes an incorrect calculation that acted like water underneath ground was above it.");
             UIWidgets::PaddedEnhancementCheckbox("Fix Bush Item Drops", "gBushDropFix", true, false);
             UIWidgets::Tooltip("Fixes the bushes to drop items correctly rather than spawning undefined items.");
-            UIWidgets::PaddedEnhancementCheckbox("Fix falling from vine edges", "gFixVineFall", true, false); 
-            UIWidgets::Tooltip("Prevents immediately falling off climbable surfaces if climbing on the edges."); 
+            UIWidgets::PaddedEnhancementCheckbox("Fix falling from vine edges", "gFixVineFall", true, false);
+            UIWidgets::Tooltip("Prevents immediately falling off climbable surfaces if climbing on the edges.");
             UIWidgets::PaddedEnhancementCheckbox("Fix Link's eyes open while sleeping", "gFixEyesOpenWhileSleeping", true, false);
             UIWidgets::Tooltip("Fixes Link's eyes being open in the opening cutscene when he is supposed to be sleeping.");
 
@@ -1399,12 +1416,12 @@ void DrawCheatsMenu() {
         if (ImGui::Button("Change Age")) {
             CVarSetInteger("gSwitchAge", 1);
         }
-        UIWidgets::Tooltip("Switches Link's age and reloads the area.");  
+        UIWidgets::Tooltip("Switches Link's age and reloads the area.");
 
         if (ImGui::Button("Clear Cutscene Pointer")) {
             GameInteractor::RawAction::ClearCutscenePointer();
         }
-        UIWidgets::Tooltip("Clears the cutscene pointer to a value safe for wrong warps.");   
+        UIWidgets::Tooltip("Clears the cutscene pointer to a value safe for wrong warps.");
 
         ImGui::EndMenu();
     }
@@ -1585,12 +1602,12 @@ void DrawRandomizerMenu() {
                 OTRGlobals::Instance->gRandomizer->GetRandoSettingValue(RSK_BOSS_KEYSANITY) == RO_DUNGEON_ITEM_LOC_ANYWHERE ||
                 (OTRGlobals::Instance->gRandomizer->GetRandoSettingValue(RSK_GANONS_BOSS_KEY) != RO_GANON_BOSS_KEY_VANILLA &&
                     OTRGlobals::Instance->gRandomizer->GetRandoSettingValue(RSK_GANONS_BOSS_KEY) != RO_GANON_BOSS_KEY_OWN_DUNGEON &&
-                    OTRGlobals::Instance->gRandomizer->GetRandoSettingValue(RSK_GANONS_BOSS_KEY) != RO_GANON_BOSS_KEY_STARTWITH) || 
+                    OTRGlobals::Instance->gRandomizer->GetRandoSettingValue(RSK_GANONS_BOSS_KEY) != RO_GANON_BOSS_KEY_STARTWITH) ||
                 !IS_RANDO) {
                 disableKeyColors = false;
             }
 
-            static const char* disableKeyColorsText = 
+            static const char* disableKeyColorsText =
                 "This setting is disabled because a savefile is loaded without any key\n"
                 "shuffle settings set to \"Any Dungeon\", \"Overworld\" or \"Anywhere\"";
 
@@ -1646,4 +1663,4 @@ void SohMenuBar::DrawElement() {
         ImGui::EndMenuBar();
     }
 }
-} // namespace SohGui 
+} // namespace SohGui
