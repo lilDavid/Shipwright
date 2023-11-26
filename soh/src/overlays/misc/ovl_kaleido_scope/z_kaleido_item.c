@@ -5,11 +5,25 @@
 #include "soh/Enhancements/randomizer/randomizerTypes.h"
 #include "soh/Enhancements/enhancementTypes.h"
 #include "soh/Enhancements/cosmetics/cosmeticsTypes.h"
+#include "soh_assets.h"
 
 u8 gAmmoItems[] = {
-    ITEM_NONE, ITEM_BOMB,      ITEM_BOMBCHU, ITEM_NUT,   ITEM_NONE, ITEM_BEAN,
-    ITEM_NONE, ITEM_SLINGSHOT, ITEM_NONE,    ITEM_STICK, ITEM_NONE, ITEM_NONE,
-    ITEM_NONE, ITEM_BOW,       ITEM_NONE,    ITEM_NONE,
+    ITEM_NONE,       // SLOT_DINS_FIRE
+    ITEM_BOMB,       // SLOT_BOMB
+    ITEM_BOMBCHU,    // SLOT_BOMBCHU
+    ITEM_NUT,        // SLOT_NUT
+    ITEM_NONE,       // SLOT_LENS
+    ITEM_BEAN,       // SLOT_BEAN
+    ITEM_NONE,       // SLOT_FARORES_WIND
+    ITEM_SLINGSHOT,  // SLOT_SLINGSHOT
+    ITEM_NONE,       // SLOT_BOOMERANG
+    ITEM_STICK,      // SLOT_STICK
+    ITEM_NONE,       // SLOT_BOOTS_HOVER
+    ITEM_NONE,       // SLOT_TRADE_CHILD
+    ITEM_NONE,       // SLOT_NAYRUS_LOVE
+    ITEM_BOW,        // SLOT_BOW
+    ITEM_NONE,       // SLOT_HOOKSHOT
+    ITEM_NONE,       // SLOT_HAMMER
 };
 
 static s16 sEquipState = 0;
@@ -23,9 +37,21 @@ static s16 sArrowMenuTimer = 0;
 
 /* Maps an inventory slot to double the position of its ammo count in sAmmoVtxTableIdx */
 static s16 sAmmoVtxOffset[] = {
-    99,  0,  2,  4, 99,  6,
-    99,  8, 99, 10, 99, 99,
-    99, 12, 99
+    99,  // SLOT_DINS_FIRE
+    0,   // SLOT_BOMB
+    2,   // SLOT_BOMBCHU
+    4,   // SLOT_NUT
+    99,  // SLOT_LENS
+    6,   // SLOT_BEAN
+    99,  // SLOT_FARORES_WIND
+    8,   // SLOT_SLINGSHOT
+    99,  // SLOT_BOOMERANG
+    10,  // SLOT_STICK
+    99,  // SLOT_BOOTS_HOVER
+    99,  // SLOT_TRADE_CHILD
+    99,  // SLOT_NAYRUS_LOVE
+    12,  // SLOT_BOW
+    99   // SLOT_HOOKSHOT
 };
 
 typedef enum {
@@ -373,19 +399,19 @@ void KaleidoScope_DrawMagicArrowIcon(PlayState* play, s16 offset, u8 itemId) {
             xOffset = 0;
             yOffset = offset;
             vtx = 0;
-            source = "__OTR__textures/icon_item_static/gFireArrowPower";
+            source = gFireArrowPowerTex;
             break;
         case ITEM_ARROW_ICE:
             xOffset = -offset;
             yOffset = 0;
             vtx = 4;
-            source = "__OTR__textures/icon_item_static/gIceArrowPower";
+            source = gIceArrowPowerTex;
             break;
         case ITEM_ARROW_LIGHT:
             xOffset = offset;
             yOffset = 0;
             vtx = 8;
-            source = "__OTR__textures/icon_item_static/gLightArrowPower";
+            source = gLightArrowPowerTex;
             break;
         default:
             return;
@@ -421,7 +447,7 @@ void KaleidoScope_DrawSelectableArrow(PlayState* play, s16 offset, u8 itemId) {
             xOffset = 0;
             yOffset = -offset;
             vtx = 12;
-            tex = "__OTR__textures/icon_item_static/gArrowIconTex";
+            tex = gArrowIconTex;
             break;
         default:
             return;

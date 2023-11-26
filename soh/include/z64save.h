@@ -390,7 +390,6 @@ typedef enum {
 typedef enum {
     /* 0 */ LINK_AGE_ADULT,
     /* 1 */ LINK_AGE_CHILD,
-    /* 9 */ LINK_AGE_EITHER = 9
 } LinkAge;
 
 
