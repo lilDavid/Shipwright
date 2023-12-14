@@ -1034,9 +1034,10 @@ void KaleidoScope_UpdateItemEquip(PlayState* play) {
                  otherSlotIndex++) {
                 int slot_item = gSaveContext.equips.buttonItems[targetButtonIndex];
                 // Don't check for bomb arrows so you can replace bomb arrow equip with just bombs
-                if ((slot_item == ITEM_BOW || slot_item == ITEM_BOW_ARROW_FIRE ||
-                     slot_item == ITEM_BOW_ARROW_ICE || slot_item == ITEM_BOW_ARROW_LIGHT)
-                    && pauseCtx->equipTargetItem == ITEM_BOMB) {
+                if (CVarGetInteger("gBombArrows", 0) &&
+                    (slot_item == ITEM_BOW || slot_item == ITEM_BOW_ARROW_FIRE ||
+                     slot_item == ITEM_BOW_ARROW_ICE || slot_item == ITEM_BOW_ARROW_LIGHT) &&
+                    pauseCtx->equipTargetItem == ITEM_BOMB) {
                     pauseCtx->equipTargetItem = ITEM_BOW_ARROW_BOMB;
                     pauseCtx->equipTargetSlot = SLOT_BOW;
                 }
