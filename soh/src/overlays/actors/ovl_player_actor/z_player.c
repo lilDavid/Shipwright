@@ -1062,6 +1062,7 @@ static s8 sItemActionParams[] = {
     PLAYER_IA_BOOTS_KOKIRI,
     PLAYER_IA_BOOTS_IRON,
     PLAYER_IA_BOOTS_HOVER,
+    PLAYER_IA_BOW_BOMB,
 };
 
 static u8 sMaskMemory;
@@ -2213,6 +2214,14 @@ s32 func_80834380(PlayState* play, Player* this, s32* itemPtr, s32* typePtr) {
         return play->interfaceCtx.hbaAmmo;
     } else if (play->shootingGalleryStatus != 0) {
         return play->shootingGalleryStatus;
+    } else if (this->heldItemAction == PLAYER_IA_BOW_BOMB) {
+        if (AMMO(*itemPtr) == 0) {
+            return 0;
+        } else if (AMMO(ITEM_BOMB) == 0) {
+            *typePtr = ARROW_NORMAL;
+        } else {
+            return MIN(AMMO(*itemPtr), AMMO(ITEM_BOMB));
+        }
     } else {
         return AMMO(*itemPtr);
     }
@@ -2224,7 +2233,7 @@ s32 func_8083442C(Player* this, PlayState* play) {
     s32 arrowType;
     s32 magicArrowType;
 
-    if ((this->heldItemAction >= PLAYER_IA_BOW_FIRE) && (this->heldItemAction <= PLAYER_IA_BOW_0E) &&
+    if ((this->heldItemAction >= PLAYER_IA_BOW_FIRE) && (this->heldItemAction < PLAYER_IA_BOW_BOMB) &&
         (gSaveContext.magicState != MAGIC_STATE_IDLE)) {
         func_80078884(NA_SE_SY_ERROR);
     } else {
@@ -4934,7 +4943,7 @@ s32 func_8083AD4C(PlayState* play, Player* this) {
             if(CVarGetInteger("gBowSlingShotAmmoFix", 0)){
                 shouldUseBowCamera = this->heldItemAction != PLAYER_IA_SLINGSHOT;
             }
-            
+
             cameraMode = shouldUseBowCamera ? CAM_MODE_BOWARROW : CAM_MODE_SLINGSHOT;
         } else {
             cameraMode = CAM_MODE_BOOMERANG;
@@ -5378,7 +5387,7 @@ s32 func_8083BDBC(Player* this, PlayState* play) {
             if (sp2C == 2) {
                 gSaveContext.sohStats.count[COUNT_BACKFLIPS]++;
             }
-            
+
             return 1;
         }
     }
@@ -6106,8 +6115,8 @@ void func_8083DFE0(Player* this, f32* arg1, s16* arg2) {
 
         if (CVarGetInteger("gMMBunnyHood", BUNNY_HOOD_VANILLA) == BUNNY_HOOD_FAST_AND_JUMP && this->currentMask == PLAYER_MASK_BUNNY) {
             maxSpeed *= 1.5f;
-        } 
-        
+        }
+
         if (CVarGetInteger("gEnableWalkModify", 0) && !CVarGetInteger("gWalkModifierDoesntChangeJump", 0)) {
             if (CVarGetInteger("gWalkSpeedToggle", 0)) {
                 if (gWalkSpeedToggle1) {
@@ -6350,8 +6359,8 @@ s32 func_8083E5A8(Player* this, PlayState* play) {
                 uint8_t showItemCutscene = play->sceneNum == SCENE_BOMBCHU_BOWLING_ALLEY || Item_CheckObtainability(giEntry.itemId) == ITEM_NONE || IS_RANDO;
 
                 // Only skip cutscenes for drops when they're items/consumables from bushes/rocks/enemies.
-                uint8_t isDropToSkip = (interactedActor->id == ACTOR_EN_ITEM00 && interactedActor->params != 6 && interactedActor->params != 17) || 
-                                        interactedActor->id == ACTOR_EN_KAREBABA || 
+                uint8_t isDropToSkip = (interactedActor->id == ACTOR_EN_ITEM00 && interactedActor->params != 6 && interactedActor->params != 17) ||
+                                        interactedActor->id == ACTOR_EN_KAREBABA ||
                                         interactedActor->id == ACTOR_EN_DEKUBABA;
 
                 // Skip cutscenes from picking up consumables with "Fast Pickup Text" enabled, even when the player never picked it up before.
@@ -7759,7 +7768,7 @@ void func_80842180(Player* this, PlayState* play) {
             if (CVarGetInteger("gMMBunnyHood", BUNNY_HOOD_VANILLA) != BUNNY_HOOD_VANILLA && this->currentMask == PLAYER_MASK_BUNNY) {
                 sp2C *= 1.5f;
             }
-            
+
             if (CVarGetInteger("gEnableWalkModify", 0)) {
                 if (CVarGetInteger("gWalkSpeedToggle", 0)) {
                     if (gWalkSpeedToggle1) {
@@ -11187,7 +11196,7 @@ void Player_Update(Actor* thisx, PlayState* play) {
         // Play fan sound (too annoying)
         //func_8002F974(&player->actor, NA_SE_EV_WIND_TRAP - SFX_FLAG);
     }
-    
+
     GameInteractor_ExecuteOnPlayerUpdate();
 }
 
@@ -11238,7 +11247,7 @@ void Player_DrawGameplay(PlayState* play, Player* this, s32 lod, Gfx* cullDList,
             MATRIX_TOMTX(sp70);
         }
 
-       
+
         if (this->currentMask != PLAYER_MASK_BUNNY || !CVarGetInteger("gHideBunnyHood", 0)) {
             gSPDisplayList(POLY_OPA_DISP++, sMaskDlists[this->currentMask - 1]);
         }
@@ -13569,7 +13578,7 @@ void func_8084F88C(Player* this, PlayState* play) {
                 play->nextEntranceIndex = 0x0088;
             } else if (this->unk_84F < 0) {
                 Play_TriggerRespawn(play);
-                // In ER, handle DMT and other special void outs to respawn from last entrance from grotto 
+                // In ER, handle DMT and other special void outs to respawn from last entrance from grotto
                 if (IS_RANDO && Randomizer_GetSettingValue(RSK_SHUFFLE_ENTRANCES)) {
                     Grotto_ForceRegularVoidOut();
                 }
@@ -14996,7 +15005,7 @@ void func_80852648(PlayState* play, Player* this, CsCmdActorAction* arg2) {
         this->heldItemId = ITEM_NONE;
         this->modelGroup = this->nextModelGroup = Player_ActionToModelGroup(this, PLAYER_IA_NONE);
         this->leftHandDLists = gPlayerLeftHandOpenDLs;
-        
+
         // If MS sword is shuffled and not in the players inventory, then we need to unequip the current sword
         // and set swordless flag to mimic Link having his weapon knocked out of his hand in the Ganon fight
         if (IS_RANDO && Randomizer_GetSettingValue(RSK_SHUFFLE_MASTER_SWORD) && !CHECK_OWNED_EQUIP(EQUIP_TYPE_SWORD, EQUIP_INV_SWORD_MASTER)) {
@@ -15005,7 +15014,7 @@ void func_80852648(PlayState* play, Player* this, CsCmdActorAction* arg2) {
             Flags_SetInfTable(INFTABLE_SWORDLESS);
             return;
         }
-        
+
         Inventory_ChangeEquipment(EQUIP_TYPE_SWORD, EQUIP_VALUE_SWORD_MASTER);
         gSaveContext.equips.buttonItems[0] = ITEM_SWORD_MASTER;
         Inventory_DeleteEquipment(play, EQUIP_TYPE_SWORD);

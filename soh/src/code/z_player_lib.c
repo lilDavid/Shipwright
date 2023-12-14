@@ -626,7 +626,7 @@ void Player_SetModels(Player* this, s32 modelGroup) {
     // Left hand
     this->leftHandType = gPlayerModelTypes[modelGroup][PLAYER_MODELGROUPENTRY_LEFT_HAND];
     this->leftHandDLists = &sPlayerDListGroups[this->leftHandType][gSaveContext.linkAge];
-    
+
     // Right hand
     this->rightHandType = gPlayerModelTypes[modelGroup][PLAYER_MODELGROUPENTRY_RIGHT_HAND];
     this->rightHandDLists = &sPlayerDListGroups[this->rightHandType][gSaveContext.linkAge];
@@ -798,6 +798,7 @@ s32 Player_HoldsBow(Player* this) {
         case PLAYER_IA_BOW_FIRE:
         case PLAYER_IA_BOW_ICE:
         case PLAYER_IA_BOW_LIGHT:
+        case PLAYER_IA_BOW_BOMB:
             return true;
         default:
             return false;
@@ -1274,7 +1275,7 @@ s32 Player_OverrideLimbDrawGameplayCommon(PlayState* play, s32 limbIndex, Gfx** 
 s32 Player_OverrideLimbDrawGameplayDefault(PlayState* play, s32 limbIndex, Gfx** dList, Vec3f* pos, Vec3s* rot, void* thisx) {
     Player* this = (Player*)thisx;
 
-    if (!Player_OverrideLimbDrawGameplayCommon(play, limbIndex, dList, pos, rot, thisx)) 
+    if (!Player_OverrideLimbDrawGameplayCommon(play, limbIndex, dList, pos, rot, thisx))
     {
         if (limbIndex == PLAYER_LIMB_L_HAND) {
             Gfx** dLists = this->leftHandDLists;
@@ -1323,7 +1324,7 @@ s32 Player_OverrideLimbDrawGameplayDefault(PlayState* play, s32 limbIndex, Gfx**
 
 
         } else if (limbIndex == PLAYER_LIMB_WAIST) {
-            
+
             if (!Player_IsCustomLinkModel()) {
                 *dList = ResourceMgr_LoadGfxByName(
                     this->waistDLists[sDListsLodOffset]); // NOTE: This needs to be disabled when using custom
@@ -1833,6 +1834,7 @@ void Player_PostLimbDrawGameplay(PlayState* play, s32 limbIndex, Gfx** dList, Ve
                         (this->heldItemAction == PLAYER_IA_BOW_FIRE) ||
                         (this->heldItemAction == PLAYER_IA_BOW_ICE) ||
                         (this->heldItemAction == PLAYER_IA_BOW_LIGHT) ||
+                        (this->heldItemAction == PLAYER_IA_BOW_BOMB) ||
                         (this->heldItemAction == PLAYER_IA_BOW) ||
                         (this->heldItemAction == PLAYER_IA_SLINGSHOT))) {
                 if (heldActor != NULL) {
@@ -1907,7 +1909,7 @@ u32 func_80091738(PlayState* play, u8* segment, SkelAnime* skelAnime) {
     return size + 0x8800 + 0x90;
 }
 
-u8 sPauseModelGroupBySword[] = { 
+u8 sPauseModelGroupBySword[] = {
     PLAYER_MODELGROUP_SWORD, // PLAYER_SWORD_KOKIRI
     PLAYER_MODELGROUP_SWORD, // PLAYER_SWORD_MASTER
     PLAYER_MODELGROUP_BGS,   // PLAYER_SWORD_BIGGORON
@@ -1931,7 +1933,7 @@ s32 Player_OverrideLimbDrawPause(PlayState* play, s32 limbIndex, Gfx** dList, Ve
         type = gPlayerModelTypes[modelGroup][PLAYER_MODELGROUPENTRY_LEFT_HAND];
         sLeftHandType = type;
 
-        // SOH: Handle unexpected swordless case. Previously OOB array access is avoided, but we want the 
+        // SOH: Handle unexpected swordless case. Previously OOB array access is avoided, but we want the
         //      hand model-type to be set to open (otherwise it is set to holding sword model-type)
         if (playerSwordAndShield[0] == PLAYER_SWORD_NONE) {
             type = PLAYER_MODELTYPE_LH_OPEN;
@@ -1956,7 +1958,7 @@ s32 Player_OverrideLimbDrawPause(PlayState* play, s32 limbIndex, Gfx** dList, Ve
         }
     } else if (limbIndex == PLAYER_LIMB_WAIST) {
         type = gPlayerModelTypes[modelGroup][PLAYER_MODELGROUPENTRY_WAIST];
-        
+
         if (Player_IsCustomLinkModel()) {
             return 0;
         }
@@ -2225,7 +2227,7 @@ void Player_DrawPause(PlayState* play, u8* segment, SkelAnime* skelAnime, Vec3f*
                                 } else {
                                     SelectedAnim=randval;
                                 }
-                            } 
+                            }
                         } else if ((CUR_EQUIP_VALUE(EQUIP_TYPE_SWORD) == EQUIP_VALUE_SWORD_NONE) && (CUR_EQUIP_VALUE(EQUIP_TYPE_SHIELD) == EQUIP_VALUE_SHIELD_NONE)) { // if the player has no sword or shield equipped
                             s16 randval = (rand() % (4 - 2 + 1)) + 2; // 3 animations
                             if (randval==4) { //if its the shield anim

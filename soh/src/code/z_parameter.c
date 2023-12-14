@@ -4839,14 +4839,18 @@ void Interface_DrawAmmoCount(PlayState* play, s16 button, s16 alpha) {
     i = gSaveContext.equips.buttonItems[button];
 
     if ((i == ITEM_STICK) || (i == ITEM_NUT) || (i == ITEM_BOMB) || (i == ITEM_BOW) ||
-        ((i >= ITEM_BOW_ARROW_FIRE) && (i <= ITEM_BOW_ARROW_LIGHT)) || (i == ITEM_SLINGSHOT) || (i == ITEM_BOMBCHU) ||
-        (i == ITEM_BEAN)) {
+        ((i >= ITEM_BOW_ARROW_FIRE) && (i <= ITEM_BOW_ARROW_LIGHT)) || (i == ITEM_BOW_ARROW_BOMB) || (i == ITEM_SLINGSHOT) ||
+        (i == ITEM_BOMBCHU) || (i == ITEM_BEAN)) {
 
-        if ((i >= ITEM_BOW_ARROW_FIRE) && (i <= ITEM_BOW_ARROW_LIGHT)) {
+        if (((i >= ITEM_BOW_ARROW_FIRE) && (i <= ITEM_BOW_ARROW_LIGHT)) || (i == ITEM_BOW_ARROW_BOMB)) {
             i = ITEM_BOW;
         }
 
-        ammo = AMMO(i);
+        if (i == ITEM_BOW_ARROW_BOMB) {
+            ammo = MIN(AMMO(ITEM_BOW), AMMO(ITEM_BOMB));
+        } else {
+            ammo = AMMO(i);
+        }
 
         gDPPipeSync(OVERLAY_DISP++);
 

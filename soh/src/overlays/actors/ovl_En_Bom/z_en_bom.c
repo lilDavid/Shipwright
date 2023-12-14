@@ -20,6 +20,8 @@ void EnBom_Draw(Actor* thisx, PlayState* play);
 void EnBom_Move(EnBom* this, PlayState* play);
 void EnBom_WaitForRelease(EnBom* this, PlayState* play);
 
+void ArrowBomb_Init(EnBom* this, PlayState* play);
+
 const ActorInit En_Bom_InitVars = {
     ACTOR_EN_BOM,
     ACTORCAT_EXPLOSIVE,
@@ -92,6 +94,11 @@ void EnBom_SetupAction(EnBom* this, EnBomActionFunc actionFunc) {
 
 void EnBom_Init(Actor* thisx, PlayState* play) {
     EnBom* this = (EnBom*)thisx;
+
+    if (this->actor.params == BOMB_ARROW) {
+        ArrowBomb_Init(this, play);
+        return;
+    }
 
     Actor_ProcessInitChain(thisx, sInitChain);
     ActorShape_Init(&thisx->shape, 700.0f, ActorShadow_DrawCircle, 16.0f);
@@ -205,7 +212,7 @@ void EnBom_Explode(EnBom* this, PlayState* play) {
     } else {
         this->explosionCollider.elements[0].dim.worldSphere.radius += this->actor.shape.rot.z + 8;
     }
-        
+
 
     if (this->actor.params == BOMB_EXPLOSION) {
         CollisionCheck_SetAT(play, &play->colChkCtx, &this->explosionCollider.base);
@@ -360,11 +367,57 @@ void EnBom_Update(Actor* thisx, PlayState* play2) {
             thisx->flags |= ACTOR_FLAG_DRAW_WHILE_CULLED;
             EnBom_SetupAction(this, EnBom_Explode);
         }
+    } else if (thisx->params == BOMB_ARROW) {
+        dustAccel.y = 0.2f;
+
+        // spawn spark effect on even frames
+        effPos = thisx->world.pos;
+        effPos.y += 5.0f;
+        if ((play->gameplayFrames % 2) == 0) {
+            EffectSsGSpk_SpawnFuse(play, thisx, &effPos, &effVelocity, &effAccel);
+        }
+
+        Audio_PlayActorSound2(thisx, NA_SE_IT_BOMB_IGNIT - SFX_FLAG);
+
+        effPos.y += 1.0f;
+        func_8002829C(play, &effPos, &effVelocity, &dustAccel, &dustColor, &dustColor, 50, 5);
+
+        dustAccel.y = 0.2f;
+        effPos = thisx->world.pos;
+        effPos.y += 1.0f;
+
+        if (this->timer == 0) {
+            effPos = thisx->world.pos;
+
+            effPos.y += 10.0f;
+
+            EffectSsBomb2_SpawnLayered(play, &effPos, &effVelocity, &bomb2Accel, 100,
+                                       (thisx->shape.rot.z * 6) + 19);
+
+            effPos.y = thisx->floorHeight;
+            if (thisx->floorHeight > BGCHECK_Y_MIN) {
+                EffectSsBlast_SpawnWhiteShockwave(play, &effPos, &effVelocity, &effAccel);
+            }
+
+            Audio_PlayActorSound2(thisx, NA_SE_IT_BOMB_EXPLOSION);
+
+            play->envCtx.adjLight1Color[0] = play->envCtx.adjLight1Color[1] =
+                play->envCtx.adjLight1Color[2] = 250;
+
+            play->envCtx.adjAmbientColor[0] = play->envCtx.adjAmbientColor[1] =
+                play->envCtx.adjAmbientColor[2] = 250;
+
+            Camera_AddQuake(&play->mainCamera, 2, 0xB, 8);
+            thisx->params = BOMB_EXPLOSION;
+            this->timer = 10;
+            thisx->flags |= ACTOR_FLAG_DRAW_WHILE_CULLED;
+            EnBom_SetupAction(this, EnBom_Explode);
+        }
     }
 
     Actor_SetFocus(thisx, 20.0f);
 
-    if (thisx->params <= BOMB_BODY) {
+    if (thisx->params != BOMB_EXPLOSION) {
         Collider_UpdateCylinder(thisx, &this->bombCollider);
 
         // if link is not holding the bomb anymore and bump conditions are met, subscribe to OC
@@ -395,7 +448,7 @@ void EnBom_Draw(Actor* thisx, PlayState* play) {
 
     OPEN_DISPS(play->state.gfxCtx);
 
-    if (thisx->params == BOMB_BODY) {
+    if (thisx->params != BOMB_EXPLOSION) {
         Gfx_SetupDL_25Opa(play->state.gfxCtx);
         if (!CVarGetInteger("gDisableBombBillboarding", 0)) {
             Matrix_ReplaceRotation(&play->billboardMtxF);
@@ -414,4 +467,90 @@ void EnBom_Draw(Actor* thisx, PlayState* play) {
     }
 
     CLOSE_DISPS(play->state.gfxCtx);
+}
+
+
+#include "overlays/actors/ovl_En_Arrow/z_en_arrow.h"
+
+void ArrowBomb_Charge(EnBom* this, PlayState* play);
+void ArrowBomb_Fly(EnBom* this, PlayState* play);
+
+void ArrowBomb_Init(EnBom* this, PlayState* play) {
+    Actor_ProcessInitChain(&this->actor, sInitChain);
+    ActorShape_Init(&this->actor.shape, 700.0f, ActorShadow_DrawCircle, 16.0f);
+
+    this->flashSpeedScale = 7;
+    Collider_InitCylinder(play, &this->bombCollider);
+    Collider_InitJntSph(play, &this->explosionCollider);
+    Collider_SetCylinder(play, &this->bombCollider, &this->actor, &sCylinderInit);
+    Collider_SetJntSph(play, &this->explosionCollider, &this->actor, &sJntSphInit, &this->explosionColliderItems[0]);
+    this->explosionColliderItems[0].info.toucher.damage += (this->actor.shape.rot.z & 0xFF00) >> 8;
+
+    this->actor.shape.rot.z &= 0xFF;
+    if (this->actor.shape.rot.z & 0x80) {
+        this->actor.shape.rot.z |= 0xFF00;
+    }
+
+    Actor_SetScale(&this->actor, 0.003f);
+
+    EnBom_SetupAction(this, ArrowBomb_Charge);
+}
+
+void ArrowBomb_Charge(EnBom* this, PlayState* play) {
+    EnArrow* arrow = (EnArrow*)this->actor.parent;
+    if ((arrow == NULL) || (arrow->actor.update == NULL)) {
+        Actor_Kill(&this->actor);
+        return;
+    }
+
+    // copy position and rotation from arrow
+    this->actor.world.pos = arrow->actor.world.pos;
+    f32 r = 10.0f;
+    f32 xrot = arrow->actor.world.rot.x;
+    f32 yrot = arrow->actor.world.rot.y;
+    this->actor.world.pos.x += r * Math_CosS(xrot) * Math_SinS(yrot);
+    this->actor.world.pos.y -= r * Math_SinS(xrot);
+    this->actor.world.pos.z += r * Math_CosS(xrot) * Math_CosS(yrot);
+
+    this->timer = 10;
+
+    // if arrow has no parent, player has fired the arrow
+    if (arrow->actor.parent == NULL) {
+        this->unkPos = this->actor.world.pos;
+        EnBom_SetupAction(this, ArrowBomb_Fly);
+    }
+}
+
+void ArrowBomb_Fly(EnBom* this, PlayState* play) {
+    EnArrow* arrow;
+    f32 distanceScaled;
+    s32 pad;
+
+    arrow = (EnArrow*)this->actor.parent;
+    if ((arrow == NULL) || (arrow->actor.update == NULL)) {
+        Actor_Kill(&this->actor);
+        return;
+    }
+    // copy position and rotation from arrow
+    this->actor.world.pos = arrow->actor.world.pos;
+    f32 r = 10.0f;
+    f32 xrot = arrow->actor.world.rot.x;
+    f32 yrot = arrow->actor.world.rot.y;
+    this->actor.world.pos.x += r * Math_SinS(yrot) * Math_CosS(xrot);
+    this->actor.world.pos.y -= r * Math_SinS(xrot);
+    this->actor.world.pos.z += r * Math_CosS(yrot) * Math_CosS(xrot);
+
+    distanceScaled = Math_Vec3f_DistXYZ(&this->unkPos, &this->actor.world.pos) * (1.0f / 24.0f);
+    this->unk_158 = distanceScaled;
+    if (distanceScaled < 1.0f) {
+        this->unk_158 = 1.0f;
+    }
+    func_80865ECC(&this->unkPos, &this->actor.world.pos, 0.05f);
+
+    if (arrow->hitFlags & 1) {
+        this->timer = 0;
+        this->actor.shape.rot.z = 0;
+    } else {
+        this->timer = 10;
+    }
 }
