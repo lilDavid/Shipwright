@@ -253,6 +253,9 @@ void EnBom_Explode(EnBom* this, PlayState* play) {
         }
 
         Actor_Kill(&this->actor);
+        if (this->actor.parent && this->actor.parent->id == ACTOR_EN_ARROW) {
+            Actor_Kill(this->actor.parent);
+        }
     }
 }
 
@@ -496,6 +499,17 @@ void ArrowBomb_Init(EnBom* this, PlayState* play) {
     EnBom_SetupAction(this, ArrowBomb_Charge);
 }
 
+void ArrowBomb_SetPosition(EnBom* this, EnArrow* arrow) {
+    // copy position and rotation from arrow
+    this->actor.world.pos = arrow->actor.world.pos;
+    f32 r = 8.0f;
+    f32 xrot = arrow->actor.world.rot.x;
+    f32 yrot = arrow->actor.world.rot.y;
+    this->actor.world.pos.x += r * Math_CosS(xrot) * Math_SinS(yrot);
+    this->actor.world.pos.y -= r * Math_SinS(xrot) + 2.0f;
+    this->actor.world.pos.z += r * Math_CosS(xrot) * Math_CosS(yrot);
+}
+
 void ArrowBomb_Charge(EnBom* this, PlayState* play) {
     EnArrow* arrow = (EnArrow*)this->actor.parent;
     if ((arrow == NULL) || (arrow->actor.update == NULL)) {
@@ -503,14 +517,7 @@ void ArrowBomb_Charge(EnBom* this, PlayState* play) {
         return;
     }
 
-    // copy position and rotation from arrow
-    this->actor.world.pos = arrow->actor.world.pos;
-    f32 r = 10.0f;
-    f32 xrot = arrow->actor.world.rot.x;
-    f32 yrot = arrow->actor.world.rot.y;
-    this->actor.world.pos.x += r * Math_CosS(xrot) * Math_SinS(yrot);
-    this->actor.world.pos.y -= r * Math_SinS(xrot);
-    this->actor.world.pos.z += r * Math_CosS(xrot) * Math_CosS(yrot);
+    ArrowBomb_SetPosition(this, arrow);
 
     this->timer = 10;
 
@@ -531,14 +538,7 @@ void ArrowBomb_Fly(EnBom* this, PlayState* play) {
         Actor_Kill(&this->actor);
         return;
     }
-    // copy position and rotation from arrow
-    this->actor.world.pos = arrow->actor.world.pos;
-    f32 r = 10.0f;
-    f32 xrot = arrow->actor.world.rot.x;
-    f32 yrot = arrow->actor.world.rot.y;
-    this->actor.world.pos.x += r * Math_SinS(yrot) * Math_CosS(xrot);
-    this->actor.world.pos.y -= r * Math_SinS(xrot);
-    this->actor.world.pos.z += r * Math_CosS(yrot) * Math_CosS(xrot);
+    ArrowBomb_SetPosition(this, arrow);
 
     distanceScaled = Math_Vec3f_DistXYZ(&this->unkPos, &this->actor.world.pos) * (1.0f / 24.0f);
     this->unk_158 = distanceScaled;

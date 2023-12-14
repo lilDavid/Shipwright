@@ -2558,6 +2558,9 @@ s32 func_808350A4(PlayState* play, Player* this) {
                 if (!CVarGetInteger("gInfiniteAmmo", 0)) {
                     play->shootingGalleryStatus--;
                 }
+            } else if (item == ITEM_BOW && this->heldItemAction == PLAYER_IA_BOW_BOMB) {
+                Inventory_ChangeAmmo(ITEM_BOW, -1);
+                Inventory_ChangeAmmo(ITEM_BOMB, -1);
             } else {
                 Inventory_ChangeAmmo(item, -1);
             }

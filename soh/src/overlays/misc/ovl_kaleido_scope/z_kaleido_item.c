@@ -42,7 +42,6 @@ void KaleidoScope_DrawAmmoCount(PauseContext* pauseCtx, GraphicsContext* gfxCtx,
             gDPSetPrimColor(POLY_KAL_DISP++, 0, 0, 130, 130, 130, pauseCtx->alpha);
         } else if ((item == ITEM_BOMB && AMMO(item) == CUR_CAPACITY(UPG_BOMB_BAG)) ||
                    (item == ITEM_BOW && AMMO(item) == CUR_CAPACITY(UPG_QUIVER)) ||
-                   (item == ITEM_BOW_ARROW_BOMB && MIN(AMMO(ITEM_BOW), AMMO(ITEM_BOMB)) == MIN(CUR_CAPACITY(UPG_QUIVER), CUR_CAPACITY(UPG_BOMB_BAG))) ||
                    (item == ITEM_SLINGSHOT && AMMO(item) == CUR_CAPACITY(UPG_BULLET_BAG)) ||
                    (item == ITEM_STICK && AMMO(item) == CUR_CAPACITY(UPG_STICKS)) ||
                    (item == ITEM_NUT && AMMO(item) == CUR_CAPACITY(UPG_NUTS)) || (item == ITEM_BOMBCHU && ammo == 50) ||
@@ -1033,7 +1032,11 @@ void KaleidoScope_UpdateItemEquip(PlayState* play) {
             uint16_t targetButtonIndex = pauseCtx->equipTargetCBtn + 1;
             for (uint16_t otherSlotIndex = 0; otherSlotIndex < ARRAY_COUNT(gSaveContext.equips.cButtonSlots);
                  otherSlotIndex++) {
-                if (gSaveContext.equips.buttonItems[targetButtonIndex] == ITEM_BOW && pauseCtx->equipTargetItem == ITEM_BOMB) {
+                int slot_item = gSaveContext.equips.buttonItems[targetButtonIndex];
+                // Don't check for bomb arrows so you can replace bomb arrow equip with just bombs
+                if ((slot_item == ITEM_BOW || slot_item == ITEM_BOW_ARROW_FIRE ||
+                     slot_item == ITEM_BOW_ARROW_ICE || slot_item == ITEM_BOW_ARROW_LIGHT)
+                    && pauseCtx->equipTargetItem == ITEM_BOMB) {
                     pauseCtx->equipTargetItem = ITEM_BOW_ARROW_BOMB;
                     pauseCtx->equipTargetSlot = SLOT_BOW;
                 }
