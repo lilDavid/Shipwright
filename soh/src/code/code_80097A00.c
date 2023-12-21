@@ -108,6 +108,7 @@ void* gItemIcons[] = {
     gItemIconBootsKokiriTex,
     gItemIconBootsIronTex,
     gItemIconBootsHoverTex,
+    gItemIconBowFireTex,
     gItemIconBulletBag30Tex,
     gItemIconBulletBag40Tex,
     gItemIconBulletBag50Tex,

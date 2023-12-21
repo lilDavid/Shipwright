@@ -813,8 +813,8 @@ void KaleidoScope_UpdateItemEquip(PlayState* play) {
         { C_DOWN_BUTTON_X+X_Margins_CD, C_DOWN_BUTTON_Y+Y_Margins_CD },
         { C_RIGHT_BUTTON_X+X_Margins_CR, C_RIGHT_BUTTON_Y+Y_Margins_CR },
         { DPAD_UP_X+X_Margins_DPad_Items, DPAD_UP_Y+Y_Margins_DPad_Items },
-        { DPAD_DOWN_X+X_Margins_DPad_Items, DPAD_DOWN_Y+Y_Margins_DPad_Items }, 
-        { DPAD_LEFT_X+X_Margins_DPad_Items, DPAD_LEFT_Y+Y_Margins_DPad_Items }, 
+        { DPAD_DOWN_X+X_Margins_DPad_Items, DPAD_DOWN_Y+Y_Margins_DPad_Items },
+        { DPAD_LEFT_X+X_Margins_DPad_Items, DPAD_LEFT_Y+Y_Margins_DPad_Items },
         { DPAD_RIGHT_X+X_Margins_DPad_Items, DPAD_RIGHT_Y+Y_Margins_DPad_Items }
     };
     s16 DPad_ItemsOffset[4][2] = {
@@ -1027,11 +1027,21 @@ void KaleidoScope_UpdateItemEquip(PlayState* play) {
                     pauseCtx->equipTargetSlot = SLOT_BOW;
                 }
             }
-            
+
             // If the item is on another button already, swap the two
             uint16_t targetButtonIndex = pauseCtx->equipTargetCBtn + 1;
             for (uint16_t otherSlotIndex = 0; otherSlotIndex < ARRAY_COUNT(gSaveContext.equips.cButtonSlots);
                  otherSlotIndex++) {
+                int slot_item = gSaveContext.equips.buttonItems[targetButtonIndex];
+                // Don't check for bomb arrows so you can replace bomb arrow equip with just bombs
+                if (CVarGetInteger("gBombArrows", 0) &&
+                    (slot_item == ITEM_BOW || slot_item == ITEM_BOW_ARROW_FIRE ||
+                     slot_item == ITEM_BOW_ARROW_ICE || slot_item == ITEM_BOW_ARROW_LIGHT) &&
+                    pauseCtx->equipTargetItem == ITEM_BOMB) {
+                    pauseCtx->equipTargetItem = ITEM_BOW_ARROW_BOMB;
+                    pauseCtx->equipTargetSlot = SLOT_BOW;
+                }
+
                 uint16_t otherButtonIndex = otherSlotIndex + 1;
                 if (otherSlotIndex == pauseCtx->equipTargetCBtn) {
                     continue;

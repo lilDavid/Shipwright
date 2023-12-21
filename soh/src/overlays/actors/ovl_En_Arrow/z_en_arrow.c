@@ -5,6 +5,7 @@
  */
 
 #include "z_en_arrow.h"
+#include "overlays/actors/ovl_en_bom/z_en_bom.h"
 #include "objects/gameplay_keep/gameplay_keep.h"
 #include "objects/object_gi_nuts/object_gi_nuts.h"
 
@@ -214,6 +215,7 @@ void EnArrow_Shoot(EnArrow* this, PlayState* play) {
             case ARROW_NORMAL_LIT:
             case ARROW_NORMAL_HORSE:
             case ARROW_NORMAL:
+            case ARROW_BOMB:
                 Player_PlaySfx(&player->actor, NA_SE_IT_ARROW_SHOT);
                 break;
 
@@ -441,11 +443,12 @@ void EnArrow_Update(Actor* thisx, PlayState* play) {
 
     if ((this->actor.params >= ARROW_FIRE) && (this->actor.params <= ARROW_0E)) {
         s16 elementalActorIds[] = { ACTOR_ARROW_FIRE, ACTOR_ARROW_ICE,  ACTOR_ARROW_LIGHT,
-                                    ACTOR_ARROW_FIRE, ACTOR_ARROW_FIRE, ACTOR_ARROW_FIRE };
+                                    ACTOR_EN_BOM, ACTOR_ARROW_FIRE, ACTOR_ARROW_FIRE };
 
         if (this->actor.child == NULL) {
             Actor_SpawnAsChild(&play->actorCtx, &this->actor, play, elementalActorIds[this->actor.params - 3],
-                               this->actor.world.pos.x, this->actor.world.pos.y, this->actor.world.pos.z, 0, 0, 0, 0);
+                               this->actor.world.pos.x, this->actor.world.pos.y, this->actor.world.pos.z, 0, 0, 0,
+                               this->actor.params == ARROW_BOMB ? BOMB_ARROW : 0);
         }
     } else if (this->actor.params == ARROW_NORMAL_LIT) {
         static Vec3f velocity = { 0.0f, 0.5f, 0.0f };

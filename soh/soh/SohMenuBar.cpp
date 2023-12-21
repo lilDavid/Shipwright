@@ -604,8 +604,12 @@ void DrawEnhancementsMenu() {
                 UIWidgets::Tooltip("Allows the bunny hood to be equipped normally from the pause menu as adult.");
                 UIWidgets::PaddedEnhancementCheckbox("Mask Select in Inventory", "gMaskSelect", true, false);
                 UIWidgets::Tooltip("After completing the mask trading sub-quest, press A and any direction on the mask slot to change masks");
+                UIWidgets::PaddedEnhancementCheckbox("Catch Poes with a bottle", "gMMPoeBottling", true, false);
+                UIWidgets::Tooltip("Catch Poes by swinging an empty bottle at them instead of from a text box like you can in Majora's Mask.");
                 UIWidgets::PaddedEnhancementCheckbox("Nuts explode bombs", "gNutsExplodeBombs", true, false);
                 UIWidgets::Tooltip("Makes nuts explode bombs, similar to how they interact with bombchus. This does not affect bombflowers.");
+                UIWidgets::PaddedEnhancementCheckbox("Bomb Arrows", "gBombArrows", true, false);
+                UIWidgets::Tooltip("Equip bombs onto the same button as your bow to shoot arrows that explode on impact");
                 UIWidgets::PaddedEnhancementCheckbox("Equip Multiple Arrows at Once", "gSeparateArrows", true, false);
                 UIWidgets::Tooltip("Allow the bow and magic arrows to be equipped at the same time on different slots. (Note this will disable the behaviour of the 'Equip Dupe' glitch)");
                 UIWidgets::PaddedEnhancementCheckbox("Switch Arrow Types", "gArrowSwitching", true, false);
@@ -863,6 +867,8 @@ void DrawEnhancementsMenu() {
             UIWidgets::Tooltip("Allows equipping the tunic and boots to c-buttons");
             UIWidgets::PaddedEnhancementCheckbox("Equipment Toggle", "gEquipmentCanBeRemoved", true, false);
             UIWidgets::Tooltip("Allows equipment to be removed by toggling it off on\nthe equipment subscreen.");
+            UIWidgets::PaddedEnhancementCheckbox("Extra Underwater Actions", "gEnhancedIronBoots", true, false);
+            UIWidgets::Tooltip("Allows opening chests and using your sword and Bombchus when underwater with Iron Boots");
             UIWidgets::PaddedEnhancementCheckbox("Link's Cow in Both Time Periods", "gCowOfTime", true, false);
             UIWidgets::Tooltip("Allows the Lon Lon Ranch obstacle course reward to be shared across time periods");
             UIWidgets::PaddedEnhancementCheckbox("Enable visible guard vision", "gGuardVision", true, false);
@@ -901,6 +907,11 @@ void DrawEnhancementsMenu() {
 
             UIWidgets::PaddedEnhancementCheckbox("Targetable Hookshot Reticle", "gHookshotableReticle", true, false);
             UIWidgets::Tooltip("Use a different color when aiming at hookshotable collision");
+
+            UIWidgets::PaddedEnhancementCheckbox("Ask to continue playing after saving", "gSaveAndQuit", true, false);
+            UIWidgets::Tooltip(
+                "The save dialog from the pause menu will ask you to continue playing after you select Yes or No.\n"
+                "Pressing B or Start on the save prompt will close the pause menu without displaying the extra screen.");
 
             ImGui::EndMenu();
         }
@@ -1004,6 +1015,11 @@ void DrawEnhancementsMenu() {
                                 "Consistent: Certain paths vanish the same way in all resolutions\n"
                                 "No Vanish: Paths do not vanish, Link seems to sink in to some paths\n"
                                 "This might affect other decal effects\n");
+            UIWidgets::PaddedEnhancementCheckbox("Visual Small Key display", "gVisualKeys", true, false);
+            UIWidgets::Tooltip("Displays Small Key count using multiple icons rather than a numeric counter");
+            const bool disableKeySpacing = !CVarGetInteger("gVisualKeys", 0);
+            static const char* disableKeySpacingTooltip = "This option is disabled because \"Visual Small Key display\" is turned off";
+            UIWidgets::EnhancementSliderInt("Small Key icon spacing: %d", "##SmallKeySpacing", "gSmallKeySpacing", 1, 16, "", 8, true, disableKeySpacing, disableKeySpacingTooltip);
             UIWidgets::PaddedEnhancementSliderInt("Text Spacing: %d", "##TEXTSPACING", "gTextSpacing", 4, 6, "", 6, true, true, true);
             UIWidgets::Tooltip("Space between text characters (useful for HD font textures)");
             UIWidgets::PaddedEnhancementCheckbox("More info in file select", "gFileSelectMoreInfo", true, false);
