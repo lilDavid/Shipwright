@@ -528,6 +528,12 @@ void ArrowBomb_Charge(EnBom* this, PlayState* play) {
     }
 }
 
+void ArrowBomb_80865ECC(Vec3f* unkPos, Vec3f* firePos, f32 scale) {
+    unkPos->x += ((firePos->x - unkPos->x) * scale);
+    unkPos->y += ((firePos->y - unkPos->y) * scale);
+    unkPos->z += ((firePos->z - unkPos->z) * scale);
+}
+
 void ArrowBomb_Fly(EnBom* this, PlayState* play) {
     EnArrow* arrow;
     f32 distanceScaled;
@@ -545,7 +551,7 @@ void ArrowBomb_Fly(EnBom* this, PlayState* play) {
     if (distanceScaled < 1.0f) {
         this->unk_158 = 1.0f;
     }
-    func_80865ECC(&this->unkPos, &this->actor.world.pos, 0.05f);
+    ArrowBomb_80865ECC(&this->unkPos, &this->actor.world.pos, 0.05f);
 
     if (arrow->hitFlags & 1) {
         this->timer = 0;
