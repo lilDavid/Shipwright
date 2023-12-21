@@ -470,8 +470,8 @@ void Message_DrawTextboxIcon(PlayState* play, Gfx** p, s16 x, s16 y) {
         sIconEnvColors[1] = color;
     } else if (CVarGetInteger("gCosmetics.DefaultColorScheme", COLORSCHEME_N64) == COLORSCHEME_GAMECUBE) {
         sIconPrimColors[0] = (Color_RGB8){ 0, 200, 80 };
-        sIconPrimColors[1] = (Color_RGB8){ 50, 255, 130 }; 
-        sIconEnvColors[1] = (Color_RGB8){ 50, 255, 130 }; 
+        sIconPrimColors[1] = (Color_RGB8){ 50, 255, 130 };
+        sIconEnvColors[1] = (Color_RGB8){ 50, 255, 130 };
     }
     static Color_RGB8 sIconPrim =  { 0, 80, 200 };
     static s16 sIconFlashTimer = 12;
@@ -1131,6 +1131,9 @@ void Message_LoadItemIcon(PlayState* play, u16 itemId, s16 y) {
     if (itemId == ITEM_DUNGEON_MAP) {
         interfaceCtx->mapPalette[30] = 0xFF;
         interfaceCtx->mapPalette[31] = 0xFF;
+    }
+    if (itemId > ITEM_BOW_ARROW_BOMB) {
+        itemId += 1;
     }
     if (itemId < ITEM_MEDALLION_FOREST) {
         R_TEXTBOX_ICON_XPOS = R_TEXT_INIT_XPOS - sIconItem32XOffsets[gSaveContext.language];
@@ -3139,7 +3142,7 @@ void Message_Update(PlayState* play) {
     if (msgCtx->msgLength == 0) {
         return;
     }
-    
+
     GameInteractor_ExecuteOnDialogMessage();
 
     bool isB_Held = CVarGetInteger("gSkipText", 0) != 0 ? CHECK_BTN_ALL(input->cur.button, BTN_B) && !sTextboxSkipped
