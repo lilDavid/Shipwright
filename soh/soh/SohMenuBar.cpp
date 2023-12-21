@@ -610,8 +610,6 @@ void DrawEnhancementsMenu() {
                 UIWidgets::Tooltip("Makes nuts explode bombs, similar to how they interact with bombchus. This does not affect bombflowers.");
                 UIWidgets::PaddedEnhancementCheckbox("Bomb Arrows", "gBombArrows", true, false);
                 UIWidgets::Tooltip("Equip bombs onto the same button as your bow to shoot arrows that explode on impact");
-                UIWidgets::PaddedEnhancementCheckbox("Equip Multiple Arrows at Once", "gSeparateArrows", true, false);
-                UIWidgets::Tooltip("Allow the bow and magic arrows to be equipped at the same time on different slots. (Note this will disable the behaviour of the 'Equip Dupe' glitch)");
                 UIWidgets::PaddedEnhancementCheckbox("Switch Arrow Types", "gArrowSwitching", true, false);
                 UIWidgets::Tooltip("Press R with the bow out to switch between normal, fire, ice, and light arrows\n"
                             "Use the \"Customize Game Controls\" window to switch with a different button");

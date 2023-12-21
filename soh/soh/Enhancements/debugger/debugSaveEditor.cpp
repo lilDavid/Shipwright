@@ -639,11 +639,15 @@ void DrawInventoryTab() {
     ImGui::Checkbox("Restrict to valid items", &restrictToValid);
     UIWidgets::InsertHelpHoverText("Restricts items and ammo to only what is possible to legally acquire in-game");
 
-    for (int32_t y = 0; y < 4; y++) {
+    for (int32_t y = 0; y < 5; y++) {
         for (int32_t x = 0; x < 6; x++) {
             int32_t index = x + y * 6;
             static int32_t selectedIndex = -1;
             static const char* itemPopupPicker = "itemPopupPicker";
+
+            if (index >= ARRAY_COUNT(gSaveContext.inventory.items)) {
+                break;
+            }
 
             ImGui::PushID(index);
 
@@ -1705,10 +1709,10 @@ void DrawPlayerTab() {
             ImGui::SameLine();
             ImGui::InputScalar("C Right", ImGuiDataType_U8, &gSaveContext.equips.buttonItems[3], &one, NULL);
 
+            ImGui::NewLine();
+            ImGui::Text("Current D-pad Equips");
+            ImGui::InputScalar("D-pad Up  ", ImGuiDataType_U8, &gSaveContext.equips.buttonItems[4], &one, NULL); // Two spaces at the end for aligning, not elegant but it's working
             if (CVarGetInteger("gDpadEquips", 0)) {
-                ImGui::NewLine();
-                ImGui::Text("Current D-pad Equips");
-                ImGui::InputScalar("D-pad Up  ", ImGuiDataType_U8, &gSaveContext.equips.buttonItems[4], &one, NULL); // Two spaces at the end for aligning, not elegant but it's working
                 ImGui::SameLine();
                 ImGui::InputScalar("D-pad Down", ImGuiDataType_U8, &gSaveContext.equips.buttonItems[5], &one, NULL);
                 // Intentionnal to not put everything on the same line, else it's taking too much for lower resolution.

@@ -43,7 +43,7 @@ typedef struct {
 } ItemEquips; // size = 0x0A
 
 typedef struct {
-    /* 0x00 */ u8 items[24];
+    /* 0x00 */ u8 items[28];
     /* 0x18 */ s8 ammo[16];
     /* 0x28 */ u16 equipment; // a mask where each nibble corresponds to a type of equipment `EquipmentType`, and each bit to an owned piece `EquipInv*`
     /* 0x2C */ u32 upgrades;
@@ -389,7 +389,7 @@ typedef enum {
 
 typedef enum {
     /* 0 */ LINK_AGE_ADULT,
-    /* 1 */ LINK_AGE_CHILD
+    /* 1 */ LINK_AGE_CHILD,
 } LinkAge;
 
 
