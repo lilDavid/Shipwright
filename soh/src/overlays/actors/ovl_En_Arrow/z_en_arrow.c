@@ -5,7 +5,7 @@
  */
 
 #include "z_en_arrow.h"
-#include "overlays/actors/ovl_en_bom/z_en_bom.h"
+#include "overlays/actors/ovl_En_Bom/z_en_bom.h"
 #include "objects/gameplay_keep/gameplay_keep.h"
 #include "objects/object_gi_nuts/object_gi_nuts.h"
 
