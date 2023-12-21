@@ -105,7 +105,8 @@ void CustomMessage::Replace(std::string&& oldStr, std::string&& newEnglish, std:
 
 void CustomMessage::Format(ItemID iid) {
     for (std::string* str : { &english, &french, &german }) {
-        str->insert(0, ITEM_OBTAINED(iid));
+        // HACK: this is so messed up
+        str->insert(0, ITEM_OBTAINED(iid > ITEM_BOW_ARROW_BOMB ? iid - 1 : iid));
         size_t start_pos = 0;
         std::replace(str->begin(), str->end(), '&', NEWLINE()[0]);
         while ((start_pos = str->find('^', start_pos)) != std::string::npos) {
@@ -253,7 +254,7 @@ bool CustomMessageManager::ClearMessageTable(std::string tableID) {
     return true;
 }
 
-bool CustomMessageManager::AddCustomMessageTable(std::string tableID) { 
+bool CustomMessageManager::AddCustomMessageTable(std::string tableID) {
     CustomMessageTable newMessageTable;
     return messageTables.emplace(tableID, newMessageTable).second;
 }
