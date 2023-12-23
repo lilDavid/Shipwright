@@ -1009,7 +1009,7 @@ void KaleidoScope_SetDefaultCursor(PlayState* play) {
     s16 s;
     s16 i;
     gSelectingMask = false;
-    KaleidoScope_SetArrowSelectActive(pauseCtx, false);
+    gSelectingArrow = false;
 
     switch (pauseCtx->pageIndex) {
         case PAUSE_ITEM:
@@ -1044,7 +1044,7 @@ void KaleidoScope_SwitchPage(PauseContext* pauseCtx, u8 pt) {
     pauseCtx->unk_1E4 = 1;
     pauseCtx->unk_1EA = 0;
     gSelectingMask = false;
-    KaleidoScope_SetArrowSelectActive(pauseCtx, false);
+    gSelectingArrow = false;
 
     if (!pt) {
         pauseCtx->mode = pauseCtx->pageIndex * 2 + 1;
@@ -3101,34 +3101,6 @@ void KaleidoScope_InitVertices(PlayState* play, GraphicsContext* gfxCtx) {
 
     pauseCtx->saveVtx = Graph_Alloc(gfxCtx, 80 * sizeof(Vtx));
     func_80823A0C(play, pauseCtx->saveVtx, 5, 5);
-
-    pauseCtx->arrowSelectVtx = Graph_Alloc(gfxCtx, 32 * sizeof(Vtx));
-
-	// All arrow select vertices
-    for (phi_t2 = 0; phi_t2 < 32; phi_t2++) {
-        pauseCtx->arrowSelectVtx[phi_t2].v.flag = 0;
-
-        // Z position
-        pauseCtx->arrowSelectVtx[phi_t2].v.ob[2] = 0;
-
-		// Color
-        pauseCtx->arrowSelectVtx[phi_t2].v.cn[0] = pauseCtx->arrowSelectVtx[phi_t2].v.cn[1] =
-            pauseCtx->arrowSelectVtx[phi_t2].v.cn[2] = pauseCtx->arrowSelectVtx[phi_t2].v.cn[3] = 255;
-    }
-
-	// All arrow select quads
-    for (phi_t2 = 0; phi_t2 < 32; phi_t2 += 4) {
-        // Top left UV at (0, 0);
-        pauseCtx->arrowSelectVtx[phi_t2 + 0].v.tc[0] = pauseCtx->arrowSelectVtx[phi_t2 + 0].v.tc[1] =
-            pauseCtx->arrowSelectVtx[phi_t2 + 1].v.tc[1] = pauseCtx->arrowSelectVtx[phi_t2 + 2].v.tc[0] = 0;
-    }
-
-	// Background quads
-    for (phi_t2 = 16; phi_t2 < 32; phi_t2 += 4) {
-        // Bottom left UV at (32, 32)
-        pauseCtx->arrowSelectVtx[phi_t2 + 1].v.tc[0] = pauseCtx->arrowSelectVtx[phi_t2 + 2].v.tc[1] =
-            pauseCtx->arrowSelectVtx[phi_t2 + 3].v.tc[0] = pauseCtx->arrowSelectVtx[phi_t2 + 3].v.tc[1] = 0x400;
-    }
 }
 
 void KaleidoScope_DrawGameOver(PlayState* play) {
@@ -4481,9 +4453,6 @@ void KaleidoScope_Update(PlayState* play)
             break;
 
         case 0x12:
-        	// OTRTODO: move this somewhere it won't be called repeatedly for several frames
-            KaleidoScope_SetArrowSelectActive(pauseCtx, false);
-
             if (pauseCtx->unk_1F4 != 160.0f) {
                 pauseCtx->unk_1F4 = pauseCtx->unk_1F8 = pauseCtx->unk_1FC = pauseCtx->unk_200 += 160.0f / WREG(6);
                 pauseCtx->infoPanelOffsetY -= 40 / WREG(6);
