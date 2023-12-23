@@ -1132,10 +1132,10 @@ void Message_LoadItemIcon(PlayState* play, u16 itemId, s16 y) {
         interfaceCtx->mapPalette[30] = 0xFF;
         interfaceCtx->mapPalette[31] = 0xFF;
     }
-    if (itemId > ITEM_BOW_ARROW_BOMB) {
+    if (itemId >= ITEM_BOW_ARROW_BOMB) {
         itemId += 1;
     }
-    if (itemId < ITEM_MEDALLION_FOREST) {
+    if (itemId - 1 < ITEM_MEDALLION_FOREST) {
         R_TEXTBOX_ICON_XPOS = R_TEXT_INIT_XPOS - sIconItem32XOffsets[gSaveContext.language];
         R_TEXTBOX_ICON_YPOS = y + 6;
         R_TEXTBOX_ICON_SIZE = 32;
