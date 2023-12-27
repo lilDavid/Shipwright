@@ -2029,7 +2029,15 @@ s32 func_80833C98(s32 item1, s32 actionParam) {
 }
 
 s32 func_80833CDC(PlayState* play, s32 index) {
-    if (index >= ((CVarGetInteger("gDpadEquips", 0) != 0) ? 8 : 5)) {
+    int buttons;
+    if (CVarGetInteger("gDpadEquips", 0)) {
+        buttons = 8;
+    } else if (CVarGetInteger("gAltItemMenu", 0)) {
+        buttons = 5;
+    } else {
+        buttons = 4;
+    }
+    if (index >= buttons) {
         return ITEM_NONE;
     } else if (play->bombchuBowlingStatus != 0) {
         return (play->bombchuBowlingStatus > 0) ? ITEM_BOMBCHU : ITEM_NONE;
@@ -2062,7 +2070,7 @@ void func_80833DF8(Player* this, PlayState* play) {
             s32 maskItem = this->currentMask - PLAYER_MASK_KEATON + ITEM_MASK_KEATON;
             bool hasOnDpad = false;
             if (CVarGetInteger("gDpadEquips", 0) != 0) {
-                for (int buttonIndex = 5; buttonIndex < 8; buttonIndex++) {
+                for (int buttonIndex = 4; buttonIndex < 8; buttonIndex++) {
                     hasOnDpad |= gSaveContext.equips.buttonItems[buttonIndex] == maskItem;
                 }
             }
@@ -2077,7 +2085,7 @@ void func_80833DF8(Player* this, PlayState* play) {
             maskActionParam = this->currentMask - 1 + PLAYER_IA_MASK_KEATON;
             bool hasOnDpad = false;
             if (CVarGetInteger("gDpadEquips", 0) != 0) {
-                for (int buttonIndex = 0; buttonIndex < 5; buttonIndex++) {
+                for (int buttonIndex = 0; buttonIndex < 4; buttonIndex++) {
                     hasOnDpad |= func_80833C98(DPAD_ITEM(buttonIndex), maskActionParam);
                 }
             }
@@ -2088,8 +2096,8 @@ void func_80833DF8(Player* this, PlayState* play) {
         }
     }
 
-	// Since boots are items now, take them off if not equipped on a button
-    if (this->currentBoots != PLAYER_BOOTS_KOKIRI) {
+	// Alt item menu: Since boots are items, take them off if not equipped on a button
+    if (CVarGetInteger("gAltItemMenu", 0) && this->currentBoots != PLAYER_BOOTS_KOKIRI) {
         s32 bootsItemAction = this->currentBoots + PLAYER_IA_BOOTS_KOKIRI;
 
         bool hasOnCBtn = false;
@@ -2494,9 +2502,12 @@ s32 func_80834E44(PlayState* play) {
 }
 
 s32 func_80834E7C(PlayState* play) {
-    u16 buttonsToCheck = BTN_A | BTN_B | BTN_CUP | BTN_CLEFT | BTN_CRIGHT | BTN_CDOWN | BTN_DUP;
+    u16 buttonsToCheck = BTN_A | BTN_B | BTN_CUP | BTN_CLEFT | BTN_CRIGHT | BTN_CDOWN;
+    if (CVarGetInteger("gAltItemMenu", 0)) {
+        buttonsToCheck |= BTN_DUP;
+    }
     if (CVarGetInteger("gDpadEquips", 0) != 0) {
-        buttonsToCheck |= BTN_DDOWN | BTN_DLEFT | BTN_DRIGHT;
+        buttonsToCheck |= BTN_DUP | BTN_DDOWN | BTN_DLEFT | BTN_DRIGHT;
     }
     return (play->shootingGalleryStatus != 0) &&
            ((play->shootingGalleryStatus < 0) || CHECK_BTN_ANY(sControlInput->cur.button, buttonsToCheck));
@@ -4956,7 +4967,7 @@ s32 func_8083AD4C(PlayState* play, Player* this) {
             if(CVarGetInteger("gBowSlingShotAmmoFix", 0)){
                 shouldUseBowCamera = this->heldItemAction != PLAYER_IA_SLINGSHOT;
             }
-
+            
             cameraMode = shouldUseBowCamera ? CAM_MODE_BOWARROW : CAM_MODE_SLINGSHOT;
         } else {
             cameraMode = CAM_MODE_BOOMERANG;
@@ -5400,7 +5411,7 @@ s32 func_8083BDBC(Player* this, PlayState* play) {
             if (sp2C == 2) {
                 gSaveContext.sohStats.count[COUNT_BACKFLIPS]++;
             }
-
+            
             return 1;
         }
     }
@@ -6128,8 +6139,8 @@ void func_8083DFE0(Player* this, f32* arg1, s16* arg2) {
 
         if (CVarGetInteger("gMMBunnyHood", BUNNY_HOOD_VANILLA) == BUNNY_HOOD_FAST_AND_JUMP && this->currentMask == PLAYER_MASK_BUNNY) {
             maxSpeed *= 1.5f;
-        }
-
+        } 
+        
         if (CVarGetInteger("gEnableWalkModify", 0) && !CVarGetInteger("gWalkModifierDoesntChangeJump", 0)) {
             if (CVarGetInteger("gWalkSpeedToggle", 0)) {
                 if (gWalkSpeedToggle1) {
@@ -6372,8 +6383,8 @@ s32 func_8083E5A8(Player* this, PlayState* play) {
                 uint8_t showItemCutscene = play->sceneNum == SCENE_BOMBCHU_BOWLING_ALLEY || Item_CheckObtainability(giEntry.itemId) == ITEM_NONE || IS_RANDO;
 
                 // Only skip cutscenes for drops when they're items/consumables from bushes/rocks/enemies.
-                uint8_t isDropToSkip = (interactedActor->id == ACTOR_EN_ITEM00 && interactedActor->params != 6 && interactedActor->params != 17) ||
-                                        interactedActor->id == ACTOR_EN_KAREBABA ||
+                uint8_t isDropToSkip = (interactedActor->id == ACTOR_EN_ITEM00 && interactedActor->params != 6 && interactedActor->params != 17) || 
+                                        interactedActor->id == ACTOR_EN_KAREBABA || 
                                         interactedActor->id == ACTOR_EN_DEKUBABA;
 
                 // Skip cutscenes from picking up consumables with "Fast Pickup Text" enabled, even when the player never picked it up before.
@@ -6504,9 +6515,12 @@ s32 func_8083EAF0(Player* this, Actor* actor) {
 }
 
 s32 func_8083EB44(Player* this, PlayState* play) {
-    u16 buttonsToCheck = BTN_A | BTN_B | BTN_CLEFT | BTN_CRIGHT | BTN_CDOWN | BTN_DUP;
+    u16 buttonsToCheck = BTN_A | BTN_B | BTN_CLEFT | BTN_CRIGHT | BTN_CDOWN;
+    if (CVarGetInteger("gAltItemMenu", 0)) {
+        buttonsToCheck |= BTN_DUP;
+    }
     if (CVarGetInteger("gDpadEquips", 0) != 0) {
-        buttonsToCheck |= BTN_DDOWN | BTN_DLEFT | BTN_DRIGHT;
+        buttonsToCheck |= BTN_DUP | BTN_DDOWN | BTN_DLEFT | BTN_DRIGHT;
     }
     if ((this->stateFlags1 & PLAYER_STATE1_ITEM_OVER_HEAD) && (this->heldActor != NULL) &&
         CHECK_BTN_ANY(sControlInput->press.button, buttonsToCheck)) {
@@ -7781,7 +7795,7 @@ void func_80842180(Player* this, PlayState* play) {
             if (CVarGetInteger("gMMBunnyHood", BUNNY_HOOD_VANILLA) != BUNNY_HOOD_VANILLA && this->currentMask == PLAYER_MASK_BUNNY) {
                 sp2C *= 1.5f;
             }
-
+            
             if (CVarGetInteger("gEnableWalkModify", 0)) {
                 if (CVarGetInteger("gWalkSpeedToggle", 0)) {
                     if (gWalkSpeedToggle1) {
@@ -8568,9 +8582,12 @@ void func_8084411C(Player* this, PlayState* play) {
         if (this->stateFlags1 & PLAYER_STATE1_ITEM_OVER_HEAD) {
             Actor* heldActor = this->heldActor;
 
-            u16 buttonsToCheck = BTN_A | BTN_B | BTN_CLEFT | BTN_CRIGHT | BTN_CDOWN | BTN_DUP;
+            u16 buttonsToCheck = BTN_A | BTN_B | BTN_CLEFT | BTN_CRIGHT | BTN_CDOWN;
+            if (CVarGetInteger("gAltItemMenu", 0)) {
+                buttonsToCheck |= BTN_DUP;
+            }
             if (CVarGetInteger("gDpadEquips", 0) != 0) {
-                buttonsToCheck |= BTN_DDOWN | BTN_DLEFT | BTN_DRIGHT;
+                buttonsToCheck |= BTN_DUP | BTN_DDOWN | BTN_DLEFT | BTN_DRIGHT;
             }
             if (!func_80835644(play, this, heldActor) && (heldActor->id == ACTOR_EN_NIW) &&
                 CHECK_BTN_ANY(sControlInput->press.button, buttonsToCheck)) {
@@ -9350,7 +9367,10 @@ void func_80846260(Player* this, PlayState* play) {
         return;
     }
 
-    u16 buttonsToCheck = BTN_A | BTN_B | BTN_CLEFT | BTN_CRIGHT | BTN_CDOWN | BTN_DUP;
+    u16 buttonsToCheck = BTN_A | BTN_B | BTN_CLEFT | BTN_CRIGHT | BTN_CDOWN;
+    if (CVarGetInteger("gAltItemMenu", 0)) {
+        buttonsToCheck |= BTN_DUP;
+    }
     if (CVarGetInteger("gDpadEquips", 0) != 0) {
         buttonsToCheck |= BTN_DUP | BTN_DDOWN | BTN_DLEFT | BTN_DRIGHT;
     }
@@ -11216,7 +11236,7 @@ void Player_Update(Actor* thisx, PlayState* play) {
         // Play fan sound (too annoying)
         //func_8002F974(&player->actor, NA_SE_EV_WIND_TRAP - SFX_FLAG);
     }
-
+    
     GameInteractor_ExecuteOnPlayerUpdate();
 }
 
@@ -11267,7 +11287,7 @@ void Player_DrawGameplay(PlayState* play, Player* this, s32 lod, Gfx* cullDList,
             MATRIX_TOMTX(sp70);
         }
 
-
+       
         if (this->currentMask != PLAYER_MASK_BUNNY || !CVarGetInteger("gHideBunnyHood", 0)) {
             gSPDisplayList(POLY_OPA_DISP++, sMaskDlists[this->currentMask - 1]);
         }
@@ -11619,9 +11639,12 @@ void func_8084B1D8(Player* this, PlayState* play) {
         func_80836670(this, play);
     }
 
-    u16 buttonsToCheck = BTN_A | BTN_B | BTN_R | BTN_CUP | BTN_CLEFT | BTN_CRIGHT | BTN_CDOWN | BTN_DUP;
+    u16 buttonsToCheck = BTN_A | BTN_B | BTN_R | BTN_CUP | BTN_CLEFT | BTN_CRIGHT | BTN_CDOWN;
+    if (CVarGetInteger("gAltItemMenu", 0)) {
+        buttonsToCheck |= BTN_DUP;
+    }
     if (CVarGetInteger("gDpadEquips", 0) != 0) {
-        buttonsToCheck |= BTN_DDOWN | BTN_DLEFT | BTN_DRIGHT;
+        buttonsToCheck |= BTN_DUP | BTN_DDOWN | BTN_DLEFT | BTN_DRIGHT;
     }
     if ((this->csMode != 0) || (this->unk_6AD == 0) || (this->unk_6AD >= 4) || func_80833B54(this) ||
         (this->unk_664 != NULL) || !func_8083AD4C(play, this) ||
@@ -13598,7 +13621,7 @@ void func_8084F88C(Player* this, PlayState* play) {
                 play->nextEntranceIndex = 0x0088;
             } else if (this->unk_84F < 0) {
                 Play_TriggerRespawn(play);
-                // In ER, handle DMT and other special void outs to respawn from last entrance from grotto
+                // In ER, handle DMT and other special void outs to respawn from last entrance from grotto 
                 if (IS_RANDO && Randomizer_GetSettingValue(RSK_SHUFFLE_ENTRANCES)) {
                     Grotto_ForceRegularVoidOut();
                 }
@@ -15025,7 +15048,7 @@ void func_80852648(PlayState* play, Player* this, CsCmdActorAction* arg2) {
         this->heldItemId = ITEM_NONE;
         this->modelGroup = this->nextModelGroup = Player_ActionToModelGroup(this, PLAYER_IA_NONE);
         this->leftHandDLists = gPlayerLeftHandOpenDLs;
-
+        
         // If MS sword is shuffled and not in the players inventory, then we need to unequip the current sword
         // and set swordless flag to mimic Link having his weapon knocked out of his hand in the Ganon fight
         if (IS_RANDO && Randomizer_GetSettingValue(RSK_SHUFFLE_MASTER_SWORD) && !CHECK_OWNED_EQUIP(EQUIP_TYPE_SWORD, EQUIP_INV_SWORD_MASTER)) {
@@ -15034,7 +15057,7 @@ void func_80852648(PlayState* play, Player* this, CsCmdActorAction* arg2) {
             Flags_SetInfTable(INFTABLE_SWORDLESS);
             return;
         }
-
+        
         Inventory_ChangeEquipment(EQUIP_TYPE_SWORD, EQUIP_VALUE_SWORD_MASTER);
         gSaveContext.equips.buttonItems[0] = ITEM_SWORD_MASTER;
         Inventory_DeleteEquipment(play, EQUIP_TYPE_SWORD);

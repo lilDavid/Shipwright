@@ -1067,6 +1067,71 @@ void RegisterRandomizedEnemySizes() {
     });
 }
 
+void AltItemMenu_Update() {
+    if (CVarGetInteger("gAltItemMenu", 0)) {  // Enabled: force equip ocarina on D-up and match equipped bow, if any
+        uint16_t targetCBtn = 3;
+        uint16_t targetButtonIndex = targetCBtn + 1;
+        for (uint16_t otherSlotIndex = 0; otherSlotIndex < ARRAY_COUNT(gSaveContext.equips.cButtonSlots); otherSlotIndex++) {
+            uint16_t otherButtonIndex = otherSlotIndex + 1;
+            if (otherSlotIndex == targetCBtn) {
+                continue;
+            }
+
+            if (gSaveContext.equips.cButtonSlots[otherSlotIndex] == SLOT_OCARINA) {
+                // Assign the other button to the target's current item
+                if (gSaveContext.equips.buttonItems[targetButtonIndex] != ITEM_NONE) {
+                    gSaveContext.equips.buttonItems[otherButtonIndex] =
+                        gSaveContext.equips.buttonItems[targetButtonIndex];
+                    gSaveContext.equips.cButtonSlots[otherSlotIndex] =
+                        gSaveContext.equips.cButtonSlots[targetCBtn];
+                    Interface_LoadItemIcon2(gPlayState, otherButtonIndex);
+                } else {
+                    gSaveContext.equips.buttonItems[otherButtonIndex] = ITEM_NONE;
+                    gSaveContext.equips.cButtonSlots[otherSlotIndex] = SLOT_NONE;
+                }
+                //break; // 'Assume there is only one possible pre-existing equip'
+            }
+
+            if (gSaveContext.equips.cButtonSlots[otherSlotIndex] == SLOT_BOW) {
+                switch (gSaveContext.equips.buttonItems[otherButtonIndex]) {
+                    case ITEM_BOW_ARROW_FIRE:
+                    case ITEM_BOW_ARROW_ICE:
+                    case ITEM_BOW_ARROW_LIGHT:
+                        INV_CONTENT(ITEM_BOW) = gSaveContext.equips.buttonItems[otherButtonIndex];
+                        break;
+                }
+            }
+        }
+
+        gSaveContext.equips.buttonItems[targetButtonIndex] = INV_CONTENT(ITEM_OCARINA_FAIRY);
+        gSaveContext.equips.cButtonSlots[targetCBtn] = SLOT_OCARINA;
+        Interface_LoadItemIcon1(gPlayState, targetButtonIndex);
+    } else {  // Disabled: reset bow item to Fairy Bow if some magic arrow is equipped
+        switch (INV_CONTENT(ITEM_BOW)) {
+            case ITEM_BOW_ARROW_FIRE:
+            case ITEM_BOW_ARROW_ICE:
+            case ITEM_BOW_ARROW_LIGHT:
+                INV_CONTENT(ITEM_BOW) = ITEM_BOW;
+                break;
+        }
+    }
+}
+
+void AltItemMenu_Register() {
+    static int altItemMenuOld = -1;
+    GameInteractor::Instance->RegisterGameHook<GameInteractor::OnInterfaceUpdate>([]() {
+        int altItemMenu = CVarGetInteger("gAltItemMenu", 0);
+        if (altItemMenu != altItemMenuOld) {
+            AltItemMenu_Update();
+        }
+        altItemMenuOld = altItemMenu;
+    });
+
+    GameInteractor::Instance->RegisterGameHook<GameInteractor::OnSceneInit>([](int16_t _) {
+        AltItemMenu_Update();
+    });
+}
+
 void InitMods() {
     RegisterTTS();
     RegisterInfiniteMoney();
@@ -1096,4 +1161,5 @@ void InitMods() {
     RegisterRandomizerSheikSpawn();
     RegisterRandomizedEnemySizes();
     NameTag_RegisterHooks();
+    AltItemMenu_Register();
 }

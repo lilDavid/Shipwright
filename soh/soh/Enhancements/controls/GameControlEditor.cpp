@@ -296,7 +296,8 @@ namespace GameControlEditor {
         UIWidgets::PaddedEnhancementCheckbox("D-pad as Equip Items", "gDpadEquips");
         DrawHelpIcon("Equip items and equipment on the D-pad\nIf used with D-pad on Pause Screen, you must hold C-Up to equip instead of navigate");
         UIWidgets::PaddedEnhancementCheckbox("Toggle minimap with D-pad down", "gMapOnDDown");
-        DrawHelpIcon("Toggle the minimap by pressing down on the D-pad\nIf \"D-pad as Equip Items\" is enabled, equipping an item on D-pad down will prevent you from toggling the map");
+        DrawHelpIcon("Toggle the minimap by pressing down on the D-pad\nIf \"D-pad as Equip Items\" is enabled, equipping an item on D-pad down will prevent "
+                     "you from toggling the map, but you can clear the item on D-pad down by re-equipping it over itself.");
         window->EndGroupPanelPublic(0);
     }
 
