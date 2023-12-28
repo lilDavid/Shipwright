@@ -1140,6 +1140,7 @@ s32 Player_ActionToBottle(Player* player, s32 actionParam);
 s32 Player_GetBottleHeld(Player* player);
 s32 Player_ActionToExplosive(Player* player, s32 actionParam);
 s32 Player_GetExplosiveHeld(Player* player);
+bool Player_CanSwitchArrows(Player* player);
 s32 func_8008F2BC(Player* player, s32 actionParam);
 s32 Player_GetEnvironmentalHazard(PlayState* play);
 void Player_DrawImpl(PlayState* play, void** skeleton, Vec3s* jointTable, s32 dListCount, s32 lod, s32 tunic,

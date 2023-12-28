@@ -743,8 +743,8 @@ void Minimap_Draw(PlayState* play) {
     } else {
         minimapToggleBtn = BTN_L;
         // If any of these CVars are enabled, disable toggling the minimap with L
-        enableMapToggle =
-            !(CVarGetInteger("gDebugEnabled", 0) || CVarGetInteger("gMoonJumpOnL", 0) || CVarGetInteger("gTurboOnL", 0));
+        enableMapToggle = !(CVarGetInteger("gDebugEnabled", 0) || CVarGetInteger("gMoonJumpOnL", 0) || CVarGetInteger("gTurboOnL", 0) ||
+                            (CVarGetInteger("gArrowSwitchBtnMap", BTN_R) == BTN_L && Player_CanSwitchArrows(GET_PLAYER(play))));
     }
     // If this CVar is set, allow toggling the map despite conflicts
     enableMapToggle = enableMapToggle || CVarGetInteger("gEnableMapToggle", 0);
