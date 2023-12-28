@@ -61,9 +61,9 @@ typedef enum {
     SLOT_ALT_NONE = 0xFF
 } InventorySlotAlt;
 
-u8 gSlotAgeReqsAlt[24];
-u8 gAltItemSlots[71];
-u8 gAltToMainSlot[24];
+extern u8 gSlotAgeReqsAlt[24];
+extern u8 gAltItemSlots[71];
+extern u8 gAltToMainSlot[24];
 #define _CHECK_AGE_REQ_SLOT_MAIN(slotIndex) (CVarGetInteger("gTimelessEquipment", 0) || (gSlotAgeReqs[slotIndex] == AGE_REQ_NONE) || gSlotAgeReqs[slotIndex] == ((void)0, gSaveContext.linkAge))
 #define _CHECK_AGE_REQ_SLOT_ALT(slotIndex) (CVarGetInteger("gTimelessEquipment", 0) || (gSlotAgeReqsAlt[slotIndex] == AGE_REQ_NONE) || gSlotAgeReqsAlt[slotIndex] == ((void)0, gSaveContext.linkAge))
 #define CHECK_AGE_REQ_SLOT(slotIndex) (CVarGetInteger("gAltItemMenu", 0) ? _CHECK_AGE_REQ_SLOT_ALT(slotIndex) : _CHECK_AGE_REQ_SLOT_MAIN(slotIndex))
