@@ -1605,9 +1605,9 @@ void KaleidoScope_DrawPages(PlayState* play, GraphicsContext* gfxCtx) {
 
         if (((pauseCtx->state == 7) &&
              (pauseCtx->unk_1EC < 4 || pauseCtx->unk_1EC == 7 ||
-              (CVarGetInteger("gSaveAndQuit", 0) && pauseCtx->unk_1EC == 5))) ||
+              (CVarGetInteger("gSaveAndQuit", 0) && (pauseCtx->unk_1EC == 5 || pauseCtx->unk_1EC == 8)))) ||
             (pauseCtx->state == 0xE)) {
-            if (pauseCtx->unk_1EC == 7 || pauseCtx->unk_1EC == 5) {
+            if (pauseCtx->unk_1EC == 5 || pauseCtx->unk_1EC == 7 || pauseCtx->unk_1EC == 8) {
                 POLY_KAL_DISP =
                     KaleidoScope_QuadTextureIA8(POLY_KAL_DISP, sContinuePromptTexs[gSaveContext.language], 152, 16, 0);
             } else {
@@ -4119,7 +4119,7 @@ void KaleidoScope_Update(PlayState* play)
                             Audio_PlaySoundGeneral(NA_SE_SY_PIECE_OF_HEART, &D_801333D4, 4, &D_801333E0, &D_801333E0,
                                                    &D_801333E8);
                             Play_PerformSave(play);
-                            pauseCtx->unk_1EC = CVarGetInteger("gSaveAndQuit", 0) ? 7 : 4;
+                            pauseCtx->unk_1EC = 4;
                             D_8082B25C = CVarGetInteger("gSkipSaveConfirmation", 0) ? 3 /* 0.1 sec */ : 90 /* 3 secs */;
                         }
                     } else if (CHECK_BTN_ALL(input->press.button, BTN_START) ||
