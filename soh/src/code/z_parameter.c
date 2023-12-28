@@ -964,11 +964,19 @@ void func_80083108(PlayState* play) {
                 gSaveContext.buttonStatus[3] = gSaveContext.buttonStatus[5] = gSaveContext.buttonStatus[6] =
                 gSaveContext.buttonStatus[7] = gSaveContext.buttonStatus[8] = BTN_DISABLED;
             } else if ((Player_GetEnvironmentalHazard(play) >= 2) && (Player_GetEnvironmentalHazard(play) < 5)) {
-                if (gSaveContext.buttonStatus[0] != BTN_DISABLED) {
-                    sp28 = 1;
-                }
+                if (CVarGetInteger("gEnhancedIronBoots", 0) && Player_GetEnvironmentalHazard(play) == 2) {
+                    if (gSaveContext.buttonStatus[0] == BTN_DISABLED) {
+                        sp28 = 1;
+                    }
 
-                gSaveContext.buttonStatus[0] = BTN_DISABLED;
+                    gSaveContext.buttonStatus[0] = BTN_ENABLED;
+                } else {
+                    if (gSaveContext.buttonStatus[0] != BTN_DISABLED) {
+                        sp28 = 1;
+                    }
+
+                    gSaveContext.buttonStatus[0] = BTN_DISABLED;
+                }
 
                 for (i = 1; i < ARRAY_COUNT(gSaveContext.equips.buttonItems); i++) {
                     if ((gSaveContext.equips.buttonItems[i] >= ITEM_SHIELD_DEKU) &&
@@ -981,7 +989,9 @@ void func_80083108(PlayState* play) {
                         gSaveContext.buttonStatus[BUTTON_STATUS_INDEX(i)] = BTN_ENABLED;
                     } else if (Player_GetEnvironmentalHazard(play) == 2) {
                         if ((gSaveContext.equips.buttonItems[i] != ITEM_HOOKSHOT) &&
-                            (gSaveContext.equips.buttonItems[i] != ITEM_LONGSHOT)) {
+                            (gSaveContext.equips.buttonItems[i] != ITEM_LONGSHOT) &&
+                            (CVarGetInteger("gEnhancedIronBoots", 0)
+                             && gSaveContext.equips.buttonItems[i] != ITEM_BOMBCHU)) {
                             if (gSaveContext.buttonStatus[BUTTON_STATUS_INDEX(i)] == BTN_ENABLED) {
                                 sp28 = 1;
                             }
@@ -1441,7 +1451,7 @@ void Inventory_SwapAgeEquipment(void) {
     u16 shieldEquipValue;
 
     if (LINK_AGE_IN_YEARS == YEARS_CHILD) {
-        
+
 
         for (i = 0; i < ARRAY_COUNT(gSaveContext.equips.buttonItems); i++) {
             if (i != 0) {
@@ -1483,13 +1493,13 @@ void Inventory_SwapAgeEquipment(void) {
             gSaveContext.equips.buttonItems[3] = gSaveContext.inventory.items[SLOT_OCARINA];
             gSaveContext.equips.cButtonSlots[1] = SLOT_BOMB;
             gSaveContext.equips.cButtonSlots[2] = SLOT_OCARINA;
-            
+
             gSaveContext.equips.equipment = (EQUIP_VALUE_SWORD_MASTER << (EQUIP_TYPE_SWORD * 4)) |
                                             (EQUIP_VALUE_SHIELD_HYLIAN << (EQUIP_TYPE_SHIELD * 4)) |
                                             (EQUIP_VALUE_TUNIC_KOKIRI << (EQUIP_TYPE_TUNIC * 4)) |
                                             (EQUIP_VALUE_BOOTS_KOKIRI << (EQUIP_TYPE_BOOTS * 4));
 
-            if (IS_RANDO && Randomizer_GetSettingValue(RSK_SHUFFLE_MASTER_SWORD) && 
+            if (IS_RANDO && Randomizer_GetSettingValue(RSK_SHUFFLE_MASTER_SWORD) &&
                 gSaveContext.equips.buttonItems[0] == ITEM_NONE) {
                 gSaveContext.equips.equipment &= (u16) ~(0xF << (EQUIP_TYPE_SWORD * 4));
             }
@@ -1828,14 +1838,14 @@ u8 Return_Item(u8 itemID, ModIndex modId, ItemID returnItem) {
 
 /**
  * @brief Adds the given item to Link's inventory.
- * 
+ *
  * NOTE: This function has been edited to be safe to use with a NULL play.
  * If you need to add to this function, be sure you check if the play is not
  * NULL before doing any operations requiring it.
- * 
- * @param play 
- * @param item 
- * @return u8 
+ *
+ * @param play
+ * @param item
+ * @return u8
  */
 u8 Item_Give(PlayState* play, u8 item) {
     lusprintf(__FILE__, __LINE__, 2, "Item Give - item: %#x", item);
@@ -1916,10 +1926,10 @@ u8 Item_Give(PlayState* play, u8 item) {
 
             // In rando, when buying Giant's Knife, also check
             // without the Koriri Sword in case we don't have it
-            if (ALL_EQUIP_VALUE(EQUIP_TYPE_SWORD) == 
+            if (ALL_EQUIP_VALUE(EQUIP_TYPE_SWORD) ==
                 ((1 << EQUIP_INV_SWORD_KOKIRI) | (1 << EQUIP_INV_SWORD_MASTER) | (1 << EQUIP_INV_SWORD_BIGGORON) |
-                 (1 << EQUIP_INV_SWORD_BROKENGIANTKNIFE)) || 
-                (IS_RANDO && ALL_EQUIP_VALUE(EQUIP_TYPE_SWORD) == 
+                 (1 << EQUIP_INV_SWORD_BROKENGIANTKNIFE)) ||
+                (IS_RANDO && ALL_EQUIP_VALUE(EQUIP_TYPE_SWORD) ==
                 ((1 << EQUIP_INV_SWORD_MASTER) | (1 << EQUIP_INV_SWORD_BIGGORON) | (1 << EQUIP_INV_SWORD_BROKENGIANTKNIFE)))) {
 
                 gSaveContext.inventory.equipment ^= OWNED_EQUIP_FLAG_ALT(EQUIP_TYPE_SWORD, EQUIP_INV_SWORD_BROKENGIANTKNIFE);
@@ -1931,7 +1941,7 @@ u8 Item_Give(PlayState* play, u8 item) {
                     }
                 }
             }
-            
+
         } else if (item == ITEM_SWORD_MASTER) {
             gSaveContext.equips.buttonItems[0] = ITEM_SWORD_MASTER;
             gSaveContext.equips.equipment &= (u16) ~(0xF << (EQUIP_TYPE_SWORD * 4));
@@ -2671,7 +2681,7 @@ u8 Item_CheckObtainability(u8 item) {
             return ITEM_NONE;
         }
     }
-    
+
     if ((item >= ITEM_SONG_MINUET) && (item <= ITEM_SONG_STORMS)) {
         return ITEM_NONE;
     } else if ((item >= ITEM_MEDALLION_FOREST) && (item <= ITEM_MEDALLION_LIGHT)) {
@@ -2935,7 +2945,7 @@ bool Inventory_HatchPocketCucco(PlayState* play) {
         return Inventory_ReplaceItem(play, ITEM_POCKET_EGG, ITEM_POCKET_CUCCO);
     }
 
-    if (!PLAYER_HAS_SHUFFLED_ADULT_TRADE_ITEM(ITEM_POCKET_EGG)) { 
+    if (!PLAYER_HAS_SHUFFLED_ADULT_TRADE_ITEM(ITEM_POCKET_EGG)) {
          return 0;
     }
 
@@ -2974,7 +2984,7 @@ void Interface_LoadActionLabel(InterfaceContext* interfaceCtx, u16 action, s16 l
         }
         doAction = newName[loadOffset];
     }
-    
+
     char* segment = interfaceCtx->doActionSegment[loadOffset];
     interfaceCtx->doActionSegment[loadOffset] = action != DO_ACTION_NONE ? doAction : gEmptyTexture;
     gSegments[7] = interfaceCtx->doActionSegment[loadOffset];
@@ -3041,7 +3051,7 @@ void Interface_LoadActionLabelB(PlayState* play, u16 action) {
     }
 
     interfaceCtx->unk_1FC = action;
-    
+
     char* segment = interfaceCtx->doActionSegment[1];
     interfaceCtx->doActionSegment[1] = action != DO_ACTION_NONE ? doAction : gEmptyTexture;
     osRecvMesg(&interfaceCtx->loadQueue, NULL, OS_MESG_BLOCK);
@@ -3066,7 +3076,7 @@ s32 Health_ChangeBy(PlayState* play, s16 healthChange) {
         if (healthChange < 0) {
             gSaveContext.health = 0;
         }
-        
+
         return 0;
     }
 
@@ -3135,7 +3145,7 @@ void Rupees_ChangeBy(s16 rupeeChange) {
 
 void GameplayStats_UpdateAmmoUsed(s16 item, s16 ammoUsed) {
 
-    switch (item) { 
+    switch (item) {
         case ITEM_STICK:
             gSaveContext.sohStats.count[COUNT_AMMO_USED_STICK] += ammoUsed;
             break;
@@ -4321,7 +4331,7 @@ void Interface_DrawItemButtons(PlayState* play) {
                                    G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
                                    G_TX_NOLOD, G_TX_NOLOD);
 
-            gSPWideTextureRectangle(OVERLAY_DISP++, C_Up_BTN_Pos[0]-LabelX_Navi << 2, C_Up_BTN_Pos[1]+LabelY_Navi << 2, 
+            gSPWideTextureRectangle(OVERLAY_DISP++, C_Up_BTN_Pos[0]-LabelX_Navi << 2, C_Up_BTN_Pos[1]+LabelY_Navi << 2,
                         (C_Up_BTN_Pos[0]-LabelX_Navi + 32) << 2, (C_Up_BTN_Pos[1]+LabelY_Navi + 8) << 2, G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
 
         }
@@ -4439,7 +4449,7 @@ void Interface_DrawItemButtons(PlayState* play) {
                 gDPSetPrimColor(OVERLAY_DISP++, 0, 0, cRightButtonColor.r, cRightButtonColor.g, cRightButtonColor.b, interfaceCtx->cRightAlpha);
             }
 
-            OVERLAY_DISP = Gfx_TextureIA8(OVERLAY_DISP, ((u8*)gButtonBackgroundTex), 32, 32, 
+            OVERLAY_DISP = Gfx_TextureIA8(OVERLAY_DISP, ((u8*)gButtonBackgroundTex), 32, 32,
                                           ItemIconPos[temp-1][0], ItemIconPos[temp-1][1], ItemIconWidthFactor[temp-1][0],
                                           ItemIconWidthFactor[temp-1][0], ItemIconWidthFactor[temp-1][1], ItemIconWidthFactor[temp-1][1]);
 
@@ -4514,8 +4524,8 @@ void Interface_DrawItemIconTexture(PlayState* play, void* texture, s16 button) {
         { C_DOWN_BUTTON_X+X_Margins_CD, C_DOWN_BUTTON_Y+Y_Margins_CD },
         { C_RIGHT_BUTTON_X+X_Margins_CR, C_RIGHT_BUTTON_Y+Y_Margins_CR },
         { DPAD_UP_X+X_Margins_DPad_Items, DPAD_UP_Y+Y_Margins_DPad_Items },
-        { DPAD_DOWN_X+X_Margins_DPad_Items, DPAD_DOWN_Y+Y_Margins_DPad_Items }, 
-        { DPAD_LEFT_X+X_Margins_DPad_Items, DPAD_LEFT_Y+Y_Margins_DPad_Items }, 
+        { DPAD_DOWN_X+X_Margins_DPad_Items, DPAD_DOWN_Y+Y_Margins_DPad_Items },
+        { DPAD_LEFT_X+X_Margins_DPad_Items, DPAD_LEFT_Y+Y_Margins_DPad_Items },
         { DPAD_RIGHT_X+X_Margins_DPad_Items, DPAD_RIGHT_Y+Y_Margins_DPad_Items }
     };
     u16 ItemsSlotsAlpha[8] = {
@@ -4898,11 +4908,11 @@ void Interface_DrawAmmoCount(PlayState* play, s16 button, s16 alpha) {
         }
 
         if (i != 0) {
-            OVERLAY_DISP = Gfx_TextureIA8(OVERLAY_DISP, (u8*)_gAmmoDigit0Tex[i], 8, 8, 
+            OVERLAY_DISP = Gfx_TextureIA8(OVERLAY_DISP, (u8*)_gAmmoDigit0Tex[i], 8, 8,
                                       ItemIconPos[button][0], ItemIconPos[button][1], 8, 8, 1 << 10, 1 << 10);
         }
 
-            OVERLAY_DISP = Gfx_TextureIA8(OVERLAY_DISP, (u8*)_gAmmoDigit0Tex[ammo], 8, 8, 
+            OVERLAY_DISP = Gfx_TextureIA8(OVERLAY_DISP, (u8*)_gAmmoDigit0Tex[ammo], 8, 8,
                                       ItemIconPos[button][0] + 6, ItemIconPos[button][1], 8, 8, 1 << 10, 1 << 10);
 
     }
@@ -5261,6 +5271,21 @@ void Interface_Draw(PlayState* play) {
 
                         gDPSetPrimColor(OVERLAY_DISP++, 0, 0, keyCountColor.r,keyCountColor.g,keyCountColor.b, interfaceCtx->magicAlpha);
                         gDPSetEnvColor(OVERLAY_DISP++, 0, 0, 20, 255); //We reset this here so it match user color :)
+
+                        if (CVarGetInteger("gVisualKeys", 0)) {
+                            s8 keyCount = gSaveContext.inventory.dungeonKeys[gSaveContext.mapIndex];
+                            s16 rectLeft = PosX_SKC;
+                            s16 keyOffset = CVarGetInteger("gSmallKeySpacing", 8);
+                            if (CVarGetInteger("gRightAlignKeys", 0)) {
+                                keyOffset = -keyOffset;
+                            }
+                            for (int i = 0; i < keyCount; i++, rectLeft += keyOffset) {
+                                OVERLAY_DISP = Gfx_TextureIA8(OVERLAY_DISP, gSmallKeyCounterIconTex, 16, 16, rectLeft, PosY_SKC, 16, 16,
+                                                              1 << 10, 1 << 10);
+                            }
+                            break;
+                        }
+
                         OVERLAY_DISP = Gfx_TextureIA8(OVERLAY_DISP, gSmallKeyCounterIconTex, 16, 16, PosX_SKC, PosY_SKC, 16, 16,
                                                       1 << 10, 1 << 10);
 
@@ -5407,7 +5432,7 @@ void Interface_Draw(PlayState* play) {
                 PosY_adjust = 6;
                 PosX_adjust = -10;
             }
-            
+
             s16 BbtnPosX;
             s16 BbtnPosY;
             s16 X_Margins_BtnB_label;
@@ -5739,7 +5764,7 @@ void Interface_Draw(PlayState* play) {
                         CarrotsPosY = CVarGetInteger("gCarrotsPosY", 0);
                         if (CVarGetInteger("gCarrotsPosType", 0) == 1) {//Anchor Left
                             if (CVarGetInteger("gCarrotsUseMargins", 0) != 0) {CarrotsMargins_X = Left_HUD_Margin;};
-                            CarrotsPosX = OTRGetDimensionFromLeftEdge(CVarGetInteger("gCarrotsPosX", 0)+CarrotsMargins_X);            
+                            CarrotsPosX = OTRGetDimensionFromLeftEdge(CVarGetInteger("gCarrotsPosX", 0)+CarrotsMargins_X);
                         } else if (CVarGetInteger("gCarrotsPosType", 0) == 2) {//Anchor Right
                             if (CVarGetInteger("gCarrotsUseMargins", 0) != 0) {CarrotsMargins_X = Right_HUD_Margin;};
                             CarrotsPosX = OTRGetDimensionFromRightEdge(CVarGetInteger("gCarrotsPosX", 0)+CarrotsMargins_X);
@@ -6249,7 +6274,7 @@ void Interface_Draw(PlayState* play) {
                 for (svar1 = 0; svar1 < 5; svar1++) {
                     // clang-format off
                     //svar5 = svar5 + 8;
-                    //svar5 = OTRGetRectDimensionFromLeftEdge(gSaveContext.timerX[svar6]); 
+                    //svar5 = OTRGetRectDimensionFromLeftEdge(gSaveContext.timerX[svar6]);
                     OVERLAY_DISP = Gfx_TextureI8(OVERLAY_DISP, digitTextures[timerDigits[svar1]], 8, 16,
                                       svar5 + timerDigitLeftPos[svar1],
                                       svar2, digitWidth[svar1], VREG(42), VREG(43) << 1,
@@ -6393,7 +6418,7 @@ void Interface_Update(PlayState* play) {
     Left_HUD_Margin = CVarGetInteger("gHUDMargin_L", 0);
     Right_HUD_Margin = CVarGetInteger("gHUDMargin_R", 0);
     Bottom_HUD_Margin = CVarGetInteger("gHUDMargin_B", 0);
-    
+
     GameInteractor_ExecuteOnInterfaceUpdate();
 
     if (CHECK_BTN_ALL(debugInput->press.button, BTN_DLEFT)) {
