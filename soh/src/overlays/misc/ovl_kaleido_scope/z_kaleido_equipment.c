@@ -181,6 +181,7 @@ void KaleidoScope_DrawEquipment(PlayState* play) {
     bool dpad = (CVarGetInteger("gDpadPause", 0) && !CHECK_BTN_ALL(input->cur.button, BTN_CUP));
     bool pauseAnyCursor = (CVarGetInteger("gPauseAnyCursor", 0) == PAUSE_ANY_CURSOR_RANDO_ONLY && IS_RANDO) ||
                           (CVarGetInteger("gPauseAnyCursor", 0) == PAUSE_ANY_CURSOR_ALWAYS_ON);
+    bool altItems = CVarGetInteger("gAltItemMenu", 0);
 
     OPEN_DISPS(play->state.gfxCtx);
 
@@ -188,7 +189,7 @@ void KaleidoScope_DrawEquipment(PlayState* play) {
     gDPSetPrimColor(POLY_KAL_DISP++, 0, 0, ZREG(39), ZREG(40), ZREG(41), pauseCtx->alpha);
     gDPSetEnvColor(POLY_KAL_DISP++, ZREG(43), ZREG(44), ZREG(45), 0);
 
-    for (i = 0, j = 64; i < 3; i++, j += 4) {
+    for (i = 0, j = 64; i < (altItems ? 3 : 4); i++, j += 4) {
         if (CUR_EQUIP_VALUE(i) != 0) {
             gDPPipeSync(POLY_KAL_DISP++);
             gSPVertex(POLY_KAL_DISP++, &pauseCtx->equipVtx[j], 4, 0);
@@ -221,7 +222,7 @@ void KaleidoScope_DrawEquipment(PlayState* play) {
                         pauseCtx->cursorPoint[PAUSE_EQUIP] -= 1;
 
                         // Kokiri tunic -> scale
-                        if (pauseCtx->cursorY[PAUSE_EQUIP] == 2 && pauseCtx->cursorX[PAUSE_EQUIP] == 0) {
+                        if (altItems && pauseCtx->cursorY[PAUSE_EQUIP] == 2 && pauseCtx->cursorX[PAUSE_EQUIP] == 0) {
                             pauseCtx->cursorY[PAUSE_EQUIP] += 1;
                             pauseCtx->cursorPoint[PAUSE_EQUIP] += 4;
                         }
@@ -268,7 +269,7 @@ void KaleidoScope_DrawEquipment(PlayState* play) {
 
                         // Strength -> Deku shield
                         //    Scale -> Kokiri tunic
-                        if (pauseCtx->cursorX[PAUSE_EQUIP] == 1 && pauseCtx->cursorY[PAUSE_EQUIP] >= 2) {
+                        if (altItems && pauseCtx->cursorX[PAUSE_EQUIP] == 1 && pauseCtx->cursorY[PAUSE_EQUIP] >= 2) {
                             pauseCtx->cursorY[PAUSE_EQUIP] -= 1;
                             pauseCtx->cursorPoint[PAUSE_EQUIP] -= 4;
                         }
@@ -342,7 +343,7 @@ void KaleidoScope_DrawEquipment(PlayState* play) {
                         pauseCtx->cursorPoint[PAUSE_EQUIP] += 4;
 
                         // Tunics -> scale
-                        if (pauseCtx->cursorY[PAUSE_EQUIP] == 3 && pauseCtx->cursorX[PAUSE_EQUIP] > 0) {
+                        if (altItems && pauseCtx->cursorY[PAUSE_EQUIP] == 3 && pauseCtx->cursorX[PAUSE_EQUIP] > 0) {
                             pauseCtx->cursorPoint[PAUSE_EQUIP] -= pauseCtx->cursorX[PAUSE_EQUIP];
                             pauseCtx->cursorX[PAUSE_EQUIP] = 0;
                         }
@@ -525,6 +526,9 @@ void KaleidoScope_DrawEquipment(PlayState* play) {
 
         u16 buttonsToCheck = BTN_A | BTN_CLEFT | BTN_CDOWN | BTN_CRIGHT;
         if (CVarGetInteger("gDpadEquips", 0) && (!CVarGetInteger("gDpadPause", 0) || CHECK_BTN_ALL(input->cur.button, BTN_CUP))) {
+            if (!CVarGetInteger("gAltItemMenu", 0)) {
+                buttonsToCheck |= BTN_DUP;
+            }
             buttonsToCheck |= BTN_DDOWN | BTN_DLEFT | BTN_DRIGHT;
         }
 
@@ -692,7 +696,7 @@ void KaleidoScope_DrawEquipment(PlayState* play) {
             point = CUR_UPG_VALUE(sChildUpgrades[i]);
             if ((point != 0) && (CUR_UPG_VALUE(sChildUpgrades[i]) != 0)) {
                 if (drawGreyItems &&
-                    ((sChildUpgradeItemBases[i] + CUR_UPG_VALUE(sChildUpgrades[i]) - 1) == ITEM_GAUNTLETS_SILVER || 
+                    ((sChildUpgradeItemBases[i] + CUR_UPG_VALUE(sChildUpgrades[i]) - 1) == ITEM_GAUNTLETS_SILVER ||
                     (sChildUpgradeItemBases[i] + CUR_UPG_VALUE(sChildUpgrades[i]) - 1) == ITEM_GAUNTLETS_GOLD)) { // Grey Out the Gauntlets
                     gDPSetGrayscaleColor(POLY_KAL_DISP++, 109, 109, 109, 255);
                     gSPGrayscale(POLY_KAL_DISP++, true);
@@ -720,7 +724,7 @@ void KaleidoScope_DrawEquipment(PlayState* play) {
             }
         }
 
-        if (i == 3) {
+        if (altItems && i == 3) {
             continue;
         }
 

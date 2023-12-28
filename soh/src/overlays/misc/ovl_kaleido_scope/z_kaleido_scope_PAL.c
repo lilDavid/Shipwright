@@ -734,30 +734,57 @@ static u16 D_8082ABEC[] = {
 };
 
 u8 gSlotAgeReqs[] = {
-    AGE_REQ_NONE,   // SLOT_DINS_FIRE
+    AGE_REQ_CHILD,  // SLOT_DEKU_STICK
+    AGE_REQ_NONE,   // SLOT_DEKU_NUT
     AGE_REQ_NONE,   // SLOT_BOMB
-    AGE_REQ_NONE,   // SLOT_BOMBCHU
-    AGE_REQ_NONE,   // SLOT_NUT
-    AGE_REQ_NONE,   // SLOT_LENS
-    AGE_REQ_CHILD,  // SLOT_BEAN
-    AGE_REQ_NONE,   // SLOT_FARORES_WIND
-    AGE_REQ_CHILD,  // SLOT_SLINGSHOT
-    AGE_REQ_CHILD,  // SLOT_BOOMERANG
-    AGE_REQ_CHILD,  // SLOT_STICK
-    AGE_REQ_ADULT,  // SLOT_BOOTS_HOVER
-    AGE_REQ_CHILD,  // SLOT_TRADE_CHILD
-    AGE_REQ_NONE,   // SLOT_NAYRUS_LOVE
     AGE_REQ_ADULT,  // SLOT_BOW
+    AGE_REQ_ADULT,  // SLOT_ARROW_FIRE
+    AGE_REQ_NONE,   // SLOT_DINS_FIRE
+    AGE_REQ_CHILD,  // SLOT_SLINGSHOT
+    AGE_REQ_NONE,   // SLOT_OCARINA
+    AGE_REQ_NONE,   // SLOT_BOMBCHU
     AGE_REQ_ADULT,  // SLOT_HOOKSHOT
+    AGE_REQ_ADULT,  // SLOT_ARROW_ICE
+    AGE_REQ_NONE,   // SLOT_FARORES_WIND
+    AGE_REQ_CHILD,  // SLOT_BOOMERANG
+    AGE_REQ_NONE,   // SLOT_LENS_OF_TRUTH
+    AGE_REQ_CHILD,  // SLOT_MAGIC_BEAN
     AGE_REQ_ADULT,  // SLOT_HAMMER
-    AGE_REQ_ADULT,  // SLOT_BOOTS_IRON
-    AGE_REQ_ADULT,  // SLOT_TRADE_ADULT
-    AGE_REQ_NONE,   // SLOT_EMPTY_LEFT
+    AGE_REQ_ADULT,  // SLOT_ARROW_LIGHT
+    AGE_REQ_NONE,   // SLOT_NAYRUS_LOVE
     AGE_REQ_NONE,   // SLOT_BOTTLE_1
     AGE_REQ_NONE,   // SLOT_BOTTLE_2
     AGE_REQ_NONE,   // SLOT_BOTTLE_3
     AGE_REQ_NONE,   // SLOT_BOTTLE_4
-    AGE_REQ_NONE,   // SLOT_EMPTY_RIGHT
+    AGE_REQ_ADULT,  // SLOT_TRADE_ADULT
+    AGE_REQ_CHILD,  // SLOT_TRADE_CHILD
+};
+
+u8 gSlotAgeReqsAlt[] = {
+    AGE_REQ_NONE,   // SLOT_ALT_DINS_FIRE
+    AGE_REQ_NONE,   // SLOT_ALT_BOMB
+    AGE_REQ_NONE,   // SLOT_ALT_BOMBCHU
+    AGE_REQ_NONE,   // SLOT_ALT_NUT
+    AGE_REQ_NONE,   // SLOT_ALT_LENS
+    AGE_REQ_CHILD,  // SLOT_ALT_BEAN
+    AGE_REQ_NONE,   // SLOT_ALT_FARORES_WIND
+    AGE_REQ_CHILD,  // SLOT_ALT_SLINGSHOT
+    AGE_REQ_CHILD,  // SLOT_ALT_BOOMERANG
+    AGE_REQ_CHILD,  // SLOT_ALT_STICK
+    AGE_REQ_ADULT,  // SLOT_ALT_BOOTS_HOVER
+    AGE_REQ_CHILD,  // SLOT_ALT_TRADE_CHILD
+    AGE_REQ_NONE,   // SLOT_ALT_NAYRUS_LOVE
+    AGE_REQ_ADULT,  // SLOT_ALT_BOW
+    AGE_REQ_ADULT,  // SLOT_ALT_HOOKSHOT
+    AGE_REQ_ADULT,  // SLOT_ALT_HAMMER
+    AGE_REQ_ADULT,  // SLOT_ALT_BOOTS_IRON
+    AGE_REQ_ADULT,  // SLOT_ALT_TRADE_ADULT
+    AGE_REQ_NONE,   // SLOT_ALT_EMPTY_LEFT
+    AGE_REQ_NONE,   // SLOT_ALT_BOTTLE_1
+    AGE_REQ_NONE,   // SLOT_ALT_BOTTLE_2
+    AGE_REQ_NONE,   // SLOT_ALT_BOTTLE_3
+    AGE_REQ_NONE,   // SLOT_ALT_BOTTLE_4
+    AGE_REQ_NONE,   // SLOT_ALT_EMPTY_RIGHT
 };
 
 u8 gEquipAgeReqs[][4] = {
@@ -875,6 +902,38 @@ u8 gItemAgeReqs[] = {
     AGE_REQ_NONE,   // ITEM_SCALE_SILVER
     AGE_REQ_NONE,   // ITEM_SCALE_GOLDEN
     AGE_REQ_ADULT,  // ITEM_GIANTS_KNIFE
+};
+
+u8 gMainToAltSlot[] = {
+    SLOT_ALT_STICK,     SLOT_ALT_NUT,      SLOT_ALT_BOMB,     SLOT_ALT_BOW,      SLOT_ALT_NONE,        SLOT_ALT_DINS_FIRE,
+    SLOT_ALT_SLINGSHOT, SLOT_ALT_NONE,     SLOT_ALT_BOMBCHU,  SLOT_ALT_HOOKSHOT, SLOT_ALT_NONE,        SLOT_ALT_FARORES_WIND,
+    SLOT_ALT_BOOMERANG, SLOT_ALT_LENS,     SLOT_ALT_BEAN,     SLOT_ALT_HAMMER,   SLOT_ALT_NONE,        SLOT_ALT_NAYRUS_LOVE,
+    SLOT_ALT_BOTTLE_1,  SLOT_ALT_BOTTLE_2, SLOT_ALT_BOTTLE_3, SLOT_ALT_BOTTLE_4, SLOT_ALT_TRADE_ADULT, SLOT_ALT_TRADE_CHILD,
+};
+
+u8 gAltToMainSlot[] = {
+    SLOT_DINS_FIRE,    SLOT_BOMB,      SLOT_BOMBCHU,   SLOT_NUT,      SLOT_LENS,        SLOT_BEAN,
+    SLOT_FARORES_WIND, SLOT_SLINGSHOT, SLOT_BOOMERANG, SLOT_STICK,    SLOT_BOOTS_IRON,  SLOT_TRADE_CHILD,
+    SLOT_NAYRUS_LOVE,  SLOT_BOW,       SLOT_HOOKSHOT,  SLOT_HAMMER,   SLOT_BOOTS_HOVER, SLOT_TRADE_ADULT,
+    SLOT_NONE,         SLOT_BOTTLE_1,  SLOT_BOTTLE_2,  SLOT_BOTTLE_3, SLOT_BOTTLE_4,    SLOT_NONE,
+};
+
+u8 gAltItemSlots[] = {
+    SLOT_ALT_STICK,       SLOT_ALT_NUT,          SLOT_ALT_BOMB,        SLOT_ALT_BOW,          SLOT_ALT_NONE,
+    SLOT_ALT_DINS_FIRE,   SLOT_ALT_SLINGSHOT,    SLOT_ALT_NONE,        SLOT_ALT_NONE,         SLOT_ALT_BOMBCHU,
+    SLOT_ALT_HOOKSHOT,    SLOT_ALT_HOOKSHOT,     SLOT_ALT_NONE,        SLOT_ALT_FARORES_WIND, SLOT_ALT_BOOMERANG,
+    SLOT_ALT_LENS,        SLOT_ALT_BEAN,         SLOT_ALT_HAMMER,      SLOT_ALT_NONE,         SLOT_ALT_NAYRUS_LOVE,
+    SLOT_ALT_BOTTLE_1,    SLOT_ALT_BOTTLE_1,     SLOT_ALT_BOTTLE_1,    SLOT_ALT_BOTTLE_1,     SLOT_ALT_BOTTLE_1,
+    SLOT_ALT_BOTTLE_1,    SLOT_ALT_BOTTLE_1,     SLOT_ALT_BOTTLE_1,    SLOT_ALT_BOTTLE_1,     SLOT_ALT_BOTTLE_1,
+    SLOT_ALT_BOTTLE_1,    SLOT_ALT_BOTTLE_1,     SLOT_ALT_BOTTLE_1,    SLOT_ALT_TRADE_CHILD,  SLOT_ALT_TRADE_CHILD,
+    SLOT_ALT_TRADE_CHILD, SLOT_ALT_TRADE_CHILD,  SLOT_ALT_TRADE_CHILD, SLOT_ALT_TRADE_CHILD,  SLOT_ALT_TRADE_CHILD,
+    SLOT_ALT_TRADE_CHILD, SLOT_ALT_TRADE_CHILD,  SLOT_ALT_TRADE_CHILD, SLOT_ALT_TRADE_CHILD,  SLOT_ALT_TRADE_CHILD,
+    SLOT_ALT_TRADE_ADULT, SLOT_ALT_TRADE_ADULT,  SLOT_ALT_TRADE_ADULT, SLOT_ALT_TRADE_ADULT,  SLOT_ALT_TRADE_ADULT,
+    SLOT_ALT_TRADE_ADULT, SLOT_ALT_TRADE_ADULT,  SLOT_ALT_TRADE_ADULT, SLOT_ALT_TRADE_ADULT,  SLOT_ALT_TRADE_ADULT,
+    SLOT_ALT_TRADE_ADULT, SLOT_ALT_BOW,          SLOT_ALT_BOW,         SLOT_ALT_BOW,          SLOT_ALT_NONE,
+    SLOT_ALT_NONE,        SLOT_ALT_NONE,         SLOT_ALT_NONE,        SLOT_ALT_NONE,         SLOT_ALT_NONE,
+    SLOT_ALT_NONE,        SLOT_ALT_NONE,         SLOT_ALT_NONE,        SLOT_ALT_NONE,         SLOT_ALT_BOOTS_IRON,
+    SLOT_ALT_BOOTS_HOVER,
 };
 
 u8 gAreaGsFlags[] = {
@@ -1009,15 +1068,15 @@ void KaleidoScope_SetDefaultCursor(PlayState* play) {
     s16 s;
     s16 i;
     gSelectingMask = false;
-    KaleidoScope_SetArrowSelectActive(pauseCtx, false);
+    gSelectingArrow = false;
 
     switch (pauseCtx->pageIndex) {
         case PAUSE_ITEM:
             s = pauseCtx->cursorSlot[PAUSE_ITEM];
-            if (gSaveContext.inventory.items[s] == ITEM_NONE) {
+            if (KaleidoScope_ItemInSlot(s) == ITEM_NONE) {
                 i = s + 1;
                 while (true) {
-                    if (gSaveContext.inventory.items[i] != ITEM_NONE) {
+                    if (KaleidoScope_ItemInSlot(i) != ITEM_NONE) {
                         break;
                     }
                     i++;
@@ -1029,7 +1088,7 @@ void KaleidoScope_SetDefaultCursor(PlayState* play) {
                         return;
                     }
                 }
-                pauseCtx->cursorItem[PAUSE_ITEM] = gSaveContext.inventory.items[i];
+                pauseCtx->cursorItem[PAUSE_ITEM] = KaleidoScope_ItemInSlot(i);
                 pauseCtx->cursorSlot[PAUSE_ITEM] = i;
             }
             break;
@@ -1044,7 +1103,7 @@ void KaleidoScope_SwitchPage(PauseContext* pauseCtx, u8 pt) {
     pauseCtx->unk_1E4 = 1;
     pauseCtx->unk_1EA = 0;
     gSelectingMask = false;
-    KaleidoScope_SetArrowSelectActive(pauseCtx, false);
+    gSelectingArrow = false;
 
     if (!pt) {
         pauseCtx->mode = pauseCtx->pageIndex * 2 + 1;
@@ -2073,7 +2132,7 @@ void KaleidoScope_DrawInfoPanel(PlayState* play) {
             bool pauseAnyCursor =
                 (CVarGetInteger("gPauseAnyCursor", 0) == PAUSE_ANY_CURSOR_RANDO_ONLY && IS_RANDO) ||
                 (CVarGetInteger("gPauseAnyCursor", 0) == PAUSE_ANY_CURSOR_ALWAYS_ON);
-            if (!pauseCtx->pageIndex && (!pauseAnyCursor || (gSaveContext.inventory.items[pauseCtx->cursorPoint[PAUSE_ITEM]] != ITEM_NONE))) { // pageIndex == PAUSE_ITEM
+            if (!pauseCtx->pageIndex && (!pauseAnyCursor || (KaleidoScope_ItemInSlot(pauseCtx->cursorPoint[PAUSE_ITEM]) != ITEM_NONE))) { // pageIndex == PAUSE_ITEM
                 pauseCtx->infoPanelVtx[16].v.ob[0] = pauseCtx->infoPanelVtx[18].v.ob[0] =
                     WREG(49 + gSaveContext.language);
 
@@ -2222,7 +2281,7 @@ void KaleidoScope_UpdateNamePanel(PlayState* play) {
 
         if (pauseAnyCursor &&
         ((pauseCtx->pageIndex == PAUSE_EQUIP && pauseCtx->cursorX[PAUSE_EQUIP] != 0 && !CHECK_OWNED_EQUIP(pauseCtx->cursorY[PAUSE_EQUIP], pauseCtx->cursorX[PAUSE_EQUIP] - 1)) ||
-        (pauseCtx->pageIndex == PAUSE_ITEM && gSaveContext.inventory.items[pauseCtx->cursorPoint[PAUSE_ITEM]] == ITEM_NONE))) {
+        (pauseCtx->pageIndex == PAUSE_ITEM && KaleidoScope_ItemInSlot(pauseCtx->cursorPoint[PAUSE_ITEM]) == ITEM_NONE))) {
             pauseCtx->namedItem = PAUSE_ITEM_NONE;
         }
 
@@ -2642,7 +2701,8 @@ s16 func_80823A0C(PlayState* play, Vtx* vtx, s16 arg2, s16 arg3) {
 }
 
 /* Maps an ammo item to an inventory slot by 4x its slot number */
-static s16 sAmmoVtxTableIdx[] = { 4, 8, 12, 20, 28, 36, 52 };
+static s16 sAmmoVtxTableIdx[] = { 0, 4, 8, 12, 24, 32, 56 };
+static s16 sAmmoVtxTableIdxAlt[] = { 36, 12, 4, 52, 28, 8, 20 };
 
 static s16 D_8082B12C[] = { -114, 12, 44, 76 };
 
@@ -2807,8 +2867,12 @@ void KaleidoScope_InitVertices(PlayState* play, GraphicsContext* gfxCtx) {
 
     for (phi_t3 = 1; phi_t3 < ARRAY_COUNT(gSaveContext.equips.buttonItems); phi_t3++, phi_t2 += 4) {
         if (gSaveContext.equips.cButtonSlots[phi_t3 - 1] != ITEM_NONE &&
-            ((phi_t3 < 5) || CVarGetInteger("gDpadEquips", 0))) {
-            phi_t4 = gSaveContext.equips.cButtonSlots[phi_t3 - 1] * 4;
+            ((phi_t3 < 4) || CVarGetInteger("gDpadEquips", 0))) {
+            int slot = gSaveContext.equips.cButtonSlots[phi_t3 - 1];
+            if (CVarGetInteger("gAltItemMenu", 0)) {
+                slot = gMainToAltSlot[slot];
+            }
+            phi_t4 = slot * 4;
 
             pauseCtx->itemVtx[phi_t2 + 0].v.ob[0] = pauseCtx->itemVtx[phi_t2 + 2].v.ob[0] =
                 pauseCtx->itemVtx[phi_t4].v.ob[0] - 2;
@@ -2857,7 +2921,11 @@ void KaleidoScope_InitVertices(PlayState* play, GraphicsContext* gfxCtx) {
     }
 
     for (phi_t3 = 0; phi_t3 < 7; phi_t3++) {
-        phi_t4 = sAmmoVtxTableIdx[phi_t3];
+        if (CVarGetInteger("gAltItemMenu", 0)) {
+            phi_t4 = sAmmoVtxTableIdxAlt[phi_t3];
+        } else {
+            phi_t4 = sAmmoVtxTableIdx[phi_t3];
+        }
 
         pauseCtx->itemVtx[phi_t2 + 0].v.ob[0] = pauseCtx->itemVtx[phi_t2 + 2].v.ob[0] =
             pauseCtx->itemVtx[phi_t4].v.ob[0];
@@ -2918,7 +2986,7 @@ void KaleidoScope_InitVertices(PlayState* play, GraphicsContext* gfxCtx) {
                 pauseCtx->equipVtx[phi_t4 + 0].v.ob[0] + 28;
 
             pauseCtx->equipVtx[phi_t4 + 0].v.ob[1] = pauseCtx->equipVtx[phi_t4 + 1].v.ob[1] =
-                phi_t5 + pauseCtx->offsetY - 2 - (phi_t3 > 0 ? 16 : 0);
+                phi_t5 + pauseCtx->offsetY - 2 - ((CVarGetInteger("gAltItemMenu", 0) && phi_t3 > 0) ? 16 : 0);
 
             pauseCtx->equipVtx[phi_t4 + 2].v.ob[1] = pauseCtx->equipVtx[phi_t4 + 3].v.ob[1] =
                 pauseCtx->equipVtx[phi_t4 + 0].v.ob[1] - 28;
@@ -3109,34 +3177,6 @@ void KaleidoScope_InitVertices(PlayState* play, GraphicsContext* gfxCtx) {
 
     pauseCtx->saveVtx = Graph_Alloc(gfxCtx, 80 * sizeof(Vtx));
     func_80823A0C(play, pauseCtx->saveVtx, 5, 5);
-
-    pauseCtx->arrowSelectVtx = Graph_Alloc(gfxCtx, 32 * sizeof(Vtx));
-
-	// All arrow select vertices
-    for (phi_t2 = 0; phi_t2 < 32; phi_t2++) {
-        pauseCtx->arrowSelectVtx[phi_t2].v.flag = 0;
-
-        // Z position
-        pauseCtx->arrowSelectVtx[phi_t2].v.ob[2] = 0;
-
-		// Color
-        pauseCtx->arrowSelectVtx[phi_t2].v.cn[0] = pauseCtx->arrowSelectVtx[phi_t2].v.cn[1] =
-            pauseCtx->arrowSelectVtx[phi_t2].v.cn[2] = pauseCtx->arrowSelectVtx[phi_t2].v.cn[3] = 255;
-    }
-
-	// All arrow select quads
-    for (phi_t2 = 0; phi_t2 < 32; phi_t2 += 4) {
-        // Top left UV at (0, 0);
-        pauseCtx->arrowSelectVtx[phi_t2 + 0].v.tc[0] = pauseCtx->arrowSelectVtx[phi_t2 + 0].v.tc[1] =
-            pauseCtx->arrowSelectVtx[phi_t2 + 1].v.tc[1] = pauseCtx->arrowSelectVtx[phi_t2 + 2].v.tc[0] = 0;
-    }
-
-	// Background quads
-    for (phi_t2 = 16; phi_t2 < 32; phi_t2 += 4) {
-        // Bottom left UV at (32, 32)
-        pauseCtx->arrowSelectVtx[phi_t2 + 1].v.tc[0] = pauseCtx->arrowSelectVtx[phi_t2 + 2].v.tc[1] =
-            pauseCtx->arrowSelectVtx[phi_t2 + 3].v.tc[0] = pauseCtx->arrowSelectVtx[phi_t2 + 3].v.tc[1] = 0x400;
-    }
 }
 
 void KaleidoScope_DrawGameOver(PlayState* play) {
@@ -4539,9 +4579,6 @@ void KaleidoScope_Update(PlayState* play)
             break;
 
         case 0x12:
-        	// OTRTODO: move this somewhere it won't be called repeatedly for several frames
-            KaleidoScope_SetArrowSelectActive(pauseCtx, false);
-
             if (pauseCtx->unk_1F4 != 160.0f) {
                 pauseCtx->unk_1F4 = pauseCtx->unk_1F8 = pauseCtx->unk_1FC = pauseCtx->unk_200 += 160.0f / WREG(6);
                 pauseCtx->infoPanelOffsetY -= 40 / WREG(6);

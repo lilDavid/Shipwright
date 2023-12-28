@@ -13,14 +13,14 @@ extern "C" MessageTableEntry* sNesMessageEntryTablePtr;
 extern "C" MessageTableEntry* sGerMessageEntryTablePtr;
 extern "C" MessageTableEntry* sFraMessageEntryTablePtr;
 extern "C" MessageTableEntry* sStaffMessageEntryTablePtr;
-//extern "C" MessageTableEntry* _message_0xFFFC_nes;
+//extern "C" MessageTableEntry* _message_0xFFFC_nes;	
 
 MessageTableEntry* OTRMessage_LoadTable(const char* filePath, bool isNES) {
     auto file = std::static_pointer_cast<LUS::Text>(LUS::Context::GetInstance()->GetResourceManager()->LoadResource(filePath));
 
     if (file == nullptr)
         return nullptr;
-
+    
     // Allocate room for an additional message
     // OTRTODO: Should not be malloc'ing here. It's fine for now since we check elsewhere that the message table is
     // already null.

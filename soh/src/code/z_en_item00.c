@@ -1373,7 +1373,7 @@ void EnItem00_DrawCollectible(EnItem00* this, PlayState* play) {
                 Randomizer_GetItemFromKnownCheck(randoCheck, GI_NONE);
             this->randoGiEntry.getItemFrom = ITEM_FROM_FREESTANDING;
         }
-
+        
         f32 mtxScale = 10.67f;
         Matrix_Scale(mtxScale, mtxScale, mtxScale, MTXMODE_APPLY);
         EnItem00_CustomItemsParticles(&this->actor, play, this->randoGiEntry);
@@ -1534,7 +1534,7 @@ s16 func_8001F404(s16 dropId) {
         }
     }
 
-    if ((CVarGetInteger("gBombchuDrops", 0) ||
+    if ((CVarGetInteger("gBombchuDrops", 0) || 
         (IS_RANDO && Randomizer_GetSettingValue(RSK_ENABLE_BOMBCHU_DROPS) == 1)) &&
         (dropId == ITEM00_BOMBS_A || dropId == ITEM00_BOMBS_B || dropId == ITEM00_BOMBS_SPECIAL)) {
         dropId = EnItem00_ConvertBombDropToBombchu(dropId);
@@ -1614,7 +1614,7 @@ EnItem00* Item_DropCollectible2(PlayState* play, Vec3f* spawnPos, s16 params) {
     params &= 0x3FFF;
 
     if ((params & 0x00FF) == ITEM00_HEART && CVarGetInteger("gNoHeartDrops", 0)) { return NULL; }
-
+    
     if (((params & 0x00FF) == ITEM00_FLEXIBLE) && !param4000) {
         // TODO: Prevent the cast to EnItem00 here since this is a different actor (En_Elf)
         spawnedActor = (EnItem00*)Actor_Spawn(&play->actorCtx, play, ACTOR_EN_ELF, spawnPos->x,

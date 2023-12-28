@@ -13,7 +13,7 @@ typedef struct BossRushSetting {
     std::vector<std::array<std::string, LANGUAGE_MAX>> choices;
 } BossRushSetting;
 
-BossRushSetting BossRushOptions[BOSSRUSH_OPTIONS_AMOUNT] = {
+BossRushSetting BossRushOptions[BOSSRUSH_OPTIONS_AMOUNT] = { 
     {
         { "BOSSES:", "BOSSE:", "BOSS:" },
         {
@@ -309,7 +309,7 @@ void BossRush_InitSave() {
 
     // Set health
     uint16_t health = 16;
-    switch (gSaveContext.bossRushOptions[BR_OPTIONS_HEARTS]) {
+    switch (gSaveContext.bossRushOptions[BR_OPTIONS_HEARTS]) { 
         case BR_CHOICE_HEARTS_7:
             health *= 7;
             break;
@@ -351,44 +351,39 @@ void BossRush_InitSave() {
     }
 
     // Set items
-    std::array<u8, 28> brItems = {
-        ITEM_NONE, ITEM_BOMB,      ITEM_NONE,      ITEM_NUT,         ITEM_LENS, ITEM_NONE,
-        ITEM_NONE, ITEM_SLINGSHOT, ITEM_BOOMERANG, ITEM_STICK,       ITEM_NONE, ITEM_NONE,
-        ITEM_NONE, ITEM_BOW,       ITEM_HOOKSHOT,  ITEM_HAMMER,      ITEM_NONE, ITEM_NONE,
-        ITEM_NONE, ITEM_NONE,      ITEM_NONE,      ITEM_NONE,        ITEM_NONE, ITEM_NONE,
-        ITEM_NONE, ITEM_NONE,      ITEM_NONE,      ITEM_ARROW_LIGHT,
+    std::array<u8, 24> brItems = {
+        ITEM_STICK,     ITEM_NUT,  ITEM_BOMB, ITEM_BOW,      ITEM_NONE,        ITEM_NONE,
+        ITEM_SLINGSHOT, ITEM_NONE, ITEM_NONE, ITEM_HOOKSHOT, ITEM_NONE,        ITEM_NONE,
+        ITEM_BOOMERANG, ITEM_LENS, ITEM_NONE, ITEM_HAMMER,   ITEM_ARROW_LIGHT, ITEM_NONE,
+        ITEM_NONE,      ITEM_NONE, ITEM_NONE, ITEM_NONE,     ITEM_NONE,        ITEM_NONE,
     };
 
     if (gSaveContext.bossRushOptions[BR_OPTIONS_LONGSHOT] == BR_CHOICE_LONGSHOT_YES) {
-        brItems[SLOT_HOOKSHOT] = ITEM_LONGSHOT;
+        brItems[9] = ITEM_LONGSHOT;
     }
 
     switch (gSaveContext.bossRushOptions[BR_OPTIONS_BOTTLE]) {
         case BR_CHOICE_BOTTLE_EMPTY:
-            brItems[SLOT_BOTTLE_1] = ITEM_BOTTLE;
+            brItems[18] = ITEM_BOTTLE;
             break;
         case BR_CHOICE_BOTTLE_FAIRY:
-            brItems[SLOT_BOTTLE_1] = ITEM_FAIRY;
+            brItems[18] = ITEM_FAIRY;
             break;
         case BR_CHOICE_BOTTLE_REDPOTION:
-            brItems[SLOT_BOTTLE_1] = ITEM_POTION_RED;
+            brItems[18] = ITEM_POTION_RED;
             break;
         case BR_CHOICE_BOTTLE_GREENPOTION:
-            brItems[SLOT_BOTTLE_1] = ITEM_POTION_GREEN;
+            brItems[18] = ITEM_POTION_GREEN;
             break;
         case BR_CHOICE_BOTTLE_BLUEPOTION:
-            brItems[SLOT_BOTTLE_1] = ITEM_POTION_BLUE;
+            brItems[18] = ITEM_POTION_BLUE;
             break;
         default:
             break;
     }
 
     if (gSaveContext.bossRushOptions[BR_OPTIONS_BUNNYHOOD] == BR_CHOICE_BUNNYHOOD_YES) {
-        brItems[SLOT_TRADE_CHILD] = ITEM_MASK_BUNNY;
-    }
-
-    if (gSaveContext.bossRushOptions[BR_OPTIONS_HOVERBOOTS] == BR_CHOICE_HOVERBOOTS_YES) {
-        brItems[SLOT_BOOTS_HOVER] = ITEM_BOOTS_HOVER;
+        brItems[23] = ITEM_MASK_BUNNY;
     }
 
     for (int item = 0; item < ARRAY_COUNT(gSaveContext.inventory.items); item++) {
@@ -396,12 +391,12 @@ void BossRush_InitSave() {
     }
 
     // Set consumable counts
-    std::array<s8, 16> brAmmo = { 0, 10, 0, 5, 0, 0, 0, 10, 0, 5, 0, 0, 0, 10, 0, 0 };
+    std::array<s8, 16> brAmmo = { 5, 5, 10, 10, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
     if (gSaveContext.bossRushOptions[BR_OPTIONS_AMMO] == BR_CHOICE_AMMO_FULL) {
-        brAmmo = { 0, 20, 0, 20, 0, 0, 0, 30, 0, 10, 0, 0, 0, 30, 0, 0 };
+        brAmmo = { 10, 20, 20, 30, 0, 0, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
     } else if (gSaveContext.bossRushOptions[BR_OPTIONS_AMMO] == BR_CHOICE_AMMO_MAXED) {
-        brAmmo = { 0, 40, 0, 40, 0, 0, 0, 50, 0, 30, 0, 0, 0, 50, 0, 0 };
+        brAmmo = { 30, 40, 40, 50, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
     }
 
     for (int ammo = 0; ammo < ARRAY_COUNT(gSaveContext.inventory.ammo); ammo++) {
