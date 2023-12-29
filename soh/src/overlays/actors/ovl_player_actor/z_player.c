@@ -2281,7 +2281,7 @@ bool Player_CanSwitchArrows(Player* this) {
         return false;
     }
 
-    if (this->heldItemAction < PLAYER_IA_BOW || this->heldItemAction > PLAYER_IA_BOW_LIGHT) {
+    if (this->heldItemAction < PLAYER_IA_BOW || this->heldItemAction > PLAYER_IA_BOW_BOMB) {
         return false;
     }
 
@@ -2292,27 +2292,34 @@ bool Player_SwitchArrowsIfEnabled(Player* this) {
     if (!CVarGetInteger("gArrowSwitching", 0)) {
         return false;
     }
-    if (this->heldItemAction < PLAYER_IA_BOW || this->heldItemAction > PLAYER_IA_BOW_LIGHT) {
+    if (this->heldItemAction < PLAYER_IA_BOW || this->heldItemAction > PLAYER_IA_BOW_BOMB) {
         return false;
     }
     if (!CHECK_BTN_ANY(sControlInput->press.button, CVarGetInteger("gArrowSwitchBtnMap", BTN_R))) {
         return false;
     }
 
-    u8 i, newItem, newItemAction;
-    const u8 arrowCount = ARRAY_COUNT(arrowTypeToItem);
-    u8 heldArrowAP = this->heldItemAction - PLAYER_IA_BOW;
-    for (i = 1; i < arrowCount; i++) {
-        u8 arrowAP = (heldArrowAP + i) % arrowCount;
-        ArrowItems items = arrowTypeToItem[arrowAP];
-        if (INV_CONTENT(items.asArrow) != ITEM_NONE) {
-            newItem = items.asBowArrow;
-            newItemAction = PLAYER_IA_BOW + arrowAP;
-            break;
+    u8 newItem, newItemAction;
+    // Cycle bomb arrow to bow, but not light arrow to bomb arrow
+    if (this->heldItemAction == PLAYER_IA_BOW_BOMB) {
+        newItem = ITEM_BOW;
+        newItemAction = PLAYER_IA_BOW;
+    } else {
+        u8 i;
+        const u8 arrowCount = ARRAY_COUNT(arrowTypeToItem);
+        u8 heldArrowAP = this->heldItemAction - PLAYER_IA_BOW;
+        for (i = 1; i < arrowCount; i++) {
+            u8 arrowAP = (heldArrowAP + i) % arrowCount;
+            ArrowItems items = arrowTypeToItem[arrowAP];
+            if (INV_CONTENT(items.asArrow) != ITEM_NONE) {
+                newItem = items.asBowArrow;
+                newItemAction = PLAYER_IA_BOW + arrowAP;
+                break;
+            }
         }
-    }
-    if (i == arrowCount) {
-        return false;
+        if (i == arrowCount) {
+            return false;
+        }
     }
 
     gSaveContext.equips.buttonItems[this->heldItemButton] = newItem;
