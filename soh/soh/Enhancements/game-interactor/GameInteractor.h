@@ -76,6 +76,7 @@ typedef enum {
     VB_MIDO_SPAWN,
     // Opt: *EnMd
     // Vanilla condition: EnMd->interactInfo.talkState == NPC_TALK_STATE_ACTION
+    // Note: When overriding this, ensure you're not in the intro cutscene as Mido's path has not been loaded
     VB_MOVE_MIDO_IN_KOKIRI_FOREST,
     // Opt: *EnMd
     // Vanilla condition: CHECK_QUEST_ITEM(QUEST_KOKIRI_EMERALD)
@@ -341,6 +342,7 @@ typedef enum {
     VB_SHOULD_GIVE_VANILLA_FISHING_PRIZE,
     VB_GIVE_RANDO_FISHING_PRIZE,
     VB_PLAY_THROW_ANIMATION,
+    VB_INFLICT_VOID_DAMAGE,
     VB_GANONDORF_DECIDE_TO_FIGHT,
 
     /*** Give Items ***/
