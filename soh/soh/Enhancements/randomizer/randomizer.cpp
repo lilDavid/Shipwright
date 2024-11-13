@@ -64,7 +64,6 @@ const std::string Randomizer::hintMessageTableID = "RandomizerHints";
 const std::string Randomizer::merchantMessageTableID = "RandomizerMerchants";
 const std::string Randomizer::rupeeMessageTableID = "RandomizerRupees";
 const std::string Randomizer::triforcePieceMessageTableID = "RandomizerTriforcePiece";
-const std::string Randomizer::christmasTreeMessageTableID = "RandomizerChristmasTree";
 const std::string Randomizer::NaviRandoMessageTableID = "RandomizerNavi";
 const std::string Randomizer::IceTrapRandoMessageTableID = "RandomizerIceTrap";
 const std::string Randomizer::randoMiscHintsTableID = "RandomizerMiscHints";
@@ -2255,39 +2254,6 @@ CustomMessage Randomizer::GetTriforcePieceMessage() {
     messageEntry.Format();
     return messageEntry;
 }
-void CreateChristmasTreeMessages() {
-    CustomMessage ChristmasTreeMessages[2] = {
-
-        { "The %yChristmas tree%w seems to be&missing some of %gits magic%w... Find all&ornaments to save %rChristmas%w!",
-          "The %yChristmas tree%w seems to be&missing some of %gits magic%w... Find all&ornaments to save %rChristmas%w!",
-          "The %yChristmas tree%w seems to be&missing some of %gits magic%w... Find all&ornaments to save %rChristmas%w!" },
-
-        { "The tree's magic has been fully&restored. %gMerry %rChristmas%w!",
-          "The tree's magic has been fully&restored. %gMerry %rChristmas%w!",
-          "The tree's magic has been fully&restored. %gMerry %rChristmas%w!" }
-    };
-    CustomMessageManager* customMessageManager = CustomMessageManager::Instance;
-    customMessageManager->AddCustomMessageTable(Randomizer::christmasTreeMessageTableID);
-    for (unsigned int i = 0; i <= 1; i++) {
-        customMessageManager->CreateMessage(Randomizer::christmasTreeMessageTableID, i, ChristmasTreeMessages[i]);
-    }
-}
-
-CustomMessage Randomizer::GetChristmasTreeMessage() {
-    // Item is only given after the textbox, so reflect that inside the textbox.
-    uint8_t current = gSaveContext.triforcePiecesCollected;
-    uint8_t required = OTRGlobals::Instance->gRandomizer->GetRandoSettingValue(RSK_TRIFORCE_HUNT_PIECES_REQUIRED);
-    uint8_t messageIndex;
-
-    if (current < required) {
-        messageIndex = 0;
-    } else {
-        messageIndex = 1;
-    }
-
-    CustomMessage messageEntry = CustomMessageManager::Instance->RetrieveMessage(Randomizer::christmasTreeMessageTableID, messageIndex);
-    return messageEntry;
-}
 
 void CreateNaviRandoMessages() {
     CustomMessage NaviMessages[NUM_NAVI_MESSAGES] = {
@@ -3038,7 +3004,6 @@ void Randomizer::CreateCustomMessages() {
     CreateGetItemMessages(&getItemMessages);
     CreateRupeeMessages();
     CreateTriforcePieceMessages();
-    CreateChristmasTreeMessages();
     CreateNaviRandoMessages();
     CreateFireTempleGoronMessages();
 }
