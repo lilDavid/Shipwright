@@ -2557,9 +2557,7 @@ extern "C" int CustomMessage_RetrieveIfExists(PlayState* play) {
         bool nonBeanMerchants = ctx->GetOption(RSK_SHUFFLE_MERCHANTS).Is(RO_SHUFFLE_MERCHANTS_ALL_BUT_BEANS) || 
                                  ctx->GetOption(RSK_SHUFFLE_MERCHANTS).Is(RO_SHUFFLE_MERCHANTS_ALL);
         Player* player = GET_PLAYER(play);
-        if (textId == 0x406B && play->sceneNum == SCENE_KAKARIKO_VILLAGE) {
-            messageEntry = Randomizer::GetChristmasTreeMessage();
-        } else if (textId == TEXT_RANDOMIZER_CUSTOM_ITEM) {
+        if (textId == TEXT_RANDOMIZER_CUSTOM_ITEM) {
             if (player->getItemEntry.getItemId == RG_ICE_TRAP) {
                 messageEntry = Randomizer::GetIceTrapMessage();
             } else if (player->getItemEntry.getItemId == RG_TRIFORCE_PIECE) {
