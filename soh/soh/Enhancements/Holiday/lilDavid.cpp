@@ -1,5 +1,7 @@
 #include "Holiday.hpp"
 
+#include "utils/StringHelper.h"
+
 extern "C" {
 #include "macros.h"
 #include "functions.h"
@@ -21,6 +23,30 @@ extern "C" {
 static void OnConfigurationChanged() {
     if (!CVarGetInteger(CVAR("BombArrows.Enabled"), 0))
         CVarSetInteger(CVAR("BombArrows.Active"), 0);
+
+    COND_HOOK(OnSaveFile, CVarGetInteger(CVAR("BombArrows.Enabled"), 0), [](int32_t file) {
+        std::string cvar = StringHelper::Sprintf("%s%d", CVAR("BombArrows.Save"), file);
+        CVarSetInteger(cvar.c_str(), CVarGetInteger(CVAR("BombArrows.Active"), 0));
+        Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesOnNextTick();
+    });
+
+    COND_HOOK(OnLoadFile, CVarGetInteger(CVAR("BombArrows.Enabled"), 0), [](int32_t file) {
+        std::string cvar = StringHelper::Sprintf("%s%d", CVAR("BombArrows.Save"), file);
+        CVarSetInteger(CVAR("BombArrows.Active"), CVarGetInteger(cvar.c_str(), 0));
+    });
+
+    COND_HOOK(OnCopyFile, CVarGetInteger(CVAR("BombArrows.Enabled"), 0), [](int32_t from, int32_t to) {
+        std::string cvarFrom = StringHelper::Sprintf("%s%d", CVAR("BombArrows.Save"), from);
+        std::string cvarTo = StringHelper::Sprintf("%s%d", CVAR("BombArrows.Save"), to);
+        CVarSetInteger(cvarTo.c_str(), CVarGetInteger(cvarFrom.c_str(), 0));
+        Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesOnNextTick();
+    });
+
+    COND_HOOK(OnDeleteFile, CVarGetInteger(CVAR("BombArrows.Enabled"), 0), [](int32_t file) {
+        std::string cvar = StringHelper::Sprintf("%s%d", CVAR("BombArrows.Save"), file);
+        CVarSetInteger(cvar.c_str(), 0);
+        Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesOnNextTick();
+    });
 
     COND_ID_HOOK(OnActorInit, ACTOR_EN_ARROW, CVarGetInteger(CVAR("BombArrows.Enabled"), 0), [](void* actorRef) {
         EnArrow* arrow = (EnArrow*) actorRef;
@@ -103,6 +129,8 @@ static void RegisterMod() {
     // #region Leave this alone unless you know what you are doing
     OnConfigurationChanged();
     // #endregion
+
+    CVarSetInteger(CVAR("BombArrows.Active"), 0);
 }
 
 static Holiday holiday(DrawMenu, RegisterMod);
