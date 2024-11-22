@@ -1145,7 +1145,7 @@ void KaleidoScope_UpdateItemEquip(PlayState* play) {
                 u8 slot_item = gSaveContext.equips.buttonItems[pauseCtx->equipTargetCBtn + 1];
                 if (!CVarGetInteger("gHoliday.lilDavid.BombArrows.Active", 0) &&
                     pauseCtx->equipTargetItem == ITEM_BOMB &&
-                    slot_item == ITEM_BOW || (slot_item >= ITEM_BOW_ARROW_FIRE && slot_item <= ITEM_BOW_ARROW_LIGHT))
+                    (slot_item == ITEM_BOW || (slot_item >= ITEM_BOW_ARROW_FIRE && slot_item <= ITEM_BOW_ARROW_LIGHT)))
                 {
                     CVarSetInteger("gHoliday.lilDavid.BombArrows.Active", 1);
                     pauseCtx->equipTargetItem = ITEM_BOW;

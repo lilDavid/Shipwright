@@ -4723,7 +4723,7 @@ void Interface_DrawAmmoCount(PlayState* play, s16 button, s16 alpha) {
 
         ammo = AMMO(i);
         if (CVarGetInteger("gHoliday.lilDavid.BombArrows.Active", 0) &&
-            AMMO(ITEM_BOMB) != 0 && AMMO(ITEM_BOMB) < AMMO(ITEM_BOW)) {
+            i == ITEM_BOW && AMMO(ITEM_BOMB) != 0 && AMMO(ITEM_BOMB) < AMMO(ITEM_BOW)) {
             ammo = AMMO(ITEM_BOMB);
         }
 
