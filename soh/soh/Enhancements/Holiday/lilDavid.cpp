@@ -24,7 +24,9 @@ static void OnConfigurationChanged() {
 
     COND_ID_HOOK(OnActorInit, ACTOR_EN_ARROW, CVarGetInteger(CVAR("BombArrows.Enabled"), 0), [](void* actorRef) {
         EnArrow* arrow = (EnArrow*) actorRef;
-        if (arrow->actor.params != ARROW_NORMAL || AMMO(ITEM_BOMB) == 0 || !CVarGetInteger(CVAR("BombArrows.Active"), 0))
+        if (!CVarGetInteger(CVAR("BombArrows.Active"), 0) ||
+            arrow->actor.params != ARROW_NORMAL || AMMO(ITEM_BOMB) == 0 ||
+            gSaveContext.minigameState == 1 || gPlayState->shootingGalleryStatus > 1)
             return;
 
         EnBom* bomb = (EnBom*) Actor_SpawnAsChild(&gPlayState->actorCtx, &arrow->actor, gPlayState, ACTOR_EN_BOM,
