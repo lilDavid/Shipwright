@@ -24,6 +24,9 @@ static void OnConfigurationChanged() {
         if (arrow->actor.params != ARROW_NORMAL)
             return;
 
+        if (AMMO(ITEM_BOMB) == 0)
+            return;
+
         EnBom* bomb = (EnBom*) Actor_SpawnAsChild(&gPlayState->actorCtx, &arrow->actor, gPlayState, ACTOR_EN_BOM,
                 arrow->actor.world.pos.x, arrow->actor.world.pos.y, arrow->actor.world.pos.z,
                 0, 0, 0, BOMB_BODY);
@@ -48,6 +51,15 @@ static void OnConfigurationChanged() {
         bomb->actor.world.pos.y -= r * Math_SinS(xrot) + 2.0f;
         bomb->actor.world.pos.z += r * Math_CosS(xrot) * Math_CosS(yrot);
 
+        if (arrow->actor.parent == nullptr) {
+            if (bomb->timer > 60) {
+                Inventory_ChangeAmmo(ITEM_BOMB, -1);
+            }
+            bomb->timer = 52;
+        } else {
+            bomb->timer = 62;
+        }
+
         if (arrow->actionFunc == func_809B45E0 ||
             arrow->actionFunc == func_809B4640 ||
             arrow->actor.params == ARROW_NORMAL_LIT)
@@ -71,8 +83,10 @@ static void OnConfigurationChanged() {
         if (!bomb->actor.parent || bomb->actor.parent->id != ACTOR_EN_ARROW)
             return;
 
-        if (bomb->timer > 40 && bomb->timer < 50)
-            bomb->timer += 10;
+        if (bomb->timer > 55 && bomb->timer < 60)
+            bomb->timer += 4;
+        if (bomb->timer > 45 && bomb->timer < 50)
+            bomb->timer += 4;
     });
 }
 
