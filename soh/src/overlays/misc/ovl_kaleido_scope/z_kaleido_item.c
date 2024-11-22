@@ -1137,15 +1137,12 @@ void KaleidoScope_UpdateItemEquip(PlayState* play) {
             }
             
             if (CVarGetInteger("gHoliday.lilDavid.BombArrows.Enabled", 0)) {
-                if (pauseCtx->equipTargetItem == ITEM_BOW ||
-                    (pauseCtx->equipTargetItem >= ITEM_BOW_ARROW_FIRE && pauseCtx->equipTargetItem <= ITEM_BOW_ARROW_LIGHT))
-                {
+                if (pauseCtx->equipTargetSlot == SLOT_BOW) {
                     CVarSetInteger("gHoliday.lilDavid.BombArrows.Active", 0);
                 }
-                u8 slot_item = gSaveContext.equips.buttonItems[pauseCtx->equipTargetCBtn + 1];
+                u8 equipped_slot = gSaveContext.equips.cButtonSlots[pauseCtx->equipTargetCBtn];
                 if (!CVarGetInteger("gHoliday.lilDavid.BombArrows.Active", 0) &&
-                    pauseCtx->equipTargetItem == ITEM_BOMB &&
-                    (slot_item == ITEM_BOW || (slot_item >= ITEM_BOW_ARROW_FIRE && slot_item <= ITEM_BOW_ARROW_LIGHT)))
+                    pauseCtx->equipTargetItem == ITEM_BOMB && equipped_slot == SLOT_BOW)
                 {
                     CVarSetInteger("gHoliday.lilDavid.BombArrows.Active", 1);
                     pauseCtx->equipTargetItem = ITEM_BOW;

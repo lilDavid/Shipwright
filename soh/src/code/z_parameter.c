@@ -4723,7 +4723,8 @@ void Interface_DrawAmmoCount(PlayState* play, s16 button, s16 alpha) {
 
         ammo = AMMO(i);
         if (CVarGetInteger("gHoliday.lilDavid.BombArrows.Active", 0) &&
-            i == ITEM_BOW && AMMO(ITEM_BOMB) != 0 && AMMO(ITEM_BOMB) < AMMO(ITEM_BOW)) {
+            gSaveContext.equips.buttonItems[button] == ITEM_BOW &&
+            AMMO(ITEM_BOMB) != 0 && AMMO(ITEM_BOMB) < AMMO(ITEM_BOW)) {
             ammo = AMMO(ITEM_BOMB);
         }
 
@@ -4738,7 +4739,8 @@ void Interface_DrawAmmoCount(PlayState* play, s16 button, s16 alpha) {
             if (ammo < 0) {
                 ammo = 0;
             }
-        } else if (CVarGetInteger("gHoliday.lilDavid.BombArrows.Active", 0)) {
+        } else if (gSaveContext.equips.buttonItems[button] == ITEM_BOW &&
+                   CVarGetInteger("gHoliday.lilDavid.BombArrows.Active", 0)) {
             if (AMMO(ITEM_BOMB) != 0 && ammo == MIN(CUR_CAPACITY(UPG_QUIVER), CUR_CAPACITY(UPG_BOMB_BAG))) {
                 gDPSetPrimColor(OVERLAY_DISP++, 0, 0, 120, 255, 0, alpha);
             }
