@@ -19,12 +19,12 @@ extern "C" {
 #define CVAR(v) "gHoliday." AUTHOR "." v
 
 static void OnConfigurationChanged() {
-    COND_ID_HOOK(OnActorInit, ACTOR_EN_ARROW, CVarGetInteger(CVAR("BombArrows"), 0), [](void* actorRef) {
-        EnArrow* arrow = (EnArrow*) actorRef;
-        if (arrow->actor.params != ARROW_NORMAL)
-            return;
+    if (!CVarGetInteger(CVAR("BombArrows.Enabled"), 0))
+        CVarSetInteger(CVAR("BombArrows.Active"), 0);
 
-        if (AMMO(ITEM_BOMB) == 0)
+    COND_ID_HOOK(OnActorInit, ACTOR_EN_ARROW, CVarGetInteger(CVAR("BombArrows.Enabled"), 0), [](void* actorRef) {
+        EnArrow* arrow = (EnArrow*) actorRef;
+        if (arrow->actor.params != ARROW_NORMAL || AMMO(ITEM_BOMB) == 0 || !CVarGetInteger(CVAR("BombArrows.Active"), 0))
             return;
 
         EnBom* bomb = (EnBom*) Actor_SpawnAsChild(&gPlayState->actorCtx, &arrow->actor, gPlayState, ACTOR_EN_BOM,
@@ -37,7 +37,7 @@ static void OnConfigurationChanged() {
         bomb->timer = 65;
     });
 
-    COND_ID_HOOK(OnActorUpdate, ACTOR_EN_ARROW, CVarGetInteger(CVAR("BombArrows"), 0), [](void* actorRef) {
+    COND_ID_HOOK(OnActorUpdate, ACTOR_EN_ARROW, CVarGetInteger(CVAR("BombArrows.Enabled"), 0), [](void* actorRef) {
         EnArrow* arrow = (EnArrow*) actorRef;
         if (!arrow->actor.child || arrow->actor.child->id != ACTOR_EN_BOM)
             return;
@@ -71,14 +71,14 @@ static void OnConfigurationChanged() {
         }
     });
 
-    COND_ID_HOOK(OnActorKill, ACTOR_EN_ARROW, CVarGetInteger(CVAR("BombArrows"), 0), [](void* actorRef) {
+    COND_ID_HOOK(OnActorKill, ACTOR_EN_ARROW, CVarGetInteger(CVAR("BombArrows.Enabled"), 0), [](void* actorRef) {
         EnArrow* arrow = (EnArrow*) actorRef;
         if (!arrow->actor.child || arrow->actor.child->id != ACTOR_EN_BOM)
             return;
         Actor_Kill(arrow->actor.child);
     });
 
-    COND_ID_HOOK(OnActorUpdate, ACTOR_EN_BOM, CVarGetInteger(CVAR("BombArrows"), 0), [](void* actorRef) {
+    COND_ID_HOOK(OnActorUpdate, ACTOR_EN_BOM, CVarGetInteger(CVAR("BombArrows.Enabled"), 0), [](void* actorRef) {
         EnBom* bomb = (EnBom*) actorRef;
         if (!bomb->actor.parent || bomb->actor.parent->id != ACTOR_EN_ARROW)
             return;
@@ -92,7 +92,7 @@ static void OnConfigurationChanged() {
 
 static void DrawMenu() {
     ImGui::SeparatorText(AUTHOR);
-    if (UIWidgets::EnhancementCheckbox("Bomb Arrows", CVAR("BombArrows"))) {
+    if (UIWidgets::EnhancementCheckbox("Bomb Arrows", CVAR("BombArrows.Enabled"))) {
         OnConfigurationChanged();
     }
 }

@@ -1136,6 +1136,24 @@ void KaleidoScope_UpdateItemEquip(PlayState* play) {
                 }
             }
             
+            if (CVarGetInteger("gHoliday.lilDavid.BombArrows.Enabled", 0)) {
+                if (pauseCtx->equipTargetItem == ITEM_BOW ||
+                    (pauseCtx->equipTargetItem >= ITEM_BOW_ARROW_FIRE && pauseCtx->equipTargetItem <= ITEM_BOW_ARROW_LIGHT))
+                {
+                    CVarSetInteger("gHoliday.lilDavid.BombArrows.Active", 0);
+                }
+                u8 slot_item = gSaveContext.equips.buttonItems[pauseCtx->equipTargetCBtn + 1];
+                if (!CVarGetInteger("gHoliday.lilDavid.BombArrows.Active", 0) &&
+                    pauseCtx->equipTargetItem == ITEM_BOMB &&
+                    slot_item == ITEM_BOW || (slot_item >= ITEM_BOW_ARROW_FIRE && slot_item <= ITEM_BOW_ARROW_LIGHT))
+                {
+                    CVarSetInteger("gHoliday.lilDavid.BombArrows.Active", 1);
+                    pauseCtx->equipTargetItem = ITEM_BOW;
+                    pauseCtx->equipTargetSlot = SLOT_BOW;
+                    Audio_PlaySoundGeneral(NA_SE_SY_SET_FIRE_ARROW, &gSfxDefaultPos, 4, &gSfxDefaultFreqAndVolScale, &gSfxDefaultFreqAndVolScale, &gSfxDefaultReverb);
+                }
+            }
+
             // If the item is on another button already, swap the two
             uint16_t targetButtonIndex = pauseCtx->equipTargetCBtn + 1;
             for (uint16_t otherSlotIndex = 0; otherSlotIndex < ARRAY_COUNT(gSaveContext.equips.cButtonSlots);
