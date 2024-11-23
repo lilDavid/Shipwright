@@ -1,7 +1,6 @@
 #include "arrow_switching.h"
 
-#include <macros.h>
-#include <variables.h>
+#include <global.h>
 
 
 s32 func_808351D4(Player* this, PlayState* play); // Arrow nocked
