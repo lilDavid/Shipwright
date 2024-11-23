@@ -4,6 +4,7 @@
 #include "textures/parameter_static/parameter_static.h"
 #include "textures/map_i_static/map_i_static.h"
 #include "textures/map_grand_static/map_grand_static.h"
+#include "soh/Enhancements/arrow-switching/arrow_switching.h"
 #include <assert.h>
 
 MapData* gMapData;
@@ -964,7 +965,7 @@ void Minimap_Draw(PlayState* play) {
                 }
 
 				u16 minimapButton = BTN_L;
-                if (Player_CanSwitchArrows(GET_PLAYER(play))) {
+                if (ArrowSwitching_CanSwitch(GET_PLAYER(play))) {
                     minimapButton &= ~CVarGetInteger("gArrowSwitchBtnMap", BTN_R);
                 }
                 if (minimapButton && CHECK_BTN_ALL(play->state.input[0].press.button, minimapButton) && !Play_InCsMode(play) && enableMapToggle) {
