@@ -488,6 +488,7 @@ typedef enum {
 extern "C" {
 #endif
 uint8_t GameInteractor_NoUIActive();
+void GameInteractor_SetNoUIActive(uint8_t state);
 GILinkSize GameInteractor_GetLinkSize();
 void GameInteractor_SetLinkSize(GILinkSize size);
 uint8_t GameInteractor_InvisibleLinkActive();
@@ -572,6 +573,33 @@ struct HookInfo {
             body;                                                                           \
             va_end(args);                                                                   \
         })
+#define COND_HOOK(hookType, condition, body)                                                     \
+    {                                                                                            \
+        static HOOK_ID hookId = 0;                                                               \
+        GameInteractor::Instance->UnregisterGameHook<GameInteractor::hookType>(hookId);          \
+        hookId = 0;                                                                              \
+        if (condition) {                                                                         \
+            hookId = GameInteractor::Instance->RegisterGameHook<GameInteractor::hookType>(body); \
+        }                                                                                        \
+    }
+#define COND_ID_HOOK(hookType, id, condition, body)                                                       \
+    {                                                                                                     \
+        static HOOK_ID hookId = 0;                                                                        \
+        GameInteractor::Instance->UnregisterGameHookForID<GameInteractor::hookType>(hookId);              \
+        hookId = 0;                                                                                       \
+        if (condition) {                                                                                  \
+            hookId = GameInteractor::Instance->RegisterGameHookForID<GameInteractor::hookType>(id, body); \
+        }                                                                                                 \
+    }
+#define COND_VB_SHOULD(id, condition, body)                                                               \
+    {                                                                                                     \
+        static HOOK_ID hookId = 0;                                                                        \
+        GameInteractor::Instance->UnregisterGameHookForID<GameInteractor::OnVanillaBehavior>(hookId); \
+        hookId = 0;                                                                                       \
+        if (condition) {                                                                                  \
+            hookId = REGISTER_VB_SHOULD(id, body);                                                        \
+        }                                                                                                 \
+    }
 
 class GameInteractor {
 public:
