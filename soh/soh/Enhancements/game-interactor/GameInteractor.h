@@ -483,6 +483,35 @@ typedef enum {
     // Opt: *Actor
     VB_BOTTLE_ACTOR,
 
+    /*** Extra Underwater Actions ***/
+    /* Vanilla condition:
+    ```
+    CHECK_BTN_ALL(sControlInput->press.button, BTN_A) &&
+    !(this->stateFlags1 & PLAYER_STATE1_CARRYING_ACTOR) &&
+    !(this->stateFlags2 & PLAYER_STATE2_UNDERWATER)
+    ```
+    */
+    VB_PLAYER_OPEN_CHEST_OR_LIFT_OBJECT,
+    /* Vanilla condition:
+    ```
+    (!(this->stateFlags1 & PLAYER_STATE1_CARRYING_ACTOR) || (heldActor == NULL)) &&
+    (interactRangeActor != NULL) &&
+    (
+        (!sp1C && (this->getItemId == GI_NONE)) ||
+        (this->getItemId < 0 && !(this->stateFlags1 & PLAYER_STATE1_IN_WATER))
+    )
+    ```
+    */
+    VB_PLAYER_SHOW_OPEN_GRAB_OR_DROP_DO_ACTION,
+    // Vanilla condition: (itemAction == PLAYER_IA_HOOKSHOT) || (itemAction == PLAYER_IA_LONGSHOT)
+    // Opt: s32 (itemAction)
+    VB_PLAYER_BE_ABLE_TO_USE_ITEM_UNDERWATER,
+    // Vanilla condition: true
+    VB_DISABLE_B_BUTTON_UNDERWATER,
+    // Vanilla condition: (gSaveContext.equips.buttonItems[i] != ITEM_HOOKSHOT) && (gSaveContext.equips.buttonItems[i] != ITEM_LONGSHOT)
+    // Opt: s16 (button index)
+    VB_DISABLE_C_BUTTON_UNDERWATER,
+
     /*** Catch Poes With a Bottle ***/
     // Vanilla condition: true
     // Opt: *EnPoh

@@ -18,6 +18,7 @@ extern "C" {
     void func_809B45E0(EnArrow*, PlayState*);
     void func_809B4640(EnArrow*, PlayState*);
     void func_80ADFE80(EnPoh*, PlayState*);
+    int func_808332B8(Player*);
 }
 
 #define AUTHOR "lilDavid"
@@ -123,6 +124,55 @@ static void OnConfigurationChanged() {
     });
 
 
+    // Extra Underwater Actions
+
+    COND_VB_SHOULD(VB_PLAYER_OPEN_CHEST_OR_LIFT_OBJECT, CVarGetInteger(CVAR("EnhancedIronBoots"), 0), {
+        Player* player = GET_PLAYER(gPlayState);
+        Input* sControlInput = &gPlayState->state.input[0];
+
+        if (CHECK_BTN_ALL(sControlInput->press.button, BTN_A) &&
+            !(player->stateFlags1 & PLAYER_STATE1_CARRYING_ACTOR) &&
+            player->stateFlags2 & PLAYER_STATE2_UNDERWATER &&
+            player->getItemId != GI_NONE)
+        {
+            *should = true;
+        }
+    })
+
+    COND_VB_SHOULD(VB_PLAYER_SHOW_OPEN_GRAB_OR_DROP_DO_ACTION, CVarGetInteger(CVAR("EnhancedIronBoots"), 0), {
+        Player* player = GET_PLAYER(gPlayState);
+        int inWaterWithoutBoots = func_808332B8(player);
+
+        if (
+            (!(player->stateFlags1 & PLAYER_STATE1_CARRYING_ACTOR) || (player->heldActor == NULL)) &&
+            (player->interactRangeActor != NULL) &&
+            (player->getItemId < 0 && !inWaterWithoutBoots)
+        ) {
+            *should = true;
+        }
+    })
+
+    COND_VB_SHOULD(VB_PLAYER_BE_ABLE_TO_USE_ITEM_UNDERWATER, CVarGetInteger(CVAR("EnhancedIronBoots"), 0), {
+        s8 itemAction = va_arg(args, s8);
+
+        if (Player_ActionToMeleeWeapon(itemAction) != 0 || itemAction == PLAYER_IA_BOMBCHU)
+            *should = true;
+    });
+
+    COND_VB_SHOULD(VB_DISABLE_B_BUTTON_UNDERWATER, CVarGetInteger(CVAR("EnhancedIronBoots"), 0), {
+        if (Player_GetEnvironmentalHazard(gPlayState) != 2)
+            return;
+
+        *should = false;
+    });
+
+    COND_VB_SHOULD(VB_DISABLE_C_BUTTON_UNDERWATER, CVarGetInteger(CVAR("EnhancedIronBoots"), 0), {
+        s16 index = va_arg(args, s16);
+
+        if (gSaveContext.equips.buttonItems[index] == ITEM_BOMBCHU)
+            *should = false;
+    });
+
     // Catch Poes with a Bottle
 
     COND_VB_SHOULD(VB_BOTTLE_ACTOR, CVarGetInteger(CVAR("MMPoeBottling"), 0), {
@@ -188,6 +238,11 @@ static void DrawMenu() {
         OnConfigurationChanged();
     }
     UIWidgets::Tooltip("Catch Poes by swinging an empty bottle at them instead of from a text box like you can in Majora's Mask.");
+
+    if (UIWidgets::PaddedEnhancementCheckbox("Extra Underwater Actions", CVAR("EnhancedIronBoots"))) {
+        OnConfigurationChanged();
+    }
+    UIWidgets::Tooltip("Allows opening chests and using your sword and Bombchus when underwater with Iron Boots");
 
     UIWidgets::EnhancementCheckbox("Visual Small Key Display", CVAR("VisualSmallKeys.Enabled"));
     UIWidgets::Tooltip("Displays Small Key count using multiple icons rather than a numeric counter");

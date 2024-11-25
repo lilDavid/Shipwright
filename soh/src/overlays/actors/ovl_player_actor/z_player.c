@@ -3432,7 +3432,11 @@ void Player_UseItem(PlayState* play, Player* this, s32 item) {
 
         if ((itemAction == PLAYER_IA_NONE) || !(this->stateFlags1 & PLAYER_STATE1_IN_WATER) ||
             ((this->actor.bgCheckFlags & 1) &&
-             ((itemAction == PLAYER_IA_HOOKSHOT) || (itemAction == PLAYER_IA_LONGSHOT)))) {
+             GameInteractor_Should(
+                VB_PLAYER_BE_ABLE_TO_USE_ITEM_UNDERWATER,
+                (itemAction == PLAYER_IA_HOOKSHOT) || (itemAction == PLAYER_IA_LONGSHOT),
+                itemAction
+            ))) {
 
             if ((play->bombchuBowlingStatus == 0) &&
                 (((itemAction == PLAYER_IA_DEKU_STICK) && (AMMO(ITEM_STICK) == 0)) ||
@@ -7337,8 +7341,16 @@ s32 Player_ActionHandler_2(Player* this, PlayState* play) {
                 this->getItemId = GI_NONE;
                 this->getItemEntry = (GetItemEntry)GET_ITEM_NONE;
             }
-        } else if (CHECK_BTN_ALL(sControlInput->press.button, BTN_A) && !(this->stateFlags1 & PLAYER_STATE1_CARRYING_ACTOR) &&
-                   !(this->stateFlags2 & PLAYER_STATE2_UNDERWATER)) {
+        } else if (
+            GameInteractor_Should(
+                VB_PLAYER_OPEN_CHEST_OR_LIFT_OBJECT,
+                (
+                    CHECK_BTN_ALL(sControlInput->press.button, BTN_A) &&
+                    !(this->stateFlags1 & PLAYER_STATE1_CARRYING_ACTOR) &&
+                    !(this->stateFlags2 & PLAYER_STATE2_UNDERWATER)
+                )
+            )
+        ) {
             if (this->getItemId != GI_NONE) {
                 GetItemEntry giEntry;
                 if (this->getItemEntry.objectId == OBJECT_INVALID) {
@@ -10975,10 +10987,19 @@ void Player_UpdateInterface(PlayState* play, Player* this) {
                     (!(this->stateFlags1 & PLAYER_STATE1_CARRYING_ACTOR) ||
                      ((heldActor != NULL) && (heldActor->id == ACTOR_EN_RU1)))) {
                     doAction = DO_ACTION_OPEN;
-                } else if ((!(this->stateFlags1 & PLAYER_STATE1_CARRYING_ACTOR) || (heldActor == NULL)) &&
-                           (interactRangeActor != NULL) &&
-                           ((!sp1C && (this->getItemId == GI_NONE)) ||
-                            (this->getItemId < 0 && !(this->stateFlags1 & PLAYER_STATE1_IN_WATER)))) {
+                } else if (
+                    GameInteractor_Should(
+                        VB_PLAYER_SHOW_OPEN_GRAB_OR_DROP_DO_ACTION,
+                        (
+                            (!(this->stateFlags1 & PLAYER_STATE1_CARRYING_ACTOR) || (heldActor == NULL)) &&
+                            (interactRangeActor != NULL) &&
+                            (
+                                (!sp1C && (this->getItemId == GI_NONE)) ||
+                                (this->getItemId < 0 && !(this->stateFlags1 & PLAYER_STATE1_IN_WATER))
+                            )
+                        )
+                    )
+                ) {
                     if (this->getItemId < 0) {
                         doAction = DO_ACTION_OPEN;
                     } else if ((interactRangeActor->id == ACTOR_BG_TOKI_SWD) && LINK_IS_ADULT) {
