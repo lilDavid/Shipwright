@@ -79,6 +79,15 @@ void GameInteractor_ExecuteOnActorInit(void* actor) {
     GameInteractor::Instance->ExecuteHooksForFilter<GameInteractor::OnActorInit>(actor);
 }
 
+bool GameInteractor_ShouldActorInit(void* actor) {
+    bool result = true;
+    GameInteractor::Instance->ExecuteHooks<GameInteractor::ShouldActorInit>(actor, &result);
+    GameInteractor::Instance->ExecuteHooksForID<GameInteractor::ShouldActorInit>(((Actor*)actor)->id, actor, &result);
+    GameInteractor::Instance->ExecuteHooksForPtr<GameInteractor::ShouldActorInit>((uintptr_t)actor, actor, &result);
+    GameInteractor::Instance->ExecuteHooksForFilter<GameInteractor::ShouldActorInit>(actor, &result);
+    return result;
+}
+
 void GameInteractor_ExecuteOnActorUpdate(void* actor) {
     GameInteractor::Instance->ExecuteHooks<GameInteractor::OnActorUpdate>(actor);
     GameInteractor::Instance->ExecuteHooksForID<GameInteractor::OnActorUpdate>(((Actor*)actor)->id, actor);
@@ -131,6 +140,12 @@ void GameInteractor_ExecuteOnPlayDrawEnd() {
     GameInteractor::Instance->ExecuteHooks<GameInteractor::OnPlayDrawEnd>();
 }
 
+void GameInteractor_ExecuteOnOpenText(u16* textId, bool* loadFromMessageTable) {
+    GameInteractor::Instance->ExecuteHooks<GameInteractor::OnOpenText>(textId, loadFromMessageTable);
+    GameInteractor::Instance->ExecuteHooksForID<GameInteractor::OnOpenText>(*textId, textId, loadFromMessageTable);
+    GameInteractor::Instance->ExecuteHooksForFilter<GameInteractor::OnOpenText>(textId, loadFromMessageTable);
+}
+
 bool GameInteractor_Should(GIVanillaBehavior flag, u32 result, ...) {
     // Only the external function can use the Variadic Function syntax
     // To pass the va args to the next caller must be done using va_list and reading the args into it
@@ -160,6 +175,10 @@ void GameInteractor_ExecuteOnSaveFile(int32_t fileNum) {
 
 void GameInteractor_ExecuteOnLoadFile(int32_t fileNum) {
     GameInteractor::Instance->ExecuteHooks<GameInteractor::OnLoadFile>(fileNum);
+}
+
+void GameInteractor_ExecuteOnCopyFile(int32_t sourceFileNum, int32_t destFileNum) {
+    GameInteractor::Instance->ExecuteHooks<GameInteractor::OnCopyFile>(sourceFileNum, destFileNum);
 }
 
 void GameInteractor_ExecuteOnDeleteFile(int32_t fileNum) {

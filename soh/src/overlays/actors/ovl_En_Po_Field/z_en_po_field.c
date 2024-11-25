@@ -669,12 +669,14 @@ void func_80AD58D4(EnPoField* this, PlayState* play) {
         EnPoField_SetupSoulDisappear(this);
         return;
     }
-    if (this->collider.base.ocFlags1 & OC1_HIT) {
-        this->actor.flags |= ACTOR_FLAG_WILL_TALK;
-        func_8002F2F4(&this->actor, play);
-    } else {
-        this->actor.flags &= ~ACTOR_FLAG_WILL_TALK;
-        CollisionCheck_SetOC(play, &play->colChkCtx, &this->collider.base);
+    if (GameInteractor_Should(VB_FIELD_POE_SOUL_TALK_TO_PLAYER, true, this)) {
+        if (this->collider.base.ocFlags1 & OC1_HIT) {
+            this->actor.flags |= ACTOR_FLAG_WILL_TALK;
+            func_8002F2F4(&this->actor, play);
+        } else {
+            this->actor.flags &= ~ACTOR_FLAG_WILL_TALK;
+            CollisionCheck_SetOC(play, &play->colChkCtx, &this->collider.base);
+        }
     }
     this->actor.world.pos.y = Math_SinS(this->unk_194 * 0x800) * 5.0f + this->actor.home.pos.y;
     if (this->unk_194 != 0) {

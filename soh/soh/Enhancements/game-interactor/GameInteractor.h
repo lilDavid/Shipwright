@@ -482,12 +482,50 @@ typedef enum {
     // Vanilla condition: Actor is ACTOR_EN_ELF, ACTOR_EN_FISH, ACTOR_EN_ICE_HONO, or ACTOR_EN_INSECT
     // Opt: *Actor
     VB_BOTTLE_ACTOR,
+
+    /*** Extra Underwater Actions ***/
+    /* Vanilla condition:
+    ```
+    CHECK_BTN_ALL(sControlInput->press.button, BTN_A) &&
+    !(this->stateFlags1 & PLAYER_STATE1_CARRYING_ACTOR) &&
+    !(this->stateFlags2 & PLAYER_STATE2_UNDERWATER)
+    ```
+    */
+    VB_PLAYER_OPEN_CHEST_OR_LIFT_OBJECT,
+    /* Vanilla condition:
+    ```
+    (!(this->stateFlags1 & PLAYER_STATE1_CARRYING_ACTOR) || (heldActor == NULL)) &&
+    (interactRangeActor != NULL) &&
+    (
+        (!sp1C && (this->getItemId == GI_NONE)) ||
+        (this->getItemId < 0 && !(this->stateFlags1 & PLAYER_STATE1_IN_WATER))
+    )
+    ```
+    */
+    VB_PLAYER_SHOW_OPEN_GRAB_OR_DROP_DO_ACTION,
+    // Vanilla condition: (itemAction == PLAYER_IA_HOOKSHOT) || (itemAction == PLAYER_IA_LONGSHOT)
+    // Opt: s32 (itemAction)
+    VB_PLAYER_BE_ABLE_TO_USE_ITEM_UNDERWATER,
+    // Vanilla condition: true
+    VB_DISABLE_B_BUTTON_UNDERWATER,
+    // Vanilla condition: (gSaveContext.equips.buttonItems[i] != ITEM_HOOKSHOT) && (gSaveContext.equips.buttonItems[i] != ITEM_LONGSHOT)
+    // Opt: s16 (button index)
+    VB_DISABLE_C_BUTTON_UNDERWATER,
+
+    /*** Catch Poes With a Bottle ***/
+    // Vanilla condition: true
+    // Opt: *EnPoh
+    VB_POE_SOUL_TALK_TO_PLAYER,
+    // Vanilla condition: true
+    // Opt: *EnPoField
+    VB_FIELD_POE_SOUL_TALK_TO_PLAYER,
 } GIVanillaBehavior;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 uint8_t GameInteractor_NoUIActive();
+void GameInteractor_SetNoUIActive(uint8_t state);
 GILinkSize GameInteractor_GetLinkSize();
 void GameInteractor_SetLinkSize(GILinkSize size);
 uint8_t GameInteractor_InvisibleLinkActive();
@@ -572,6 +610,33 @@ struct HookInfo {
             body;                                                                           \
             va_end(args);                                                                   \
         })
+#define COND_HOOK(hookType, condition, body)                                                     \
+    {                                                                                            \
+        static HOOK_ID hookId = 0;                                                               \
+        GameInteractor::Instance->UnregisterGameHook<GameInteractor::hookType>(hookId);          \
+        hookId = 0;                                                                              \
+        if (condition) {                                                                         \
+            hookId = GameInteractor::Instance->RegisterGameHook<GameInteractor::hookType>(body); \
+        }                                                                                        \
+    }
+#define COND_ID_HOOK(hookType, id, condition, body)                                                       \
+    {                                                                                                     \
+        static HOOK_ID hookId = 0;                                                                        \
+        GameInteractor::Instance->UnregisterGameHookForID<GameInteractor::hookType>(hookId);              \
+        hookId = 0;                                                                                       \
+        if (condition) {                                                                                  \
+            hookId = GameInteractor::Instance->RegisterGameHookForID<GameInteractor::hookType>(id, body); \
+        }                                                                                                 \
+    }
+#define COND_VB_SHOULD(id, condition, body)                                                               \
+    {                                                                                                     \
+        static HOOK_ID hookId = 0;                                                                        \
+        GameInteractor::Instance->UnregisterGameHookForID<GameInteractor::OnVanillaBehavior>(hookId); \
+        hookId = 0;                                                                                       \
+        if (condition) {                                                                                  \
+            hookId = REGISTER_VB_SHOULD(id, body);                                                        \
+        }                                                                                                 \
+    }
 
 class GameInteractor {
 public:

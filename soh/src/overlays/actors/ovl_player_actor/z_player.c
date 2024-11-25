@@ -3432,7 +3432,11 @@ void Player_UseItem(PlayState* play, Player* this, s32 item) {
 
         if ((itemAction == PLAYER_IA_NONE) || !(this->stateFlags1 & PLAYER_STATE1_IN_WATER) ||
             ((this->actor.bgCheckFlags & 1) &&
-             ((itemAction == PLAYER_IA_HOOKSHOT) || (itemAction == PLAYER_IA_LONGSHOT)))) {
+             GameInteractor_Should(
+                VB_PLAYER_BE_ABLE_TO_USE_ITEM_UNDERWATER,
+                (itemAction == PLAYER_IA_HOOKSHOT) || (itemAction == PLAYER_IA_LONGSHOT),
+                itemAction
+            ))) {
 
             if ((play->bombchuBowlingStatus == 0) &&
                 (((itemAction == PLAYER_IA_DEKU_STICK) && (AMMO(ITEM_STICK) == 0)) ||
@@ -7337,8 +7341,16 @@ s32 Player_ActionHandler_2(Player* this, PlayState* play) {
                 this->getItemId = GI_NONE;
                 this->getItemEntry = (GetItemEntry)GET_ITEM_NONE;
             }
-        } else if (CHECK_BTN_ALL(sControlInput->press.button, BTN_A) && !(this->stateFlags1 & PLAYER_STATE1_CARRYING_ACTOR) &&
-                   !(this->stateFlags2 & PLAYER_STATE2_UNDERWATER)) {
+        } else if (
+            GameInteractor_Should(
+                VB_PLAYER_OPEN_CHEST_OR_LIFT_OBJECT,
+                (
+                    CHECK_BTN_ALL(sControlInput->press.button, BTN_A) &&
+                    !(this->stateFlags1 & PLAYER_STATE1_CARRYING_ACTOR) &&
+                    !(this->stateFlags2 & PLAYER_STATE2_UNDERWATER)
+                )
+            )
+        ) {
             if (this->getItemId != GI_NONE) {
                 GetItemEntry giEntry;
                 if (this->getItemEntry.objectId == OBJECT_INVALID) {
@@ -10975,10 +10987,19 @@ void Player_UpdateInterface(PlayState* play, Player* this) {
                     (!(this->stateFlags1 & PLAYER_STATE1_CARRYING_ACTOR) ||
                      ((heldActor != NULL) && (heldActor->id == ACTOR_EN_RU1)))) {
                     doAction = DO_ACTION_OPEN;
-                } else if ((!(this->stateFlags1 & PLAYER_STATE1_CARRYING_ACTOR) || (heldActor == NULL)) &&
-                           (interactRangeActor != NULL) &&
-                           ((!sp1C && (this->getItemId == GI_NONE)) ||
-                            (this->getItemId < 0 && !(this->stateFlags1 & PLAYER_STATE1_IN_WATER)))) {
+                } else if (
+                    GameInteractor_Should(
+                        VB_PLAYER_SHOW_OPEN_GRAB_OR_DROP_DO_ACTION,
+                        (
+                            (!(this->stateFlags1 & PLAYER_STATE1_CARRYING_ACTOR) || (heldActor == NULL)) &&
+                            (interactRangeActor != NULL) &&
+                            (
+                                (!sp1C && (this->getItemId == GI_NONE)) ||
+                                (this->getItemId < 0 && !(this->stateFlags1 & PLAYER_STATE1_IN_WATER))
+                            )
+                        )
+                    )
+                ) {
                     if (this->getItemId < 0) {
                         doAction = DO_ACTION_OPEN;
                     } else if ((interactRangeActor->id == ACTOR_BG_TOKI_SWD) && LINK_IS_ADULT) {
@@ -14662,6 +14683,8 @@ static BottleCatchInfo sBottleCatchInfo[] = {
     { ACTOR_EN_FISH, ITEM_FISH, PLAYER_IA_BOTTLE_FISH, 0x47 },          // BOTTLE_CATCH_FISH
     { ACTOR_EN_ICE_HONO, ITEM_BLUE_FIRE, PLAYER_IA_BOTTLE_FIRE, 0x5D }, // BOTTLE_CATCH_BLUE_FIRE
     { ACTOR_EN_INSECT, ITEM_BUG, PLAYER_IA_BOTTLE_BUG, 0x7A },          // BOTTLE_CATCH_BUGS
+    { ACTOR_EN_POH, ITEM_POE, PLAYER_IA_BOTTLE_POE, 0x97 },
+    { ACTOR_EN_PO_FIELD, ITEM_BIG_POE, PLAYER_IA_BOTTLE_BIG_POE, 0xF9 },
 };
 
 void Player_Action_SwingBottle(Player* this, PlayState* play) {
@@ -14712,7 +14735,13 @@ void Player_Action_SwingBottle(Player* this, PlayState* play) {
                     }
                 }
 
-                if (GameInteractor_Should(VB_BOTTLE_ACTOR, i < ARRAY_COUNT(sBottleCatchInfo), this->interactRangeActor)) {
+                // If the catch is a small field Poe (as opposed to a Big Poe), catch a graveyard Poe instead
+                if (catchInfo->actorId == ACTOR_EN_PO_FIELD && this->interactRangeActor->params == 0) {
+                    i--;
+                    catchInfo--;
+                }
+
+                if (GameInteractor_Should(VB_BOTTLE_ACTOR, i + 1 <= BOTTLE_CATCH_BUGS, this->interactRangeActor)) {
                     // 1 is added because `sBottleCatchInfo` does not have an entry for `BOTTLE_CATCH_NONE`
                     this->av1.bottleCatchType = i + 1;
 

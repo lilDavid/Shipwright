@@ -1,0 +1,263 @@
+#include "Mods.hpp"
+
+#include "utils/StringHelper.h"
+
+extern "C" {
+#include "macros.h"
+#include "functions.h"
+#include "variables.h"
+extern PlayState* gPlayState;
+}
+
+#include "src/overlays/actors/ovl_En_Arrow/z_en_arrow.h"
+#include "src/overlays/actors/ovl_En_Bom/z_en_bom.h"
+#include "src/overlays/actors/ovl_En_Poh/z_en_poh.h"
+#include "src/overlays/actors/ovl_En_Po_Field/z_en_po_field.h"
+
+extern "C" {
+    void func_809B45E0(EnArrow*, PlayState*);
+    void func_809B4640(EnArrow*, PlayState*);
+    void func_80ADFE80(EnPoh*, PlayState*);
+    int func_808332B8(Player*);
+}
+
+#define AUTHOR "lilDavid"
+#define CVAR(v) "gMods." AUTHOR "." v
+
+static void OnConfigurationChanged() {
+    // Bomb Arrows
+
+    if (!CVarGetInteger(CVAR("BombArrows.Enabled"), 0))
+        CVarSetInteger(CVAR("BombArrows.Active"), 0);
+
+    COND_HOOK(OnSaveFile, CVarGetInteger(CVAR("BombArrows.Enabled"), 0), [](int32_t file) {
+        std::string cvar = StringHelper::Sprintf("%s%d", CVAR("BombArrows.Save"), file);
+        CVarSetInteger(cvar.c_str(), CVarGetInteger(CVAR("BombArrows.Active"), 0));
+        Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesOnNextTick();
+    });
+
+    COND_HOOK(OnLoadFile, CVarGetInteger(CVAR("BombArrows.Enabled"), 0), [](int32_t file) {
+        std::string cvar = StringHelper::Sprintf("%s%d", CVAR("BombArrows.Save"), file);
+        CVarSetInteger(CVAR("BombArrows.Active"), CVarGetInteger(cvar.c_str(), 0));
+    });
+
+    COND_HOOK(OnCopyFile, CVarGetInteger(CVAR("BombArrows.Enabled"), 0), [](int32_t from, int32_t to) {
+        std::string cvarFrom = StringHelper::Sprintf("%s%d", CVAR("BombArrows.Save"), from);
+        std::string cvarTo = StringHelper::Sprintf("%s%d", CVAR("BombArrows.Save"), to);
+        CVarSetInteger(cvarTo.c_str(), CVarGetInteger(cvarFrom.c_str(), 0));
+        Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesOnNextTick();
+    });
+
+    COND_HOOK(OnDeleteFile, CVarGetInteger(CVAR("BombArrows.Enabled"), 0), [](int32_t file) {
+        std::string cvar = StringHelper::Sprintf("%s%d", CVAR("BombArrows.Save"), file);
+        CVarSetInteger(cvar.c_str(), 0);
+        Ship::Context::GetInstance()->GetWindow()->GetGui()->SaveConsoleVariablesOnNextTick();
+    });
+
+    COND_ID_HOOK(OnActorInit, ACTOR_EN_ARROW, CVarGetInteger(CVAR("BombArrows.Enabled"), 0), [](void* actorRef) {
+        EnArrow* arrow = (EnArrow*) actorRef;
+        if (!CVarGetInteger(CVAR("BombArrows.Active"), 0) ||
+            arrow->actor.params != ARROW_NORMAL || AMMO(ITEM_BOMB) == 0 ||
+            gSaveContext.minigameState == 1 || gPlayState->shootingGalleryStatus > 1)
+            return;
+
+        EnBom* bomb = (EnBom*) Actor_SpawnAsChild(&gPlayState->actorCtx, &arrow->actor, gPlayState, ACTOR_EN_BOM,
+                arrow->actor.world.pos.x, arrow->actor.world.pos.y, arrow->actor.world.pos.z,
+                0, 0, 0, BOMB_BODY);
+        if (bomb == nullptr)
+            return;
+
+        Actor_SetScale(&bomb->actor, 0.003f);
+        bomb->timer = 65;
+    });
+
+    COND_ID_HOOK(OnActorUpdate, ACTOR_EN_ARROW, CVarGetInteger(CVAR("BombArrows.Enabled"), 0), [](void* actorRef) {
+        EnArrow* arrow = (EnArrow*) actorRef;
+        if (!arrow->actor.child || arrow->actor.child->id != ACTOR_EN_BOM)
+            return;
+
+        EnBom* bomb = (EnBom*) arrow->actor.child;
+        bomb->actor.world.pos = arrow->actor.world.pos;
+        f32 r = 8.0f;
+        f32 xrot = arrow->actor.world.rot.x;
+        f32 yrot = arrow->actor.world.rot.y;
+        bomb->actor.world.pos.x += r * Math_CosS(xrot) * Math_SinS(yrot);
+        bomb->actor.world.pos.y -= r * Math_SinS(xrot) + 2.0f;
+        bomb->actor.world.pos.z += r * Math_CosS(xrot) * Math_CosS(yrot);
+
+        if (arrow->actor.parent == nullptr) {
+            if (bomb->timer > 60) {
+                Inventory_ChangeAmmo(ITEM_BOMB, -1);
+            }
+            bomb->timer = 52;
+        } else {
+            bomb->timer = 62;
+        }
+
+        if (arrow->actionFunc == func_809B45E0 ||
+            arrow->actionFunc == func_809B4640 ||
+            arrow->actor.params == ARROW_NORMAL_LIT)
+        {
+            arrow->actor.child = nullptr;
+            bomb->actor.parent = nullptr;
+            bomb->timer = 2;
+            Actor_Kill(&arrow->actor);
+        }
+    });
+
+    COND_ID_HOOK(OnActorKill, ACTOR_EN_ARROW, CVarGetInteger(CVAR("BombArrows.Enabled"), 0), [](void* actorRef) {
+        EnArrow* arrow = (EnArrow*) actorRef;
+        if (!arrow->actor.child || arrow->actor.child->id != ACTOR_EN_BOM)
+            return;
+        Actor_Kill(arrow->actor.child);
+    });
+
+    COND_ID_HOOK(OnActorUpdate, ACTOR_EN_BOM, CVarGetInteger(CVAR("BombArrows.Enabled"), 0), [](void* actorRef) {
+        EnBom* bomb = (EnBom*) actorRef;
+        if (!bomb->actor.parent || bomb->actor.parent->id != ACTOR_EN_ARROW)
+            return;
+
+        if (bomb->timer > 55 && bomb->timer < 60)
+            bomb->timer += 4;
+        if (bomb->timer > 45 && bomb->timer < 50)
+            bomb->timer += 4;
+    });
+
+
+    // Extra Underwater Actions
+
+    COND_VB_SHOULD(VB_PLAYER_OPEN_CHEST_OR_LIFT_OBJECT, CVarGetInteger(CVAR("EnhancedIronBoots"), 0), {
+        Player* player = GET_PLAYER(gPlayState);
+        Input* sControlInput = &gPlayState->state.input[0];
+
+        if (CHECK_BTN_ALL(sControlInput->press.button, BTN_A) &&
+            !(player->stateFlags1 & PLAYER_STATE1_CARRYING_ACTOR) &&
+            player->stateFlags2 & PLAYER_STATE2_UNDERWATER &&
+            player->getItemId != GI_NONE)
+        {
+            *should = true;
+        }
+    })
+
+    COND_VB_SHOULD(VB_PLAYER_SHOW_OPEN_GRAB_OR_DROP_DO_ACTION, CVarGetInteger(CVAR("EnhancedIronBoots"), 0), {
+        Player* player = GET_PLAYER(gPlayState);
+        int inWaterWithoutBoots = func_808332B8(player);
+
+        if (
+            (!(player->stateFlags1 & PLAYER_STATE1_CARRYING_ACTOR) || (player->heldActor == NULL)) &&
+            (player->interactRangeActor != NULL) &&
+            (player->getItemId < 0 && !inWaterWithoutBoots)
+        ) {
+            *should = true;
+        }
+    })
+
+    COND_VB_SHOULD(VB_PLAYER_BE_ABLE_TO_USE_ITEM_UNDERWATER, CVarGetInteger(CVAR("EnhancedIronBoots"), 0), {
+        s8 itemAction = va_arg(args, s8);
+
+        if (Player_ActionToMeleeWeapon(itemAction) != 0 || itemAction == PLAYER_IA_BOMBCHU)
+            *should = true;
+    });
+
+    COND_VB_SHOULD(VB_DISABLE_B_BUTTON_UNDERWATER, CVarGetInteger(CVAR("EnhancedIronBoots"), 0), {
+        if (Player_GetEnvironmentalHazard(gPlayState) != 2)
+            return;
+
+        *should = false;
+    });
+
+    COND_VB_SHOULD(VB_DISABLE_C_BUTTON_UNDERWATER, CVarGetInteger(CVAR("EnhancedIronBoots"), 0), {
+        s16 index = va_arg(args, s16);
+
+        if (gSaveContext.equips.buttonItems[index] == ITEM_BOMBCHU)
+            *should = false;
+    });
+
+    // Catch Poes with a Bottle
+
+    COND_VB_SHOULD(VB_BOTTLE_ACTOR, CVarGetInteger(CVAR("MMPoeBottling"), 0), {
+        Actor* interactRangeActor = va_arg(args, Actor*);
+
+        if (interactRangeActor->id == ACTOR_EN_PO_FIELD) {
+            *should = true;
+            return;
+        }
+
+        if (interactRangeActor->id != ACTOR_EN_POH)
+            return;
+
+        // Don't catch Sharp or Flat
+        // I think they talk to you before you can get in catching range, but might as well prevent it outright
+        if (interactRangeActor->params >= EN_POH_SHARP) {
+            *should = false;
+            return;
+        }
+
+        *should = true;
+    });
+
+    COND_VB_SHOULD(VB_POE_SOUL_TALK_TO_PLAYER, CVarGetInteger(CVAR("MMPoeBottling"), 0), {
+        EnPoh* poe = va_arg(args, EnPoh*);
+
+        if (poe->actor.params >= EN_POH_SHARP)
+            return;
+
+        *should = false;
+
+        if (Actor_HasParent(&poe->actor, gPlayState)) {
+            Actor_Kill(&poe->actor);
+        } else {
+            // GI_MAX in this case allows the player to catch the actor in a bottle
+            Actor_OfferGetItem(&poe->actor, gPlayState, GI_MAX, 35.0f, 60.0f);
+        }
+    });
+
+    COND_VB_SHOULD(VB_FIELD_POE_SOUL_TALK_TO_PLAYER, CVarGetInteger(CVAR("MMPoeBottling"), 0), {
+        EnPoField* poe = va_arg(args, EnPoField*);
+
+        *should = false;
+
+        if (Actor_HasParent(&poe->actor, gPlayState)) {
+            Actor_Kill(&poe->actor);
+        } else {
+            // GI_MAX in this case allows the player to catch the actor in a bottle
+            Actor_OfferGetItem(&poe->actor, gPlayState, GI_MAX, 35.0f, 60.0f);
+        }
+    });
+}
+
+static void DrawMenu() {
+    ImGui::SeparatorText(AUTHOR);
+
+    if (UIWidgets::EnhancementCheckbox("Bomb Arrows", CVAR("BombArrows.Enabled"))) {
+        OnConfigurationChanged();
+    }
+    UIWidgets::Tooltip("Equip Bombs onto the same item as your bow to shoot Bomb Arrows that explode on contact.");
+
+    if (UIWidgets::PaddedEnhancementCheckbox("Catch Poes With a Bottle", CVAR("MMPoeBottling"))) {
+        OnConfigurationChanged();
+    }
+    UIWidgets::Tooltip("Catch Poes by swinging an empty bottle at them instead of from a text box like you can in Majora's Mask.");
+
+    if (UIWidgets::PaddedEnhancementCheckbox("Extra Underwater Actions", CVAR("EnhancedIronBoots"))) {
+        OnConfigurationChanged();
+    }
+    UIWidgets::Tooltip("Allows opening chests and using your sword and Bombchus when underwater with Iron Boots");
+
+    UIWidgets::EnhancementCheckbox("Visual Small Key Display", CVAR("VisualSmallKeys.Enabled"));
+    UIWidgets::Tooltip("Displays Small Key count using multiple icons rather than a numeric counter");
+    const bool disableKeySpacing = !CVarGetInteger(CVAR("VisualSmallKeys.Enabled"), 0);
+    static const char* disableKeySpacingTooltip = "This option is disabled because \"Visual Small Key Display\" is turned off";
+    UIWidgets::EnhancementSliderInt("Small Key Icon Spacing: %d", "##SmallKeySpacing", CVAR("VisualSmallKeys.Spacing"), 1, 16, "", 8, true, disableKeySpacing, disableKeySpacingTooltip);
+    UIWidgets::EnhancementCheckbox("Right Align Key Icons", CVAR("VisualSmallKeys.RightAlign"), disableKeySpacing, disableKeySpacingTooltip);
+}
+
+static void RegisterMod() {
+    // #region Leave this alone unless you know what you are doing
+    OnConfigurationChanged();
+    // #endregion
+
+    CVarSetInteger(CVAR("BombArrows.Active"), 0);
+}
+
+static Mod mod(DrawMenu, RegisterMod);
