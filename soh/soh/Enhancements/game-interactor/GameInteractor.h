@@ -482,6 +482,14 @@ typedef enum {
     // Vanilla condition: Actor is ACTOR_EN_ELF, ACTOR_EN_FISH, ACTOR_EN_ICE_HONO, or ACTOR_EN_INSECT
     // Opt: *Actor
     VB_BOTTLE_ACTOR,
+
+    /*** Catch Poes With a Bottle ***/
+    // Vanilla condition: true
+    // Opt: *EnPoh
+    VB_POE_SOUL_TALK_TO_PLAYER,
+    // Vanilla condition: true
+    // Opt: *EnPoField
+    VB_FIELD_POE_SOUL_TALK_TO_PLAYER,
 } GIVanillaBehavior;
 
 #ifdef __cplusplus

@@ -14662,6 +14662,8 @@ static BottleCatchInfo sBottleCatchInfo[] = {
     { ACTOR_EN_FISH, ITEM_FISH, PLAYER_IA_BOTTLE_FISH, 0x47 },          // BOTTLE_CATCH_FISH
     { ACTOR_EN_ICE_HONO, ITEM_BLUE_FIRE, PLAYER_IA_BOTTLE_FIRE, 0x5D }, // BOTTLE_CATCH_BLUE_FIRE
     { ACTOR_EN_INSECT, ITEM_BUG, PLAYER_IA_BOTTLE_BUG, 0x7A },          // BOTTLE_CATCH_BUGS
+    { ACTOR_EN_POH, ITEM_POE, PLAYER_IA_BOTTLE_POE, 0x97 },
+    { ACTOR_EN_PO_FIELD, ITEM_BIG_POE, PLAYER_IA_BOTTLE_BIG_POE, 0xF9 },
 };
 
 void Player_Action_SwingBottle(Player* this, PlayState* play) {
@@ -14712,7 +14714,13 @@ void Player_Action_SwingBottle(Player* this, PlayState* play) {
                     }
                 }
 
-                if (GameInteractor_Should(VB_BOTTLE_ACTOR, i < ARRAY_COUNT(sBottleCatchInfo), this->interactRangeActor)) {
+                // If the catch is a small field Poe (as opposed to a Big Poe), catch a graveyard Poe instead
+                if (catchInfo->actorId == ACTOR_EN_PO_FIELD && this->interactRangeActor->params == 0) {
+                    i--;
+                    catchInfo--;
+                }
+
+                if (GameInteractor_Should(VB_BOTTLE_ACTOR, i + 1 <= BOTTLE_CATCH_BUGS, this->interactRangeActor)) {
                     // 1 is added because `sBottleCatchInfo` does not have an entry for `BOTTLE_CATCH_NONE`
                     this->av1.bottleCatchType = i + 1;
 

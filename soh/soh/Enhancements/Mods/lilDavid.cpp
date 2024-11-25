@@ -11,16 +11,21 @@ extern PlayState* gPlayState;
 
 #include "src/overlays/actors/ovl_En_Arrow/z_en_arrow.h"
 #include "src/overlays/actors/ovl_En_Bom/z_en_bom.h"
+#include "src/overlays/actors/ovl_En_Poh/z_en_poh.h"
+#include "src/overlays/actors/ovl_En_Po_Field/z_en_po_field.h"
 
 extern "C" {
     void func_809B45E0(EnArrow*, PlayState*);
     void func_809B4640(EnArrow*, PlayState*);
+    void func_80ADFE80(EnPoh*, PlayState*);
 }
 
 #define AUTHOR "lilDavid"
 #define CVAR(v) "gMods." AUTHOR "." v
 
 static void OnConfigurationChanged() {
+    // Bomb Arrows
+
     if (!CVarGetInteger(CVAR("BombArrows.Enabled"), 0))
         CVarSetInteger(CVAR("BombArrows.Active"), 0);
 
@@ -116,6 +121,59 @@ static void OnConfigurationChanged() {
         if (bomb->timer > 45 && bomb->timer < 50)
             bomb->timer += 4;
     });
+
+
+    // Catch Poes with a Bottle
+
+    COND_VB_SHOULD(VB_BOTTLE_ACTOR, CVarGetInteger(CVAR("MMPoeBottling"), 0), {
+        Actor* interactRangeActor = va_arg(args, Actor*);
+
+        if (interactRangeActor->id == ACTOR_EN_PO_FIELD) {
+            *should = true;
+            return;
+        }
+
+        if (interactRangeActor->id != ACTOR_EN_POH)
+            return;
+
+        // Don't catch Sharp or Flat
+        // I think they talk to you before you can get in catching range, but might as well prevent it outright
+        if (interactRangeActor->params >= EN_POH_SHARP) {
+            *should = false;
+            return;
+        }
+
+        *should = true;
+    });
+
+    COND_VB_SHOULD(VB_POE_SOUL_TALK_TO_PLAYER, CVarGetInteger(CVAR("MMPoeBottling"), 0), {
+        EnPoh* poe = va_arg(args, EnPoh*);
+
+        if (poe->actor.params >= EN_POH_SHARP)
+            return;
+
+        *should = false;
+
+        if (Actor_HasParent(&poe->actor, gPlayState)) {
+            Actor_Kill(&poe->actor);
+        } else {
+            // GI_MAX in this case allows the player to catch the actor in a bottle
+            Actor_OfferGetItem(&poe->actor, gPlayState, GI_MAX, 35.0f, 60.0f);
+        }
+    });
+
+    COND_VB_SHOULD(VB_FIELD_POE_SOUL_TALK_TO_PLAYER, CVarGetInteger(CVAR("MMPoeBottling"), 0), {
+        EnPoField* poe = va_arg(args, EnPoField*);
+
+        *should = false;
+
+        if (Actor_HasParent(&poe->actor, gPlayState)) {
+            Actor_Kill(&poe->actor);
+        } else {
+            // GI_MAX in this case allows the player to catch the actor in a bottle
+            Actor_OfferGetItem(&poe->actor, gPlayState, GI_MAX, 35.0f, 60.0f);
+        }
+    });
 }
 
 static void DrawMenu() {
@@ -125,6 +183,11 @@ static void DrawMenu() {
         OnConfigurationChanged();
     }
     UIWidgets::Tooltip("Equip Bombs onto the same item as your bow to shoot Bomb Arrows that explode on contact.");
+
+    if (UIWidgets::PaddedEnhancementCheckbox("Catch Poes With a Bottle", CVAR("MMPoeBottling"))) {
+        OnConfigurationChanged();
+    }
+    UIWidgets::Tooltip("Catch Poes by swinging an empty bottle at them instead of from a text box like you can in Majora's Mask.");
 
     UIWidgets::EnhancementCheckbox("Visual Small Key Display", CVAR("VisualSmallKeys.Enabled"));
     UIWidgets::Tooltip("Displays Small Key count using multiple icons rather than a numeric counter");

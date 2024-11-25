@@ -784,12 +784,14 @@ void func_80ADFE80(EnPoh* this, PlayState* play) {
         this->actor.flags &= ~ACTOR_FLAG_WILL_TALK;
         return;
     }
-    if (this->colliderCyl.base.ocFlags1 & OC1_HIT) {
-        this->actor.flags |= ACTOR_FLAG_WILL_TALK;
-        func_8002F2F4(&this->actor, play);
-    } else {
-        this->actor.flags &= ~ACTOR_FLAG_WILL_TALK;
-        CollisionCheck_SetOC(play, &play->colChkCtx, &this->colliderCyl.base);
+    if (GameInteractor_Should(VB_POE_SOUL_TALK_TO_PLAYER, true, this)) {
+        if (this->colliderCyl.base.ocFlags1 & OC1_HIT) {
+            this->actor.flags |= ACTOR_FLAG_WILL_TALK;
+            func_8002F2F4(&this->actor, play);
+        } else {
+            this->actor.flags &= ~ACTOR_FLAG_WILL_TALK;
+            CollisionCheck_SetOC(play, &play->colChkCtx, &this->colliderCyl.base);
+        }
     }
     this->actor.world.pos.y = Math_SinS(this->unk_195 * 0x800) * 5.0f + this->actor.home.pos.y;
     if (this->unk_195 != 0) {
