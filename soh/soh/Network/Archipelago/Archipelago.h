@@ -30,6 +30,7 @@ class ArchipelagoClient {
         std::string hintName;
         std::string locationName;
         std::string playerName;
+        std::string gameName;
         int playerNumber;
         unsigned int flags;
         uint64_t index;
