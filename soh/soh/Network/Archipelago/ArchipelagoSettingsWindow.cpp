@@ -107,6 +107,11 @@ void ArchipelagoSettingsWindow::DrawElement() {
                 "or when clear hints are turned on for this slot, it will apply to things like speaking to "
                 "business scrubs and all of the other static hint options.\n\n"
                 "This does not apply to Gossip Stones as they don't always give away the exact location of an item."));
+    UIWidgets::CVarCheckbox(
+        "Non-local item models", CVAR_REMOTE_ARCHIPELAGO("ItemModels"),
+        UIWidgets::CheckboxOptions()
+            .Color(THEME_COLOR)
+            .Tooltip("Items for other players playing Ship of Harkinian appear as themselves, rather than AP logos."));
 };
 
 void ArchipelagoSettingsWindow::InitElement() {

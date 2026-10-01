@@ -412,7 +412,10 @@ GetItemEntry Context::GetFinalGIEntry(const RandomizerCheck rc, const bool check
         return ItemTableManager::Instance->RetrieveItemEntry(MOD_NONE, GI_RUPEE_BLUE);
     }
     GetItemEntry giEntry = itemLoc->GetPlacedItem().GetGIEntry_Copy();
-    if (overrides.contains(rc)) {
+    if (overrides.contains(rc) &&
+        (CVarGetInteger(CVAR_REMOTE_ARCHIPELAGO("ItemModels"), 0) ||
+         !(giEntry.getItemId == RG_ARCHIPELAGO_ITEM_PROGRESSION || giEntry.getItemId == RG_ARCHIPELAGO_ITEM_USEFUL ||
+           giEntry.getItemId == RG_ARCHIPELAGO_ITEM_JUNK))) {
         const auto fakeGiEntry = StaticData::RetrieveItem(overrides[rc].LooksLike()).GetGIEntry();
         giEntry.gid = fakeGiEntry->gid;
         giEntry.gi = fakeGiEntry->gi;
