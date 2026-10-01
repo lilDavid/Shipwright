@@ -993,6 +993,18 @@ void Context::ParseArchipelagoItemsLocations(const std::vector<ArchipelagoClient
             } else {
                 itemLocationTable[rc].SetPlacedItem(RG_ARCHIPELAGO_ITEM_JUNK);
             }
+
+            if (ap_item.gameName == AP_Client_consts::AP_GAME_NAME) {
+                const RandomizerGet visualItem = StaticData::itemNameToEnum[ap_item.itemName];
+                if (visualItem == RG_ICE_TRAP) {
+                    RandomizerGet iceTrapItem = ArchipelagoClient::GetInstance().GetIceTrapItem();
+                    overrides[rc] = ItemOverride(rc, iceTrapItem);
+                    overrides[rc].SetTrickName(Text(Traps::GetTrapName(iceTrapItem)));
+                } else {
+                    overrides[rc] = ItemOverride(rc, visualItem);
+                    overrides[rc].SetTrickName(Text(ap_item.itemName));
+                }
+            }
         }
     }
 

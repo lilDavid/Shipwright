@@ -274,7 +274,9 @@ void SaveManager::SaveRandomizer(SaveContext* saveContext, int sectionID, bool f
     SaveManager::Instance->SaveArray("itemLocations", RC_MAX, [&](size_t i) {
         SaveManager::Instance->SaveStruct("", [&]() {
             SaveManager::Instance->SaveData("rgID", randoContext->GetItemLocation(i)->GetPlacedRandomizerGet());
-            if (randoContext->GetItemLocation(i)->GetPlacedRandomizerGet() == RG_ICE_TRAP) {
+            RandomizerGet placedRandomizerGet = randoContext->GetItemLocation(i)->GetPlacedRandomizerGet();
+            if (placedRandomizerGet == RG_ICE_TRAP || placedRandomizerGet == RG_ARCHIPELAGO_ITEM_PROGRESSION ||
+                placedRandomizerGet == RG_ARCHIPELAGO_ITEM_USEFUL || placedRandomizerGet == RG_ARCHIPELAGO_ITEM_JUNK) {
                 SaveManager::Instance->SaveData("fakeRgID", randoContext->GetItemOverride(i).LooksLike());
                 SaveManager::Instance->SaveStruct("trickName", [&]() {
                     SaveManager::Instance->SaveData("english",
