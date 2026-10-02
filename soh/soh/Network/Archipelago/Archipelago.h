@@ -92,6 +92,9 @@ class ArchipelagoClient {
     void QueueItem(const ApItem item);
     void QueueExternalCheck(int64_t apLocation);
 
+    RandomizerGet GetRemoteItem(const ApItem item);
+    bool ApItemMatchesContents(RandomizerCheck rc);
+
     void SendGameWon();
     void SendMessageToConsole(const std::string message);
     void UpdateHints(const std::vector<nlohmann::json>& hints_json);

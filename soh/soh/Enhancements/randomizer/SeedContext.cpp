@@ -413,7 +413,7 @@ GetItemEntry Context::GetFinalGIEntry(const RandomizerCheck rc, const bool check
     }
     GetItemEntry giEntry = itemLoc->GetPlacedItem().GetGIEntry_Copy();
     if (overrides.contains(rc) &&
-        (CVarGetInteger(CVAR_REMOTE_ARCHIPELAGO("ItemModels"), 0) ||
+        (ArchipelagoClient::GetInstance().ApItemMatchesContents(rc) ||
          !(giEntry.getItemId == RG_ARCHIPELAGO_ITEM_PROGRESSION || giEntry.getItemId == RG_ARCHIPELAGO_ITEM_USEFUL ||
            giEntry.getItemId == RG_ARCHIPELAGO_ITEM_JUNK))) {
         const auto fakeGiEntry = StaticData::RetrieveItem(overrides[rc].LooksLike()).GetGIEntry();
@@ -997,16 +997,14 @@ void Context::ParseArchipelagoItemsLocations(const std::vector<ArchipelagoClient
                 itemLocationTable[rc].SetPlacedItem(RG_ARCHIPELAGO_ITEM_JUNK);
             }
 
-            if (ap_item.gameName == AP_Client_consts::AP_GAME_NAME) {
-                const RandomizerGet visualItem = StaticData::itemNameToEnum[ap_item.itemName];
-                if (visualItem == RG_ICE_TRAP) {
-                    RandomizerGet iceTrapItem = ArchipelagoClient::GetInstance().GetIceTrapItem();
-                    overrides[rc] = ItemOverride(rc, iceTrapItem);
-                    overrides[rc].SetTrickName(Text(Traps::GetTrapName(iceTrapItem)));
-                } else {
-                    overrides[rc] = ItemOverride(rc, visualItem);
-                    overrides[rc].SetTrickName(Text(ap_item.itemName));
-                }
+            RandomizerGet visualItem = ArchipelagoClient::GetInstance().GetRemoteItem(ap_item);
+            if (visualItem == RG_ICE_TRAP) {
+                RandomizerGet iceTrapItem = ArchipelagoClient::GetInstance().GetIceTrapItem();
+                overrides[rc] = ItemOverride(rc, iceTrapItem);
+                overrides[rc].SetTrickName(Text(Traps::GetTrapName(iceTrapItem)));
+            } else if (visualItem != RG_NONE) {
+                overrides[rc] = ItemOverride(rc, visualItem);
+                overrides[rc].SetTrickName(Text(ap_item.itemName));
             }
         }
     }
