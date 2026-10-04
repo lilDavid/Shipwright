@@ -2638,36 +2638,27 @@ static const std::unordered_map<std::string, std::unordered_map<std::string, Ran
           } },
     };
 
-RandomizerGet ArchipelagoClient::GetRemoteItem(const ApItem item) {
-    if (item.gameName == AP_Client_consts::AP_GAME_NAME) {
+RandomizerGet ArchipelagoClient::GetApItemLookalike(RandomizerCheck rc) {
+    int cvar = CVarGetInteger(CVAR_NONLOCAL_ITEMS, CVAR_NONLOCAL_ITEMS_ALL);
+    if (cvar == CVAR_NONLOCAL_ITEMS_NONE) {
+        return RG_NONE;
+    }
+
+    ArchipelagoLocationData& item = gSaveContext.ship.quest.data.archipelago.locations[rc];
+    if (std::strcmp(item.gameName, AP_Client_consts::AP_GAME_NAME) == 0) {
         return Rando::StaticData::itemNameToEnum[item.itemName];
+    }
+    if (cvar == CVAR_NONLOCAL_ITEMS_OOT_ONLY && std::strcmp(item.gameName, "Ocarina of Time") != 0) {
+        return RG_NONE;
     }
 
     auto gameEntry = archipelagoRemoteItemMapping.find(item.gameName);
     if (gameEntry == archipelagoRemoteItemMapping.end()) {
         return RG_NONE;
     }
-
     auto itemEntry = gameEntry->second.find(item.itemName);
     if (itemEntry == gameEntry->second.end()) {
         return RG_NONE;
     }
-
     return itemEntry->second;
-}
-
-bool ArchipelagoClient::ApItemMatchesContents(RandomizerCheck rc) {
-    int cvar = CVarGetInteger(CVAR_NONLOCAL_ITEMS, CVAR_NONLOCAL_ITEMS_ALL);
-
-    if (cvar == CVAR_NONLOCAL_ITEMS_NONE) {
-        return false;
-    }
-
-    ArchipelagoLocationData& item = gSaveContext.ship.quest.data.archipelago.locations[rc];
-    if (std::strcmp(item.gameName, AP_Client_consts::AP_GAME_NAME) == 0 ||
-        std::strcmp(item.gameName, "Ocarina of Time") == 0) {
-        return true;
-    }
-
-    return cvar == CVAR_NONLOCAL_ITEMS_ALL;
 }

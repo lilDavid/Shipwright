@@ -412,16 +412,25 @@ GetItemEntry Context::GetFinalGIEntry(const RandomizerCheck rc, const bool check
         return ItemTableManager::Instance->RetrieveItemEntry(MOD_NONE, GI_RUPEE_BLUE);
     }
     GetItemEntry giEntry = itemLoc->GetPlacedItem().GetGIEntry_Copy();
-    if (overrides.contains(rc) &&
-        (ArchipelagoClient::GetInstance().ApItemMatchesContents(rc) ||
-         !(giEntry.getItemId == RG_ARCHIPELAGO_ITEM_PROGRESSION || giEntry.getItemId == RG_ARCHIPELAGO_ITEM_USEFUL ||
-           giEntry.getItemId == RG_ARCHIPELAGO_ITEM_JUNK))) {
+    if (overrides.contains(rc)) {
         const auto fakeGiEntry = StaticData::RetrieveItem(overrides[rc].LooksLike()).GetGIEntry();
         giEntry.gid = fakeGiEntry->gid;
         giEntry.gi = fakeGiEntry->gi;
         giEntry.drawItemId = fakeGiEntry->drawItemId;
         giEntry.drawModIndex = fakeGiEntry->drawModIndex;
         giEntry.drawFunc = fakeGiEntry->drawFunc;
+    } else if (giEntry.getItemId == RG_ARCHIPELAGO_ITEM_PROGRESSION ||
+               giEntry.getItemId == RG_ARCHIPELAGO_ITEM_USEFUL || giEntry.getItemId == RG_ARCHIPELAGO_ITEM_JUNK) {
+        RandomizerGet apRG = ArchipelagoClient::GetInstance().GetApItemLookalike(rc);
+        if (apRG != RG_NONE) {
+            const auto apGiEntry = StaticData::RetrieveItem(apRG).GetGIEntry();
+            giEntry.gid = apGiEntry->gid;
+            giEntry.gi = apGiEntry->gi;
+            giEntry.getItemCategory = apGiEntry->getItemCategory;
+            giEntry.drawItemId = apGiEntry->drawItemId;
+            giEntry.drawModIndex = apGiEntry->drawModIndex;
+            giEntry.drawFunc = apGiEntry->drawFunc;
+        }
     }
     return giEntry;
 }
@@ -997,14 +1006,10 @@ void Context::ParseArchipelagoItemsLocations(const std::vector<ArchipelagoClient
                 itemLocationTable[rc].SetPlacedItem(RG_ARCHIPELAGO_ITEM_JUNK);
             }
 
-            RandomizerGet visualItem = ArchipelagoClient::GetInstance().GetRemoteItem(ap_item);
-            if (visualItem == RG_ICE_TRAP) {
+            if (ArchipelagoClient::GetInstance().GetApItemLookalike(rc) == RG_ICE_TRAP) {
                 RandomizerGet iceTrapItem = ArchipelagoClient::GetInstance().GetIceTrapItem();
                 overrides[rc] = ItemOverride(rc, iceTrapItem);
                 overrides[rc].SetTrickName(Text(Traps::GetTrapName(iceTrapItem)));
-            } else if (visualItem != RG_NONE) {
-                overrides[rc] = ItemOverride(rc, visualItem);
-                overrides[rc].SetTrickName(Text(ap_item.itemName));
             }
         }
     }
