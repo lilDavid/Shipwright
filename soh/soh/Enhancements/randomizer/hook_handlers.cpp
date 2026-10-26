@@ -78,6 +78,8 @@ extern void EnGe1_Wait_Archery(EnGe1* enGe1, PlayState* play);
 extern void EnGe1_SetAnimationIdle(EnGe1* enGe1);
 extern void EnGe1_SetAnimationIdle(EnGe1* enGe1);
 extern void EnGe2_SetupCapturePlayer(EnGe2* enGe2, PlayState* play);
+extern void EnBox_Open(EnBox*, PlayState*);
+extern s32 Object_Spawn(ObjectContext* objectCtx, s16 objectId);
 }
 
 bool LocMatchesQuest(Rando::Location loc) {
@@ -477,26 +479,29 @@ void RandomizerOnPlayerUpdateForRCQueueHandler() {
         SPDLOG_INFO("Queuing Item mod {} item {} from RC {}", getItemEntry.modIndex, getItemEntry.itemId,
                     static_cast<uint32_t>(rc));
 
-        if (
-            // Skipping ItemGet animation incompatible with checks that require closing a text box to finish
-            !(rc == RC_HF_OCARINA_OF_TIME_ITEM && gPlayState->sceneNum == SCENE_HYRULE_FIELD) &&
-            !(rc == RC_SPIRIT_TEMPLE_SILVER_GAUNTLETS_CHEST && gPlayState->sceneNum == SCENE_DESERT_COLOSSUS) &&
-            !(rc == RC_MARKET_BOMBCHU_BOWLING_FIRST_PRIZE && gPlayState->sceneNum == SCENE_BOMBCHU_BOWLING_ALLEY) &&
-            !(rc == RC_MARKET_BOMBCHU_BOWLING_SECOND_PRIZE && gPlayState->sceneNum == SCENE_BOMBCHU_BOWLING_ALLEY) &&
-            // Always show ItemGet animation for ice traps
-            !(getItemEntry.modIndex == MOD_RANDOMIZER && getItemEntry.getItemId == RG_ICE_TRAP) &&
-            // Always show ItemGet animation outside of randomizer to keep behaviour consistent in vanilla
-            IS_RANDO &&
-            (CVarGetInteger(CVAR_RANDOMIZER_ENHANCEMENT("TimeSavers.SkipGetItemAnimation"), SGIA_JUNK) == SGIA_ALL ||
-             (CVarGetInteger(CVAR_RANDOMIZER_ENHANCEMENT("TimeSavers.SkipGetItemAnimation"), SGIA_JUNK) == SGIA_JUNK &&
-              (
-                  // crude fix to ensure map hints are readable. Ideally replace with better hint tracking.
-                  !(getItemEntry.getItemId >= RG_DEKU_TREE_MAP && getItemEntry.getItemId <= RG_ICE_CAVERN_MAP &&
-                    getItemEntry.modIndex == MOD_RANDOMIZER) &&
-                  (getItemCategory == ITEM_CATEGORY_JUNK || getItemCategory == ITEM_CATEGORY_SKULLTULA_TOKEN ||
-                   getItemCategory == ITEM_CATEGORY_HEALTH || getItemCategory == ITEM_CATEGORY_LESSER))))) {
+        // Skipping ItemGet animation incompatible with checks that require closing a text box to finish
+        bool requiresClosingTextBox =
+            (rc == RC_HF_OCARINA_OF_TIME_ITEM && gPlayState->sceneNum == SCENE_HYRULE_FIELD) ||
+            (rc == RC_SPIRIT_TEMPLE_SILVER_GAUNTLETS_CHEST && gPlayState->sceneNum == SCENE_DESERT_COLOSSUS) ||
+            (rc == RC_MARKET_BOMBCHU_BOWLING_FIRST_PRIZE && gPlayState->sceneNum == SCENE_BOMBCHU_BOWLING_ALLEY) ||
+            (rc == RC_MARKET_BOMBCHU_BOWLING_SECOND_PRIZE && gPlayState->sceneNum == SCENE_BOMBCHU_BOWLING_ALLEY);
+        if (!requiresClosingTextBox) {
+            if (getItemEntry.modIndex == MOD_RANDOMIZER && getItemEntry.getItemId == RG_ICE_TRAP) {
+                isGiSkipped = 1;
+            } else {
+                int skipGetItemAnimation =
+                    CVarGetInteger(CVAR_RANDOMIZER_ENHANCEMENT("TimeSavers.SkipGetItemAnimation"), SGIA_JUNK);
+                bool isJunk = getItemCategory == ITEM_CATEGORY_JUNK || getItemCategory == ITEM_CATEGORY_LESSER ||
+                              getItemCategory == ITEM_CATEGORY_HEALTH ||
+                              getItemCategory == ITEM_CATEGORY_SKULLTULA_TOKEN;
+                // Crude fix to ensure map hints are readable. Ideally replace with better hint tracking.
+                bool isMap = getItemEntry.getItemId >= RG_DEKU_TREE_MAP &&
+                             getItemEntry.getItemId <= RG_ICE_CAVERN_MAP && getItemEntry.modIndex == MOD_RANDOMIZER;
+                isGiSkipped = skipGetItemAnimation == SGIA_ALL || skipGetItemAnimation == SGIA_JUNK && isJunk && !isMap;
+            }
+        }
+        if (isGiSkipped) {
             Item_DropCollectible(gPlayState, &spawnPos, static_cast<int16_t>(ITEM00_SOH_GIVE_ITEM_ENTRY | 0x8000));
-
             isGiSkipped = 1;
         }
     }
@@ -1040,6 +1045,19 @@ void RandomizerOnVanillaBehaviorHandler(GIVanillaBehavior id, bool* should, va_l
             // otherwise
             if (CVarGetInteger(CVAR_RANDOMIZER_ENHANCEMENT("TimeSavers.SkipGetItemAnimation"), SGIA_JUNK)) {
                 *should = false;
+                break;
+            }
+            // Same for chests containing ice traps since the get item animation is almost always skipped
+            EnBox* chest = va_arg(args, EnBox*);
+            RandomizerCheck rc = OTRGlobals::Instance->gRandomizer->GetCheckFromActor(
+                chest->dyna.actor.id, gPlayState->sceneNum, chest->dyna.actor.params);
+            if (rc == RC_SPIRIT_TEMPLE_SILVER_GAUNTLETS_CHEST) {
+                break;
+            }
+            GetItemEntry randoItem = OTRGlobals::Instance->gRandomizer->GetItemFromKnownCheck(
+                rc, static_cast<GetItemID>(chest->dyna.actor.params >> 5 & 0x7F));
+            if (randoItem.modIndex == MOD_RANDOMIZER && randoItem.itemId == RG_ICE_TRAP) {
+                *should = false;
             }
             break;
         }
@@ -1282,8 +1300,7 @@ void RandomizerOnVanillaBehaviorHandler(GIVanillaBehavior id, bool* should, va_l
                 Actor_Kill(&item00->actor);
                 *should = false;
             } else if (item00->actor.params == ITEM00_SOH_GIVE_ITEM_ENTRY) {
-                Audio_PlaySoundGeneral(NA_SE_SY_GET_ITEM, &gSfxDefaultPos, 4, &gSfxDefaultFreqAndVolScale,
-                                       &gSfxDefaultFreqAndVolScale, &gSfxDefaultReverb);
+                bool playSound = true;
                 if (item00->itemEntry.modIndex == MOD_NONE) {
                     if (item00->itemEntry.getItemId == GI_SWORD_BGS) {
                         gSaveContext.bgsFlag = true;
@@ -1292,9 +1309,16 @@ void RandomizerOnVanillaBehaviorHandler(GIVanillaBehavior id, bool* should, va_l
                 } else if (item00->itemEntry.modIndex == MOD_RANDOMIZER) {
                     if (item00->itemEntry.getItemId == RG_ICE_TRAP) {
                         gSaveContext.ship.pendingIceTrapCount++;
+                        playSound = false;
+                        Actor_Kill(&item00->actor);
                     } else {
                         Randomizer_Item_Give(gPlayState, item00->itemEntry);
                     }
+                }
+
+                if (playSound) {
+                    Audio_PlaySoundGeneral(NA_SE_SY_GET_ITEM, &gSfxDefaultPos, 4, &gSfxDefaultFreqAndVolScale,
+                                           &gSfxDefaultFreqAndVolScale, &gSfxDefaultReverb);
                 }
 
                 if (item00->itemEntry.modIndex == MOD_NONE) {
@@ -2042,9 +2066,32 @@ void RandomizerOnVanillaBehaviorHandler(GIVanillaBehavior id, bool* should, va_l
         case VB_GIVE_ITEM_WATER_MEDALLION:
         case VB_GIVE_ITEM_SPIRIT_MEDALLION:
         case VB_GIVE_ITEM_SHADOW_MEDALLION:
-        case VB_CHEST_USE_ICE_EFFECT:
             *should = false;
             break;
+        case VB_CHEST_USE_ICE_EFFECT: {
+            *should = false;
+            EnBox* chest = va_arg(args, EnBox*);
+            if (!(chest->actionFunc == EnBox_Open && chest->skelanime.curFrame > 45 && chest->iceSmokeTimer < 100)) {
+                break;
+            }
+            GetItemEntry randoItem = OTRGlobals::Instance->gRandomizer->GetItemFromActor(
+                chest->dyna.actor.id, gPlayState->sceneNum, chest->dyna.actor.params,
+                static_cast<GetItemID>(chest->dyna.actor.params >> 5 & 0x7F));
+            if (randoItem.modIndex == MOD_RANDOMIZER && randoItem.itemId == RG_ICE_TRAP) {
+                s32 objBankIdx = Object_GetIndex(&gPlayState->objectCtx, OBJECT_FZ);
+                if (!Object_IsLoaded(&gPlayState->objectCtx, objBankIdx)) {
+                    Object_Spawn(&gPlayState->objectCtx, OBJECT_FZ);
+                }
+                // Wait a frame to avoid the sound effect starting as Link lifts the item over his head
+                // (relevant because of silver gauntlets chest)
+                if (chest->iceSmokeTimer == 0) {
+                    chest->iceSmokeTimer++;
+                } else {
+                    *should = true;
+                }
+            }
+            break;
+        }
         case VB_GIVE_ITEM_SKULL_TOKEN:
             *should = (Rando::Context::GetInstance()->GetOption(RSK_SHUFFLE_TOKENS).Is(RO_TOKENSANITY_OFF));
             break;

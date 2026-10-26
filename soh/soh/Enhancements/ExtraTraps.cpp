@@ -32,6 +32,7 @@ typedef enum {
 static AltTrapType roll = ADD_TRAP_MAX;
 static int statusTimer = -1;
 static int eventTimer = -1;
+static int cooldownTimer = 0;
 static EntranceIndex teleportRoll = ENTR_MAX;
 
 const char* altTrapTypeCvars[] = {
@@ -156,6 +157,9 @@ static void OnPlayerUpdate() {
     if (eventTimer >= 0) {
         eventTimer--;
     }
+    if (cooldownTimer > 0) {
+        cooldownTimer--;
+    }
 }
 
 void RegisterExtraTraps() {
@@ -167,6 +171,11 @@ void RegisterExtraTraps() {
         }
 
         Player* player = GET_PLAYER(gPlayState);
+        if (cooldownTimer > 0) {
+            player->getItemId = GI_NONE;
+            player->getItemEntry = ((GetItemEntry)GET_ITEM_NONE);
+            return;
+        }
 
         *should = true;
         gSaveContext.ship.pendingIceTrapCount--;
@@ -180,6 +189,7 @@ void RegisterExtraTraps() {
                 // GIs, and them being deterministic in Archipelago isn't really important.
                 RollRandomTrap(gPlayState->sceneNum + Random(0, 100));
             }
+            cooldownTimer = 10;
         } else {
             GameInteractor::RawAction::FreezePlayer();
         }
