@@ -447,7 +447,8 @@ void RandomizerOnPlayerUpdateForRCQueueHandler() {
                     GetItemEntry vanillaEntry =
                         ItemTableManager::Instance->RetrieveItemEntry(MOD_NONE, locInfo->GetActorParams() >> 5 & 0x7F);
                     int fastChests = CVarGetInteger(CVAR_ENHANCEMENT("FastChests"), 0);
-                    skipGi = skipGiCvar >= SGIA_JUNK || fastChests || vanillaEntry.gi < 0;
+                    skipGi = skipGiCvar >= SGIA_JUNK || fastChests ||
+                             !(vanillaEntry.gi >= 0 && Item_CheckObtainability(vanillaEntry.itemId) == ITEM_NONE);
                 } else {
                     skipGi = skipGiCvar >= SGIA_ICE_TRAPS;
                 }
