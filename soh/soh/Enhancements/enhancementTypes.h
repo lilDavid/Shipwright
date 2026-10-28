@@ -8,6 +8,7 @@ typedef enum {
 
 typedef enum {
     SGIA_DISABLED,
+    SGIA_ICE_TRAPS,
     SGIA_JUNK,
     SGIA_ALL,
     SGIA_SIZE,

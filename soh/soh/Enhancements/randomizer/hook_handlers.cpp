@@ -446,9 +446,10 @@ void RandomizerOnPlayerUpdateForRCQueueHandler() {
                 if (locInfo->GetActorID() == ACTOR_EN_BOX) {
                     GetItemEntry vanillaEntry =
                         ItemTableManager::Instance->RetrieveItemEntry(MOD_NONE, locInfo->GetActorParams() >> 5 & 0x7F);
-                    skipGi = skipGiCvar || CVarGetInteger(CVAR_ENHANCEMENT("FastChests"), 0) || vanillaEntry.gi < 0;
+                    int fastChests = CVarGetInteger(CVAR_ENHANCEMENT("FastChests"), 0);
+                    skipGi = skipGiCvar >= SGIA_JUNK || fastChests || vanillaEntry.gi < 0;
                 } else {
-                    skipGi = 1;
+                    skipGi = skipGiCvar >= SGIA_ICE_TRAPS;
                 }
             } else {
                 bool isJunk = getItemCategory == ITEM_CATEGORY_JUNK || getItemCategory == ITEM_CATEGORY_LESSER ||
@@ -1080,7 +1081,8 @@ void RandomizerOnVanillaBehaviorHandler(GIVanillaBehavior id, bool* should, va_l
         case VB_PLAY_SLOW_CHEST_CS: {
             // We force fast chests if SkipGetItemAnimation is enabled because the camera in the CS looks pretty wonky
             // otherwise
-            if (CVarGetInteger(CVAR_RANDOMIZER_ENHANCEMENT("TimeSavers.SkipGetItemAnimation"), SGIA_JUNK)) {
+            if (CVarGetInteger(CVAR_RANDOMIZER_ENHANCEMENT("TimeSavers.SkipGetItemAnimation"), SGIA_JUNK) >=
+                SGIA_JUNK) {
                 *should = false;
                 break;
             }

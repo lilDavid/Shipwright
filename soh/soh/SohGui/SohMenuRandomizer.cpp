@@ -23,6 +23,7 @@ using namespace UIWidgets;
 
 static const std::map<int32_t, const char*> skipGetItemAnimationOptions = {
     { SGIA_DISABLED, "Disabled" },
+    { SGIA_ICE_TRAPS, "Ice Traps" },
     { SGIA_JUNK, "Junk Items" },
     { SGIA_ALL, "All Items" },
 };
