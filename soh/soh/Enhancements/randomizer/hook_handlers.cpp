@@ -12,6 +12,7 @@
 #include "soh/Enhancements/randomizer/static_data.h"
 #include "soh/Enhancements/game-interactor/GameInteractor.h"
 #include "soh/Enhancements/game-interactor/GameInteractor_Hooks.h"
+#include "soh/Enhancements/item-tables/ItemTableManager.h"
 #include "soh/SohGui/ImGuiUtils.h"
 #include "soh/Notification/Notification.h"
 #include "soh/SaveManager.h"
@@ -439,18 +440,24 @@ void RandomizerOnPlayerUpdateForRCQueueHandler() {
                                       rc == RC_MARKET_BOMBCHU_BOWLING_SECOND_PRIZE;
         if (!requiresClosingTextBox) {
             bool skipGi;
+            int skipGiCvar = CVarGetInteger(CVAR_RANDOMIZER_ENHANCEMENT("TimeSavers.SkipGetItemAnimation"), SGIA_JUNK);
             if (getItemEntry.modIndex == MOD_RANDOMIZER && getItemEntry.getItemId == RG_ICE_TRAP) {
-                skipGi = true;
+                auto locInfo = Rando::StaticData::GetLocation(rc);
+                if (locInfo->GetActorID() == ACTOR_EN_BOX) {
+                    GetItemEntry vanillaEntry =
+                        ItemTableManager::Instance->RetrieveItemEntry(MOD_NONE, locInfo->GetActorParams() >> 5 & 0x7F);
+                    skipGi = skipGiCvar || CVarGetInteger(CVAR_ENHANCEMENT("FastChests"), 0) || vanillaEntry.gi < 0;
+                } else {
+                    skipGi = 1;
+                }
             } else {
-                int skipGetItemAnimation =
-                    CVarGetInteger(CVAR_RANDOMIZER_ENHANCEMENT("TimeSavers.SkipGetItemAnimation"), SGIA_JUNK);
                 bool isJunk = getItemCategory == ITEM_CATEGORY_JUNK || getItemCategory == ITEM_CATEGORY_LESSER ||
                               getItemCategory == ITEM_CATEGORY_HEALTH ||
                               getItemCategory == ITEM_CATEGORY_SKULLTULA_TOKEN;
                 // Crude fix to ensure map hints are readable. Ideally replace with better hint tracking.
                 bool isMap = getItemEntry.getItemId >= RG_DEKU_TREE_MAP &&
                              getItemEntry.getItemId <= RG_ICE_CAVERN_MAP && getItemEntry.modIndex == MOD_RANDOMIZER;
-                skipGi = skipGetItemAnimation == SGIA_ALL || skipGetItemAnimation == SGIA_JUNK && isJunk && !isMap;
+                skipGi = skipGiCvar == SGIA_ALL || skipGiCvar == SGIA_JUNK && isJunk && !isMap;
             }
             if (skipGi) {
                 Item_DropCollectible(gPlayState, &spawnPos, static_cast<int16_t>(ITEM00_SOH_GIVE_ITEM_ENTRY | 0x8000));
@@ -1076,14 +1083,6 @@ void RandomizerOnVanillaBehaviorHandler(GIVanillaBehavior id, bool* should, va_l
             if (CVarGetInteger(CVAR_RANDOMIZER_ENHANCEMENT("TimeSavers.SkipGetItemAnimation"), SGIA_JUNK)) {
                 *should = false;
                 break;
-            }
-            // Same for chests containing ice traps since the get item animation is always skipped
-            EnBox* chest = va_arg(args, EnBox*);
-            GetItemEntry randoItem = OTRGlobals::Instance->gRandomizer->GetItemFromActor(
-                chest->dyna.actor.id, gPlayState->sceneNum, chest->dyna.actor.params,
-                static_cast<GetItemID>(chest->dyna.actor.params >> 5 & 0x7F));
-            if (randoItem.modIndex == MOD_RANDOMIZER && randoItem.itemId == RG_ICE_TRAP) {
-                *should = false;
             }
             break;
         }
@@ -2189,6 +2188,9 @@ void RandomizerOnVanillaBehaviorHandler(GIVanillaBehavior id, bool* should, va_l
             *should = false;
             EnBox* chest = va_arg(args, EnBox*);
             if (!(chest->actionFunc == EnBox_Open && chest->skelanime.curFrame > 45 && chest->iceSmokeTimer < 100)) {
+                break;
+            }
+            if (GameInteractor::IsGameplayPaused()) {
                 break;
             }
             GetItemEntry randoItem = OTRGlobals::Instance->gRandomizer->GetItemFromActor(
